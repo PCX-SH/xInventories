@@ -1,0 +1,222 @@
+[CENTER]
+[IMG]https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/BANNER.png[/IMG]
+
+[SIZE=7][B][COLOR=#5e4fa2]x[/COLOR][COLOR=#9e7bb5]Inventories[/COLOR][/B][/SIZE]
+[SIZE=5]Advanced Per-World Inventory Management for Paper 1.21.1+[/SIZE]
+[/CENTER]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Overview ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[B]xInventories[/B] is a powerful and modern per-world inventory management plugin built specifically for Paper 1.21.1+ servers. Keep player inventories, experience, health, hunger, potion effects, and ender chests completely separate across different worlds or world groups.
+
+Whether you're running a survival server with a creative world, a minigame network, or a skyblock server with multiple islands, xInventories gives you complete control over how player data is managed across your worlds.
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Features ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][B]Per-World Inventories[/B] - Separate inventories for different worlds or world groups
+[*][B]Per-GameMode Inventories[/B] - Optionally separate inventories by gamemode
+[*][B]Flexible World Groups[/B] - Group multiple worlds together to share inventories
+[*][B]Regex Pattern Matching[/B] - Automatically assign worlds using patterns (e.g., skyblock_.*)
+[*][B]Multiple Storage Backends[/B] - Choose from YAML, SQLite, or MySQL
+[*][B]High-Performance Caching[/B] - Caffeine-powered write-behind caching
+[*][B]Admin GUI[/B] - Visual interface for managing groups, worlds, and player inventories
+[*][B]Backup & Restore[/B] - Create and restore backups of all player data
+[*][B]Data Migration[/B] - Seamlessly migrate between storage backends
+[*][B]Full Developer API[/B] - Comprehensive API with events and subscriptions
+[*][B]PlaceholderAPI Support[/B] - Built-in placeholders for scoreboards and more
+[*][B]Async Operations[/B] - Non-blocking saves and loads for lag-free performance
+[/LIST]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Requirements ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][B]Paper 1.21.1+[/B] (not compatible with Spigot)
+[*][B]Java 21+[/B]
+[/LIST]
+
+[COLOR=#e74c3c][B]Important:[/B] This plugin requires Paper and will NOT work on Spigot servers.[/COLOR]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Installation ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[LIST=1]
+[*]Download the jar file
+[*]Place it in your server's [FONT=Courier New]plugins/[/FONT] folder
+[*]Restart your server
+[*]Configure [FONT=Courier New]plugins/xInventories/config.yml[/FONT]
+[*]Set up world groups in [FONT=Courier New]plugins/xInventories/groups.yml[/FONT]
+[/LIST]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Commands ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+Base command: [FONT=Courier New]/xinventories[/FONT] (aliases: [FONT=Courier New]/xinv[/FONT], [FONT=Courier New]/xi[/FONT])
+
+[SPOILER="Click to view all commands"]
+[B]Core Commands[/B]
+[LIST]
+[*][FONT=Courier New]/xinv[/FONT] - Show help menu
+[*][FONT=Courier New]/xinv reload[/FONT] - Reload configuration
+[*][FONT=Courier New]/xinv gui[/FONT] - Open admin GUI
+[*][FONT=Courier New]/xinv save [player][/FONT] - Save player inventory
+[*][FONT=Courier New]/xinv load <player> [group][/FONT] - Load player inventory
+[/LIST]
+
+[B]Management Commands[/B]
+[LIST]
+[*][FONT=Courier New]/xinv group list[/FONT] - List all groups
+[*][FONT=Courier New]/xinv group info <name>[/FONT] - View group details
+[*][FONT=Courier New]/xinv group create <name>[/FONT] - Create a new group
+[*][FONT=Courier New]/xinv group delete <name>[/FONT] - Delete a group
+[*][FONT=Courier New]/xinv world assign <world> <group>[/FONT] - Assign world to group
+[*][FONT=Courier New]/xinv world unassign <world>[/FONT] - Remove world assignment
+[*][FONT=Courier New]/xinv world list[/FONT] - List world assignments
+[*][FONT=Courier New]/xinv pattern add <group> <regex>[/FONT] - Add pattern to group
+[*][FONT=Courier New]/xinv pattern remove <group> <regex>[/FONT] - Remove pattern
+[*][FONT=Courier New]/xinv pattern list <group>[/FONT] - List group patterns
+[/LIST]
+
+[B]Utility Commands[/B]
+[LIST]
+[*][FONT=Courier New]/xinv cache stats[/FONT] - View cache statistics
+[*][FONT=Courier New]/xinv cache clear[/FONT] - Clear the cache
+[*][FONT=Courier New]/xinv backup create [name][/FONT] - Create a backup
+[*][FONT=Courier New]/xinv backup restore <id>[/FONT] - Restore from backup
+[*][FONT=Courier New]/xinv backup list[/FONT] - List all backups
+[*][FONT=Courier New]/xinv backup delete <id>[/FONT] - Delete a backup
+[*][FONT=Courier New]/xinv convert <from> <to>[/FONT] - Migrate storage (yaml/sqlite/mysql)
+[*][FONT=Courier New]/xinv debug[/FONT] - Debug information
+[/LIST]
+[/SPOILER]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Permissions ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[SPOILER="Click to view all permissions"]
+[B]Admin Permission[/B]
+[LIST]
+[*][FONT=Courier New]xinventories.admin[/FONT] - Full admin access (default: op)
+[/LIST]
+
+[B]Command Permissions[/B]
+[LIST]
+[*][FONT=Courier New]xinventories.command[/FONT] - Use base command (default: true)
+[*][FONT=Courier New]xinventories.command.reload[/FONT] - Reload config (default: op)
+[*][FONT=Courier New]xinventories.command.save[/FONT] - Save inventories (default: op)
+[*][FONT=Courier New]xinventories.command.load[/FONT] - Load inventories (default: op)
+[*][FONT=Courier New]xinventories.command.group[/FONT] - Manage groups (default: op)
+[*][FONT=Courier New]xinventories.command.world[/FONT] - Manage worlds (default: op)
+[*][FONT=Courier New]xinventories.command.pattern[/FONT] - Manage patterns (default: op)
+[*][FONT=Courier New]xinventories.command.cache[/FONT] - Manage cache (default: op)
+[*][FONT=Courier New]xinventories.command.backup[/FONT] - Manage backups (default: op)
+[*][FONT=Courier New]xinventories.command.convert[/FONT] - Migrate storage (default: op)
+[*][FONT=Courier New]xinventories.command.debug[/FONT] - Debug commands (default: op)
+[*][FONT=Courier New]xinventories.gui[/FONT] - Access admin GUI (default: op)
+[/LIST]
+
+[B]Bypass Permissions[/B]
+[LIST]
+[*][FONT=Courier New]xinventories.bypass[/FONT] - Bypass all inventory switching (default: false)
+[*][FONT=Courier New]xinventories.bypass.<group>[/FONT] - Bypass specific group (default: false)
+[/LIST]
+[/SPOILER]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Configuration ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[SPOILER="groups.yml Example"]
+[CODE]# Survival worlds - share inventory
+survival:
+  priority: 10
+  worlds:
+    - "world"
+    - "world_nether"
+    - "world_the_end"
+  settings:
+    separateGameModeInventories: true
+    saveEnderChest: true
+
+# Creative worlds - separate inventory
+creative:
+  priority: 10
+  worlds:
+    - "creative"
+  patterns:
+    - "creative_.*"
+  settings:
+    separateGameModeInventories: false
+
+# Minigames - fresh inventory each time
+minigames:
+  priority: 20
+  patterns:
+    - "game_.*"
+    - "arena_.*"
+  settings:
+    saveHealth: false
+    saveExperience: false
+    clearOnJoin: true[/CODE]
+[/SPOILER]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Storage Options ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[B]YAML[/B] (Default)
+Best for small servers. Human-readable, easy to edit manually.
+
+[B]SQLite[/B]
+Best for medium servers. Better performance, single database file.
+
+[B]MySQL[/B]
+Best for large servers and networks. Required for multi-server setups.
+
+Migrate between backends with: [FONT=Courier New]/xinv convert <from> <to>[/FONT]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ PlaceholderAPI ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[SPOILER="Available Placeholders"]
+[LIST]
+[*][FONT=Courier New]%xinventories_group%[/FONT] - Current inventory group
+[*][FONT=Courier New]%xinventories_bypass%[/FONT] - Bypass status
+[*][FONT=Courier New]%xinventories_groups_count%[/FONT] - Total groups
+[*][FONT=Courier New]%xinventories_storage_type%[/FONT] - Storage backend
+[*][FONT=Courier New]%xinventories_cache_size%[/FONT] - Cache entries
+[*][FONT=Courier New]%xinventories_cache_hit_rate%[/FONT] - Cache hit rate
+[*][FONT=Courier New]%xinventories_version%[/FONT] - Plugin version
+[/LIST]
+[/SPOILER]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Developer API ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+xInventories provides a comprehensive API for developers:
+
+[CODE]// Get the API
+val api = XInventoriesProvider.get()
+
+// Get player's current group
+val group = api.getGroupForWorld(player.world)
+
+// Save/load inventories
+api.savePlayerData(player)
+api.loadPlayerData(player, "creative")
+
+// Subscribe to events
+api.onInventorySwitch { context ->
+    println("${context.player.name} switched groups")
+}[/CODE]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Support ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[LIST]
+[*][URL='https://github.com/PCX-SH/xInventories/issues']GitHub Issues[/URL] - Bug reports and feature requests
+[*][URL='https://github.com/PCX-SH/xInventories']Source Code[/URL] - Open source on GitHub
+[*][URL='https://pcx.sh']Website[/URL] - More information
+[/LIST]
+
+[SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Screenshots ━━━━━━━━━━[/B][/COLOR][/SIZE]
+
+[SPOILER="View Screenshots"]
+[IMG]https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/GUI_MAIN.png[/IMG]
+[IMG]https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/GUI_GROUPS.png[/IMG]
+[IMG]https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/GUI_PLAYER.png[/IMG]
+[/SPOILER]
+
+[CENTER]
+[SIZE=3][COLOR=#888888]Made with love by Reset65 | Licensed under MIT[/COLOR][/SIZE]
+[/CENTER]

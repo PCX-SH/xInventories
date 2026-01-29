@@ -1,0 +1,85 @@
+# xInventories Group Configuration
+#
+# Groups define which worlds share inventories.
+# Players switching between worlds in the same group keep their inventory.
+# Players switching to a world in a different group get that group's inventory.
+
+groups:
+  # Survival group - main worlds
+  survival:
+    # Explicitly assigned worlds
+    worlds:
+      - "world"
+      - "world_nether"
+      - "world_the_end"
+
+    # Regex patterns for automatic world matching
+    # Worlds matching these patterns join this group automatically
+    patterns:
+      - "^survival_.*"
+      - "^smp_.*"
+
+    # Priority for conflict resolution (higher = wins)
+    priority: 10
+
+    # Parent group (inherits settings, null for none)
+    parent: null
+
+    # Group-specific settings
+    settings:
+      save-health: true
+      save-hunger: true
+      save-saturation: true
+      save-exhaustion: true
+      save-experience: true
+      save-potion-effects: true
+      save-ender-chest: true
+      save-gamemode: false
+      separate-gamemode-inventories: true
+      clear-on-death: false
+
+  # Creative group
+  creative:
+    worlds:
+      - "creative"
+    patterns:
+      - "^creative_.*"
+      - "^build_.*"
+    priority: 20
+    settings:
+      save-health: false
+      save-hunger: false
+      save-experience: false
+      save-potion-effects: false
+      save-ender-chest: true
+      separate-gamemode-inventories: false
+
+  # Minigames group - fresh inventory each time
+  minigames:
+    worlds:
+      - "lobby"
+    patterns:
+      - "^minigame_.*"
+      - "^game_.*"
+      - "^arena_.*"
+    priority: 30
+    settings:
+      save-health: false
+      save-hunger: false
+      save-experience: false
+      save-potion-effects: false
+      save-ender-chest: false
+      separate-gamemode-inventories: false
+      clear-on-join: true
+
+# Default group for unassigned worlds
+default-group: survival
+
+# Global settings applied to all groups (can be overridden per-group)
+global-settings:
+  # Notify players when inventory switches
+  notify-on-switch: true
+  # Sound to play on switch (null for none)
+  switch-sound: "ENTITY_ENDERMAN_TELEPORT"
+  switch-sound-volume: 0.5
+  switch-sound-pitch: 1.2

@@ -1,0 +1,166 @@
+# xInventories Messages
+# Uses MiniMessage format: https://docs.advntr.dev/minimessage/format.html
+#
+# Available placeholders:
+#   {player} - Player name
+#   {world} - World name
+#   {group} - Group name
+#   {from_group} - Previous group
+#   {to_group} - New group
+#   {count} - Generic count
+#   {time} - Time/duration
+
+# Prefix for all messages (empty for none)
+prefix: "<gradient:#5e4fa2:#9e7bb5><bold>xInventories</bold></gradient> <dark_gray>»</dark_gray> "
+
+messages:
+  # ═══════════════════════════════════════
+  # General
+  # ═══════════════════════════════════════
+  no-permission: "<red>You don't have permission to do this."
+  player-not-found: "<red>Player <aqua>{player}</aqua> not found."
+  player-not-online: "<red>Player <aqua>{player}</aqua> is not online."
+  invalid-syntax: "<red>Invalid syntax. Usage: <aqua>{usage}</aqua>"
+  console-only: "<red>This command can only be run from console."
+  player-only: "<red>This command can only be run by players."
+  world-not-found: "<red>World <aqua>{world}</aqua> not found."
+  reloaded: "<green>Configuration reloaded successfully!"
+  reload-failed: "<red>Failed to reload configuration. Check console for errors."
+  unknown-command: "<red>Unknown command: <aqua>{command}</aqua>. Use <aqua>/xinv</aqua> for help."
+  command-error: "<red>An error occurred while executing the command."
+
+  # ═══════════════════════════════════════
+  # Help
+  # ═══════════════════════════════════════
+  help-header: "<gold><bold>xInventories Commands</bold></gold>"
+  help-entry: "<gray>• <aqua>{command}</aqua> <gray>- {description}</gray>"
+  help-footer: "<gray>Use <aqua>/xinv <command></aqua> for more info."
+
+  # ═══════════════════════════════════════
+  # Inventory Operations
+  # ═══════════════════════════════════════
+  inventory-saved: "<green>Inventory saved for <aqua>{player}</aqua>."
+  inventory-saved-self: "<green>Your inventory has been saved."
+  inventory-loaded: "<green>Inventory loaded for <aqua>{player}</aqua>."
+  inventory-loaded-self: "<green>Your inventory has been loaded."
+  inventory-save-failed: "<red>Failed to save inventory for <aqua>{player}</aqua>."
+  inventory-load-failed: "<red>Failed to load inventory for <aqua>{player}</aqua>."
+  inventory-cleared: "<gray>Your inventory has been cleared for this group."
+
+  # Inventory switch notifications
+  inventory-switched: "<gray>Inventory switched: <aqua>{from_group}</aqua> → <green>{to_group}</green>"
+  inventory-switch-same: "<gray>Staying in group <aqua>{group}</aqua>."
+
+  # ═══════════════════════════════════════
+  # Group Management
+  # ═══════════════════════════════════════
+  group-created: "<green>Group <aqua>{group}</aqua> created successfully."
+  group-deleted: "<green>Group <aqua>{group}</aqua> deleted."
+  group-not-found: "<red>Group <aqua>{group}</aqua> not found."
+  group-already-exists: "<red>Group <aqua>{group}</aqua> already exists."
+  group-cannot-delete-default: "<red>Cannot delete the default group."
+  group-list-header: "<gold><bold>Inventory Groups</bold></gold>"
+  group-list-entry: "<gray>• <aqua>{group}</aqua> <gray>({count} worlds)</gray>"
+  group-list-empty: "<gray>No groups configured."
+  group-info-header: "<gold><bold>Group: {group}</bold></gold>"
+  group-info-worlds: "<gray>Worlds: <white>{worlds}</white>"
+  group-info-patterns: "<gray>Patterns: <white>{patterns}</white>"
+  group-info-priority: "<gray>Priority: <white>{priority}</white>"
+  group-info-parent: "<gray>Parent: <white>{parent}</white>"
+  group-modified: "<green>Group <aqua>{group}</aqua> updated."
+
+  # ═══════════════════════════════════════
+  # World Management
+  # ═══════════════════════════════════════
+  world-assigned: "<green>World <aqua>{world}</aqua> assigned to group <aqua>{group}</aqua>."
+  world-unassigned: "<green>World <aqua>{world}</aqua> unassigned from group <aqua>{group}</aqua>."
+  world-not-assigned: "<gray>World <aqua>{world}</aqua> is not assigned to any group."
+  world-already-assigned: "<gray>World <aqua>{world}</aqua> is already assigned to <aqua>{group}</aqua>."
+  world-list-header: "<gold><bold>World Assignments</bold></gold>"
+  world-list-entry: "<gray>• <aqua>{world}</aqua> → <green>{group}</green>"
+  world-list-pattern: "<gray>• <aqua>{world}</aqua> → <green>{group}</green> <gray>(pattern)</gray>"
+  world-list-default: "<gray>• <aqua>{world}</aqua> → <green>{group}</green> <gray>(default)</gray>"
+
+  # ═══════════════════════════════════════
+  # Pattern Management
+  # ═══════════════════════════════════════
+  pattern-added: "<green>Pattern <aqua>{pattern}</aqua> added to group <aqua>{group}</aqua>."
+  pattern-removed: "<green>Pattern <aqua>{pattern}</aqua> removed from group <aqua>{group}</aqua>."
+  pattern-not-found: "<red>Pattern <aqua>{pattern}</aqua> not found in group <aqua>{group}</aqua>."
+  pattern-invalid: "<red>Invalid regex pattern: <aqua>{pattern}</aqua>"
+  pattern-already-exists: "<red>Pattern <aqua>{pattern}</aqua> already exists in group <aqua>{group}</aqua>."
+  pattern-list-header: "<gold><bold>Patterns for {group}</bold></gold>"
+  pattern-list-entry: "<gray>• <aqua>{pattern}</aqua>"
+  pattern-list-empty: "<gray>No patterns configured for this group."
+
+  # ═══════════════════════════════════════
+  # Cache Management
+  # ═══════════════════════════════════════
+  cache-cleared: "<green>Cache cleared. <aqua>{count}</aqua> entries removed."
+  cache-player-cleared: "<green>Cache cleared for player <aqua>{player}</aqua>."
+  cache-stats-header: "<gold><bold>Cache Statistics</bold></gold>"
+  cache-stats-size: "<gray>Entries: <white>{size}/{max}</white>"
+  cache-stats-hits: "<gray>Hits: <green>{hits}</green> <gray>({rate}%)</gray>"
+  cache-stats-misses: "<gray>Misses: <red>{misses}</red>"
+  cache-stats-evictions: "<gray>Evictions: <aqua>{evictions}</aqua>"
+
+  # ═══════════════════════════════════════
+  # Backup Management
+  # ═══════════════════════════════════════
+  backup-created: "<green>Backup created: <aqua>{name}</aqua>"
+  backup-create-failed: "<red>Failed to create backup. Check console for errors."
+  backup-restored: "<green>Backup <aqua>{name}</aqua> restored successfully."
+  backup-restore-failed: "<red>Failed to restore backup. Check console for errors."
+  backup-deleted: "<green>Backup <aqua>{name}</aqua> deleted."
+  backup-not-found: "<red>Backup <aqua>{name}</aqua> not found."
+  backup-list-header: "<gold><bold>Available Backups</bold></gold>"
+  backup-list-entry: "<gray>• <aqua>{name}</aqua> <gray>({time}, {size})</gray>"
+  backup-list-empty: "<gray>No backups available."
+  backup-in-progress: "<gray>Backup in progress... Please wait."
+  backup-restore-confirm: "<red>Warning: This will overwrite current data! Use <aqua>/xinv backup restore {name} confirm</aqua> to proceed."
+
+  # ═══════════════════════════════════════
+  # Conversion
+  # ═══════════════════════════════════════
+  convert-started: "<gray>Starting conversion from <white>{source}</white>..."
+  convert-complete: "<green>Conversion complete! <aqua>{count}</aqua> players migrated."
+  convert-failed: "<red>Conversion failed. Check console for errors."
+  convert-not-found: "<red>No data found for <aqua>{source}</aqua>."
+  convert-in-progress: "<gray>Conversion already in progress."
+
+  # ═══════════════════════════════════════
+  # GUI
+  # ═══════════════════════════════════════
+  gui-title-main: "<gradient:#5e4fa2:#9e7bb5>xInventories Admin</gradient>"
+  gui-title-groups: "<gold>Group Management</gold>"
+  gui-title-group-editor: "<gold>Edit: {group}</gold>"
+  gui-title-worlds: "<gold>World Assignments</gold>"
+  gui-title-patterns: "<gold>Pattern Editor</gold>"
+  gui-title-player-select: "<gold>Select Player</gold>"
+  gui-title-player-view: "<gold>{player}'s Inventory</gold>"
+  gui-title-player-edit: "<red>Editing: {player}</red>"
+  gui-title-cache: "<gold>Cache Statistics</gold>"
+  gui-title-backups: "<gold>Backup Management</gold>"
+  gui-title-confirm: "<red>Confirm Action</red>"
+
+  gui-item-back: "<gray>← Back"
+  gui-item-close: "<red>Close"
+  gui-item-next-page: "<aqua>Next Page →"
+  gui-item-prev-page: "<aqua>← Previous Page"
+  gui-item-confirm: "<green>Confirm"
+  gui-item-cancel: "<red>Cancel"
+  gui-item-refresh: "<aqua>Refresh"
+
+  # ═══════════════════════════════════════
+  # Error Messages
+  # ═══════════════════════════════════════
+  error-generic: "<red>An error occurred. Please check console for details."
+  error-storage: "<red>Storage error. Data may not have been saved."
+  error-storage-connect: "<red>Failed to connect to database."
+  error-migration: "<red>Migration failed. Original data preserved."
+  error-serialization: "<red>Failed to serialize inventory data."
+  error-deserialization: "<red>Failed to load inventory data. It may be corrupted."
+
+  # Admin notifications
+  admin-error: "<dark_red>[xInventories Error]</dark_red> <red>{message}</red>"
+  admin-warning: "<gold>[xInventories Warning]</gold> <yellow>{message}</yellow>"

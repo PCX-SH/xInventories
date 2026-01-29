@@ -1,0 +1,82 @@
+#  __  ___                      _             _
+#  \ \/ (_)_ ____   _____ _ __ | |_ ___  _ __(_) ___  ___
+#   \  /| | '_ \ \ / / _ \ '_ \| __/ _ \| '__| |/ _ \/ __|
+#   /  \| | | | \ V /  __/ | | | || (_) | |  | |  __/\__ \
+#  /_/\_\_|_| |_|\_/ \___|_| |_|\__\___/|_|  |_|\___||___/
+#
+# xInventories Configuration
+# Documentation: https://pcx.gg/xinventories
+
+# Storage backend configuration
+storage:
+  # Type: yaml, sqlite, mysql
+  type: yaml
+
+  # SQLite settings (only if type: sqlite)
+  sqlite:
+    file: "data/inventories.db"
+
+  # MySQL settings (only if type: mysql)
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "xinventories"
+    username: "root"
+    password: ""
+    # HikariCP pool settings
+    pool:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+# Cache configuration
+cache:
+  enabled: true
+  # Maximum entries in cache
+  max-size: 1000
+  # Time-to-live in minutes (0 = never expire)
+  ttl-minutes: 30
+  # Write-behind delay in seconds (batch writes)
+  write-behind-seconds: 5
+
+# Feature toggles
+features:
+  # Separate inventories per gamemode within groups
+  separate-gamemode-inventories: true
+  # Save inventory when changing worlds
+  save-on-world-change: true
+  # Save inventory when changing gamemodes
+  save-on-gamemode-change: true
+  # Use async saving (recommended)
+  async-saving: true
+  # Clear inventory on death (per-group override available)
+  clear-on-death: false
+  # Notify admins of critical errors
+  admin-notifications: true
+
+# Backup configuration
+backup:
+  # Enable automatic backups
+  auto-backup: true
+  # Interval in hours
+  interval-hours: 24
+  # Maximum backups to keep (0 = unlimited)
+  max-backups: 7
+  # Compress backups
+  compression: true
+  # Backup directory
+  directory: "backups"
+
+# Performance tuning
+performance:
+  # Batch size for bulk operations
+  batch-size: 100
+  # Async thread pool size
+  thread-pool-size: 4
+  # Save delay on world change (ticks, 0 = immediate)
+  save-delay-ticks: 1
+
+# Debug mode (verbose logging)
+debug: false

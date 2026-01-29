@@ -1,0 +1,87 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.0.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.21'
+    id 'com.gradleup.shadow' version '8.3.5'
+    id 'xyz.jpenilla.run-paper' version '2.3.1'
+}
+
+group = 'sh.pcx'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url = 'https://jitpack.io' }
+}
+
+dependencies {
+    // Paper API
+    compileOnly 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
+
+    // Kotlin - provided by Paper 1.21+
+    compileOnly 'org.jetbrains.kotlin:kotlin-stdlib'
+
+    // Coroutines - must be shaded
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+
+    // Serialization - must be shaded
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
+
+    // Caching - must be shaded
+    implementation('com.github.ben-manes.caffeine:caffeine:3.1.8') {
+        exclude group: 'com.google.errorprone'
+        exclude group: 'org.checkerframework'
+    }
+
+    // Database - must be shaded
+    implementation('com.zaxxer:HikariCP:6.0.0') {
+        exclude group: 'org.slf4j'
+    }
+
+    // Soft dependencies
+    compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') {
+        exclude group: 'org.bukkit', module: 'bukkit'
+    }
+    compileOnly 'me.clip:placeholderapi:2.11.6'
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties(props)
+    filesMatching('plugin.yml') {
+        expand(props)
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+
+    // Minimize - exclude reflection-heavy libraries
+    minimize {
+        exclude dependency('com.zaxxer:HikariCP:.*')
+        exclude dependency('com.github.ben-manes.caffeine:caffeine:.*')
+    }
+
+    // Exclude compile-time only stuff
+    exclude 'org/jetbrains/annotations/**'
+    exclude 'org/intellij/lang/annotations/**'
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/maven/**'
+    exclude 'META-INF/proguard/**'
+    exclude 'META-INF/native-image/**'
+}
+
+build {
+    dependsOn shadowJar
+}
+
+runServer {
+    minecraftVersion '1.21.1'
+}

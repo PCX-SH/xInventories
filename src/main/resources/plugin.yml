@@ -1,0 +1,88 @@
+name: xInventories
+version: '${version}'
+main: sh.pcx.xinventories.XInventories
+api-version: '1.21'
+author: Reset65
+description: Advanced per-world inventory management
+website: https://pcx.sh
+
+softdepend:
+  - Vault
+  - PlaceholderAPI
+  - Magic
+
+commands:
+  xinventories:
+    description: Main xInventories command
+    aliases: [xinv, xi]
+    permission: xinventories.command
+
+permissions:
+  xinventories.admin:
+    description: Full admin access
+    default: op
+    children:
+      xinventories.command: true
+      xinventories.command.*: true
+      xinventories.gui: true
+      xinventories.bypass: true
+
+  xinventories.command:
+    description: Use base command
+    default: true
+
+  xinventories.command.reload:
+    description: Reload configuration
+    default: op
+
+  xinventories.command.save:
+    description: Force save inventories
+    default: op
+
+  xinventories.command.save.others:
+    description: Save other players
+    default: op
+
+  xinventories.command.load:
+    description: Force load inventories
+    default: op
+
+  xinventories.command.group:
+    description: Manage groups
+    default: op
+
+  xinventories.command.world:
+    description: Manage world assignments
+    default: op
+
+  xinventories.command.pattern:
+    description: Manage patterns
+    default: op
+
+  xinventories.command.cache:
+    description: Manage cache
+    default: op
+
+  xinventories.command.backup:
+    description: Manage backups
+    default: op
+
+  xinventories.command.convert:
+    description: Convert from other plugins
+    default: op
+
+  xinventories.command.debug:
+    description: Debug commands
+    default: op
+
+  xinventories.gui:
+    description: Access admin GUI
+    default: op
+
+  xinventories.bypass:
+    description: Bypass all inventory separation
+    default: false
+
+  xinventories.bypass.*:
+    description: Bypass specific groups
+    default: false
