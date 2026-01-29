@@ -36,6 +36,7 @@ run/
 # Build artifacts
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
+bin/
 
 # Test output
 out/
