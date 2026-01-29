@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'sh.pcx'
-version = '1.0.0'
+version = '1.0.1'
 
 repositories {
     mavenCentral()
@@ -44,6 +44,17 @@ dependencies {
         exclude group: 'org.bukkit', module: 'bukkit'
     }
     compileOnly 'me.clip:placeholderapi:2.11.6'
+
+    // Testing
+    testImplementation 'org.jetbrains.kotlin:kotlin-test:2.0.21'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation 'io.mockk:mockk:1.13.10'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    testImplementation 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
+    testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.14.0') {
+        exclude group: 'org.jetbrains.kotlin'
+    }
+    testImplementation 'org.xerial:sqlite-jdbc:3.45.1.0'
 }
 
 kotlin {
@@ -84,4 +95,14 @@ build {
 
 runServer {
     minecraftVersion '1.21.1'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+    }
 }

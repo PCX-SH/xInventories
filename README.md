@@ -26,7 +26,7 @@ A powerful per-world inventory management plugin for Paper 1.21.1+ servers. Sepa
 
 ## Installation
 
-1. Download `xInventories-1.0.0.jar`
+1. Download `xInventories-1.0.1.jar`
 2. Place in your server's `plugins/` folder
 3. Restart your server
 4. Configure `plugins/xInventories/config.yml` as needed
@@ -317,7 +317,7 @@ subscription.unsubscribe()
 
 ```kotlin
 // build.gradle.kts
-compileOnly(files("libs/xInventories-1.0.0.jar"))
+compileOnly(files("libs/xInventories-1.0.1.jar"))
 ```
 
 ```xml
@@ -325,7 +325,7 @@ compileOnly(files("libs/xInventories-1.0.0.jar"))
 <dependency>
     <groupId>sh.pcx</groupId>
     <artifactId>xInventories</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -353,6 +353,48 @@ softdepend: [xInventories]
 ![Player GUI](https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/GUI_PLAYER.png)
 
 </details>
+
+## Testing
+
+xInventories includes a comprehensive test suite to ensure reliability and prevent regressions.
+
+### Test Coverage
+
+| Category | Tests | Description |
+|----------|-------|-------------|
+| **Unit Tests** | 400+ | Serializers, models, cache, configuration |
+| **Integration Tests** | 500+ | Storage backends, services, API |
+| **Total** | **991 passing** | 83 skipped (MockBukkit limitations) |
+
+### Running Tests
+
+```bash
+# Run all tests
+./gradlew test
+
+# Run with detailed output
+./gradlew test --info
+
+# View HTML report
+# build/reports/tests/test/index.html
+```
+
+### Test Framework
+
+- **JUnit 5** - Test framework
+- **MockK** - Kotlin mocking library
+- **MockBukkit** - Bukkit API mocking for Paper 1.21
+- **kotlinx-coroutines-test** - Coroutine testing utilities
+
+### Test Categories
+
+- **Serializers** - ItemStack, PlayerData, PotionEffect serialization/deserialization
+- **Models** - Group, WorldPattern, PlayerData data classes
+- **Cache** - Caffeine cache operations, dirty tracking, eviction
+- **Configuration** - Config loading, validation, defaults
+- **Storage** - YAML, SQLite storage operations and roundtrips
+- **Services** - GroupService, StorageService, InventoryService, BackupService, MigrationService
+- **API** - Public API methods, event handling, subscriptions
 
 ## FAQ
 

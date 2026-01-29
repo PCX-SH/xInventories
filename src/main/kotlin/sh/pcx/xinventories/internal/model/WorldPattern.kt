@@ -12,6 +12,20 @@ data class WorldPattern(
      */
     fun matches(worldName: String): Boolean = regex.matches(worldName)
 
+    /**
+     * Equals based on pattern string only (Regex doesn't have value-based equals).
+     */
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is WorldPattern) return false
+        return pattern == other.pattern
+    }
+
+    /**
+     * HashCode based on pattern string only.
+     */
+    override fun hashCode(): Int = pattern.hashCode()
+
     companion object {
         /**
          * Creates a WorldPattern from a regex string.

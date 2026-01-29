@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.entity.Player
+import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -312,7 +313,7 @@ class InventoryService(
     // Bypass management
 
     fun addBypass(uuid: UUID, group: String? = null) {
-        bypasses.getOrPut(uuid) { ConcurrentHashMap.newKeySet() }.add(group)
+        bypasses.getOrPut(uuid) { Collections.synchronizedSet(HashSet()) }.add(group)
     }
 
     fun removeBypass(uuid: UUID, group: String? = null) {
