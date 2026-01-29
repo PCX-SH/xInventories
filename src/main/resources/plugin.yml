@@ -4,7 +4,6 @@ main: sh.pcx.xinventories.XInventories
 api-version: '1.21'
 author: Reset65
 description: Advanced per-world inventory management
-website: https://pcx.sh
 
 softdepend:
   - Vault

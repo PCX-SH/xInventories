@@ -381,7 +381,6 @@ A: Yes! Use `/xinv gui`, navigate to Player Management, select a player, and you
 
 - **Issues:** [GitHub Issues](https://github.com/PCX-SH/xInventories/issues)
 - **Source:** [GitHub](https://github.com/PCX-SH/xInventories)
-- **Website:** [pcx.sh](https://pcx.sh)
 
 ## License
 
