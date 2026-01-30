@@ -51,6 +51,20 @@ class CommandManager(private val plugin: XInventories) {
         ))
         registerSubcommand(ImportCommand(plugin.serviceManager.importService))
 
+        // Quality of Life commands
+        registerSubcommand(MergeCommand())
+        registerSubcommand(ExportCommand())
+        registerSubcommand(ImportJsonCommand())
+
+        // Admin Tools commands
+        registerSubcommand(BulkCommand())
+        registerSubcommand(AuditCommand())
+        registerSubcommand(StatsCommand())
+
+        // Advanced Features commands
+        registerSubcommand(ExpirationCommand())
+        registerSubcommand(TempGroupCommand())
+
         // Register main command executor
         val command: PluginCommand? = plugin.getCommand("xinventories")
         if (command != null) {
