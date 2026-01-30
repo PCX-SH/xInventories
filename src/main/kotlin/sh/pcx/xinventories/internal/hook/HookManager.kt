@@ -4,6 +4,7 @@ import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.internal.integration.XInventoriesEconomyProvider
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 
 /**
  * Manages integration hooks with other plugins.
@@ -12,6 +13,7 @@ class HookManager(private val plugin: XInventories) {
 
     private var placeholderAPIHook: PlaceholderAPIHook? = null
     private var vaultHook: VaultHook? = null
+    private var luckPermsHook: LuckPermsHook? = null
     private var economyProvider: XInventoriesEconomyProvider? = null
 
     /**
@@ -46,6 +48,25 @@ class HookManager(private val plugin: XInventories) {
                 Logging.warning("Failed to register Vault hook: ${e.message}")
             }
         }
+
+        // LuckPerms
+        if (Bukkit.getPluginManager().getPlugin("LuckPerms") != null) {
+            try {
+                luckPermsHook = LuckPermsHook(plugin)
+                if (luckPermsHook?.initialize() == true) {
+                    Logging.info("LuckPerms context hook registered")
+                } else {
+                    luckPermsHook = null
+                }
+            } catch (e: NoClassDefFoundError) {
+                // LuckPerms API classes not available
+                Logging.debug { "LuckPerms API not available on classpath" }
+                luckPermsHook = null
+            } catch (e: Exception) {
+                Logging.warning("Failed to register LuckPerms hook: ${e.message}")
+                luckPermsHook = null
+            }
+        }
     }
 
     /**
@@ -71,6 +92,10 @@ class HookManager(private val plugin: XInventories) {
         placeholderAPIHook?.unregister()
         placeholderAPIHook = null
 
+        // Unregister LuckPerms hook
+        luckPermsHook?.unregister()
+        luckPermsHook = null
+
         // Unregister economy provider
         economyProvider?.unregister()
         economyProvider = null
@@ -89,7 +114,27 @@ class HookManager(private val plugin: XInventories) {
     fun hasVault(): Boolean = vaultHook?.isInitialized() == true
 
     /**
+     * Checks if LuckPerms is available.
+     */
+    fun hasLuckPerms(): Boolean = luckPermsHook?.isInitialized() == true
+
+    /**
      * Gets the Vault hook, if available.
      */
     fun getVaultHook(): VaultHook? = vaultHook
+
+    /**
+     * Gets the LuckPerms hook, if available.
+     */
+    fun getLuckPermsHook(): LuckPermsHook? = luckPermsHook
+
+    /**
+     * Signals to LuckPerms that a player's context has changed.
+     * This should be called when a player changes inventory groups.
+     *
+     * @param player The player whose context changed
+     */
+    fun signalLuckPermsContextUpdate(player: Player) {
+        luckPermsHook?.signalContextUpdate(player)
+    }
 }
