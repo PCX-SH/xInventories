@@ -1,0 +1,39 @@
+# xInventories Import Mapping Configuration
+# This file defines how groups from source plugins map to xInventories groups.
+#
+# Example configuration for PerWorldInventory:
+#
+# source: pwi
+# mappings:
+#   default: survival
+#   survival_worlds: survival
+#   creative_worlds: creative
+#   minigames: minigames
+#
+# Options:
+#   overwriteExisting: false    - Skip players with existing xInventories data
+#   importBalances: true        - Import economy data if available
+#   deleteSourceAfter: false    - Delete source data after successful import (WARNING: destructive!)
+#   useApiWhenAvailable: true   - Use plugin API when source plugin is loaded
+#   createMissingGroups: true   - Create target groups if they don't exist
+#   importOfflinePlayers: true  - Import data for offline players
+#   batchSize: 100              - Players to process per batch
+#   dryRun: false               - Preview mode (no actual changes)
+#
+# Supported sources:
+#   - pwi (PerWorldInventory-kt)
+#   - mvi (Multiverse-Inventories)
+#   - myworlds (MyWorlds)
+
+# Example empty mapping (will be auto-generated during import detect):
+source: ""
+mappings: {}
+options:
+  overwriteExisting: false
+  importBalances: true
+  deleteSourceAfter: false
+  useApiWhenAvailable: true
+  createMissingGroups: true
+  importOfflinePlayers: true
+  batchSize: 100
+  dryRun: false

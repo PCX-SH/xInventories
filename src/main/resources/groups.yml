@@ -72,6 +72,61 @@ groups:
       separate-gamemode-inventories: false
       clear-on-join: true
 
+  # ============================================================
+  # Conditional Group Examples
+  # ============================================================
+  # Groups can have conditions that determine if a player qualifies.
+  # When conditions are defined, the group is only applied if the
+  # player meets those conditions (in addition to world matching).
+
+  # Example: VIP players get a different inventory
+  # vip_survival:
+  #   worlds: []                    # No world restriction
+  #   patterns: []
+  #   priority: 15                  # Higher than regular survival (10)
+  #   conditions:
+  #     permission: "xinventories.group.vip"
+
+  # Example: Staff-only creative world
+  # staff_creative:
+  #   worlds:
+  #     - "creative"
+  #   priority: 25                  # Higher than regular creative
+  #   conditions:
+  #     permission: "xinventories.group.staff"
+
+  # Example: Event inventory (time-based)
+  # event_halloween:
+  #   worlds:
+  #     - "*"                       # All worlds
+  #   priority: 100
+  #   conditions:
+  #     schedule:
+  #       - start: "2024-10-25T00:00:00"
+  #         end: "2024-11-01T23:59:59"
+  #         timezone: "America/New_York"
+  #     # OR use cron expression:
+  #     # cron: "0 18-22 * * FRI,SAT"   # Fridays and Saturdays 6-10 PM
+
+  # Example: High-level player inventory (PlaceholderAPI required)
+  # veteran_survival:
+  #   worlds: []
+  #   priority: 12
+  #   conditions:
+  #     placeholder:
+  #       placeholder: "%player_level%"
+  #       operator: ">="
+  #       value: "50"
+  #     # Multiple conditions (require-all determines AND vs OR):
+  #     # placeholders:
+  #     #   - placeholder: "%player_level%"
+  #     #     operator: ">="
+  #     #     value: "50"
+  #     #   - placeholder: "%player_playtime_hours%"
+  #     #     operator: ">="
+  #     #     value: "100"
+  #     require-all: true           # AND logic (all conditions must match)
+
 # Default group for unassigned worlds
 default-group: survival
 

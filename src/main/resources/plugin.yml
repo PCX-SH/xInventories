@@ -9,6 +9,9 @@ softdepend:
   - Vault
   - PlaceholderAPI
   - Magic
+  - PerWorldInventory
+  - Multiverse-Inventories
+  - My_Worlds
 
 commands:
   xinventories:
@@ -18,13 +21,12 @@ commands:
 
 permissions:
   xinventories.admin:
-    description: Full admin access
+    description: Full admin access (does not include bypass)
     default: op
     children:
       xinventories.command: true
       xinventories.command.*: true
       xinventories.gui: true
-      xinventories.bypass: true
 
   xinventories.command:
     description: Use base command
@@ -72,6 +74,89 @@ permissions:
 
   xinventories.command.debug:
     description: Debug commands
+    default: op
+
+  xinventories.command.balance:
+    description: View economy balances
+    default: op
+
+  xinventories.command.balance.set:
+    description: Set economy balances
+    default: op
+
+  xinventories.command.balance.transfer:
+    description: Transfer balances between groups
+    default: op
+
+  xinventories.command.import:
+    description: Import from other plugins
+    default: op
+
+  xinventories.command.sync:
+    description: View sync status
+    default: op
+
+  xinventories.command.sync.unlock:
+    description: Force unlock player data
+    default: op
+
+  # Versioning & Death Recovery permissions
+  xinventories.command.history:
+    description: View inventory history
+    default: op
+
+  xinventories.command.restore:
+    description: Restore inventory versions
+    default: op
+
+  xinventories.command.snapshot:
+    description: Create manual snapshots
+    default: op
+
+  xinventories.command.deaths:
+    description: View death records
+    default: op
+
+  xinventories.command.deaths.restore:
+    description: Restore death inventories
+    default: op
+
+  # Content Control permissions
+  xinventories.command.template:
+    description: Manage templates
+    default: op
+
+  xinventories.command.template.create:
+    description: Create templates
+    default: op
+
+  xinventories.command.template.apply:
+    description: Apply templates to players
+    default: op
+
+  xinventories.command.template.delete:
+    description: Delete templates
+    default: op
+
+  xinventories.command.template.edit:
+    description: Edit templates
+    default: op
+
+  xinventories.command.restrict:
+    description: Manage item restrictions
+    default: op
+
+  xinventories.reset:
+    description: Reset own inventory to template
+    default: true
+
+  # Advanced Groups permissions
+  xinventories.command.lock:
+    description: Lock and unlock player inventories
+    default: op
+
+  xinventories.lock.bypass:
+    description: Bypass inventory locks
     default: op
 
   xinventories.gui:

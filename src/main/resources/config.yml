@@ -78,5 +78,137 @@ performance:
   # Save delay on world change (ticks, 0 = immediate)
   save-delay-ticks: 1
 
+# ============================================================
+# Inventory Versioning
+# ============================================================
+# Track inventory changes over time for rollback capability.
+versioning:
+  enabled: true
+  # Maximum versions kept per player per group
+  max-versions-per-player: 10
+  # Minimum seconds between versions (prevent spam)
+  min-interval-seconds: 300
+  # Auto-delete versions older than this (days)
+  retention-days: 7
+  # When to create versions
+  trigger-on:
+    world-change: true
+    disconnect: true
+    manual: true
+
+# ============================================================
+# Death Recovery
+# ============================================================
+# Preserve inventory on death for recovery.
+death-recovery:
+  enabled: true
+  # Maximum deaths stored per player
+  max-deaths-per-player: 5
+  # Auto-delete deaths older than this (days)
+  retention-days: 3
+  # Store additional death context
+  store-location: true
+  store-death-cause: true
+  store-killer: true
+
+# ============================================================
+# Inventory Locking
+# ============================================================
+# Temporarily freeze player inventories.
+locking:
+  enabled: true
+  # Message shown when locked player tries to modify inventory
+  default-message: "<red>Your inventory is currently locked."
+  # Allow admins with xinventories.lock.bypass to modify locked inventories
+  allow-admin-bypass: true
+
+# ============================================================
+# Shared Slots
+# ============================================================
+# Slots that persist across all groups.
+shared-slots:
+  enabled: true
+  slots: []
+  # Example shared slot configuration:
+  # slots:
+  #   - slot: 8                    # Hotbar slot 9 (0-indexed)
+  #     mode: PRESERVE             # PRESERVE, LOCK, SYNC
+  #     item:                      # Optional: enforce specific item
+  #       type: COMPASS
+  #       display-name: "<gold>Server Menu"
+  #   - slots: [36, 37, 38, 39]    # All armor slots
+  #     mode: PRESERVE
+
+# ============================================================
+# Economy Integration
+# ============================================================
+# Separate Vault economy balances per inventory group.
+economy:
+  enabled: true
+  # Economy provider: VAULT
+  provider: VAULT
+  # Whether to separate balances by group
+  separate-by-group: true
+
+# ============================================================
+# Cross-Server Synchronization (Network Sync)
+# ============================================================
+# Enable this for multi-server networks using BungeeCord/Velocity.
+# Requires Redis for real-time synchronization.
+sync:
+  # Enable cross-server sync
+  enabled: false
+
+  # Sync mode: REDIS (recommended), PLUGIN_MESSAGING, MYSQL_NOTIFY
+  mode: REDIS
+
+  # Unique identifier for this server (must be different on each server)
+  server-id: "server-1"
+
+  # Redis connection settings
+  redis:
+    host: "localhost"
+    port: 6379
+    password: ""
+    # Redis pub/sub channel for sync messages
+    channel: "xinventories:sync"
+    # Connection timeout in milliseconds
+    timeout: 5000
+
+  # Conflict resolution when the same player is modified on multiple servers
+  conflicts:
+    # Strategy: LAST_WRITE_WINS, MERGE, PROMPT_ADMIN
+    strategy: LAST_WRITE_WINS
+
+    # Merge rules (only used when strategy is MERGE)
+    merge-rules:
+      # How to merge inventory: NEWER, OLDER, CURRENT_SERVER
+      inventory: NEWER
+      # How to merge experience: HIGHER, LOWER, NEWER, OLDER
+      experience: HIGHER
+      # How to merge health: HIGHER, LOWER, CURRENT_SERVER, NEWER
+      health: CURRENT_SERVER
+      # How to merge potion effects: UNION, INTERSECTION, NEWER
+      potion-effects: UNION
+
+  # Lock transfer for seamless server switches
+  transfer-lock:
+    # Enable lock transfer during server transfers
+    enabled: true
+    # Timeout in seconds to wait for lock during transfer
+    timeout-seconds: 10
+
+  # Heartbeat for server health monitoring
+  heartbeat:
+    # Interval in seconds between heartbeats
+    interval-seconds: 30
+    # Timeout in seconds before considering a server dead
+    timeout-seconds: 90
+
+# Enable bStats metrics collection (https://bstats.org/plugin/bukkit/xInventories)
+# This helps us understand how the plugin is used and improve it.
+# All data is anonymous and no personal information is collected.
+metrics: true
+
 # Debug mode (verbose logging)
 debug: false

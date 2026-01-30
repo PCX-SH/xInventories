@@ -164,3 +164,39 @@ messages:
   # Admin notifications
   admin-error: "<dark_red>[xInventories Error]</dark_red> <red>{message}</red>"
   admin-warning: "<gold>[xInventories Warning]</gold> <yellow>{message}</yellow>"
+
+  # ═══════════════════════════════════════
+  # Inventory Versioning
+  # ═══════════════════════════════════════
+  versioning-disabled: "<red>Inventory versioning is disabled."
+  manual-snapshots-disabled: "<red>Manual snapshots are disabled in the configuration."
+  player-must-be-online: "<red>Player <aqua>{player}</aqua> must be online for this action."
+  no-versions-found: "<gray>No inventory versions found for <aqua>{player}</aqua> in group <aqua>{group}</aqua>."
+  version-history-header: "<gold><bold>Inventory History for {player}</bold></gold> <gray>({count} versions)</gray>"
+  version-history-entry: "<gray>{index}. <aqua>{id}</aqua> - {group} ({trigger}) - {relative_time}"
+  version-history-footer: "<gray>Use <aqua>{restore_usage}</aqua> to restore a version."
+  version-not-found: "<red>Version <aqua>{version}</aqua> not found."
+  version-restored: "<green>Restored version <aqua>{version}</aqua> for <aqua>{player}</aqua>."
+  version-restore-failed: "<red>Failed to restore version for <aqua>{player}</aqua>: {error}"
+  your-inventory-restored: "<green>Your inventory has been restored to a previous version."
+  snapshot-created: "<green>Created snapshot <aqua>{version}</aqua> for <aqua>{player}</aqua> in group <aqua>{group}</aqua>."
+  snapshot-failed: "<red>Failed to create snapshot for <aqua>{player}</aqua>."
+
+  # ═══════════════════════════════════════
+  # Death Recovery
+  # ═══════════════════════════════════════
+  death-recovery-disabled: "<red>Death recovery is disabled."
+  no-deaths-found: "<gray>No death records found for <aqua>{player}</aqua>."
+  death-history-header: "<gold><bold>Death History for {player}</bold></gold> <gray>({count} deaths)</gray>"
+  death-history-entry: "<gray>{index}. <aqua>{id}</aqua> - {location} - {cause} - {relative_time}"
+  death-history-footer: "<gray>Use <aqua>{restore_usage}</aqua> to restore a death inventory."
+  death-record-not-found: "<red>Death record <aqua>{death_id}</aqua> not found."
+  death-record-detail-header: "<gold><bold>Death Record for {player}</bold></gold>"
+  death-record-detail-id: "<gray>ID: <white>{id}</white>"
+  death-record-detail-time: "<gray>Time: <white>{time}</white> ({relative_time})"
+  death-record-detail-location: "<gray>Location: <white>{location}</white>"
+  death-record-detail-cause: "<gray>Cause: <white>{cause}</white>"
+  death-record-detail-items: "<gray>Items: <white>{items}</white>"
+  death-inventory-restored: "<green>Restored death inventory <aqua>{death_id}</aqua> for <aqua>{player}</aqua>."
+  death-restore-failed: "<red>Failed to restore death inventory for <aqua>{player}</aqua>: {error}"
+  your-death-inventory-restored: "<green>Your death inventory has been restored."
