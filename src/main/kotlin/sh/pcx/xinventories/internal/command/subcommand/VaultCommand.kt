@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.menu.ConfiscationVaultGUI
 
 /**
@@ -26,7 +26,7 @@ class VaultCommand : Subcommand {
     override val description = "View and claim confiscated items"
     override val playerOnly = true
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val player = sender as Player
         val messages = plugin.serviceManager.messageService
         val restrictionService = plugin.serviceManager.restrictionService
@@ -105,7 +105,7 @@ class VaultCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> {
                 val completions = mutableListOf("claim", "count")

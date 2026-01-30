@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.TemplateApplyTrigger
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -21,7 +21,7 @@ class ResetCommand : Subcommand {
     override val description = "Reset your inventory to the group template"
     override val playerOnly = true
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val groupService = plugin.serviceManager.groupService
         val templateService = plugin.serviceManager.templateService
@@ -90,7 +90,7 @@ class ResetCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         val groupService = plugin.serviceManager.groupService
 
         return when (args.size) {

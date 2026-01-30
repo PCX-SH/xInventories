@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import org.bukkit.command.CommandSender
 
 /**
@@ -46,7 +46,7 @@ interface Subcommand {
      * @param args The arguments (excluding the subcommand name)
      * @return true if the command was handled
      */
-    suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean
+    suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean
 
     /**
      * Provides tab completions for this subcommand.
@@ -56,7 +56,7 @@ interface Subcommand {
      * @param args The arguments (excluding the subcommand name)
      * @return List of completions
      */
-    fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> = emptyList()
+    fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> = emptyList()
 
     /**
      * Checks if the sender has permission to use this subcommand.

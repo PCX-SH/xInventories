@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.InventoryLoadEvent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -16,7 +16,7 @@ class LoadCommand : Subcommand {
     override val usage = "/xinv load <player> [group]"
     override val description = "Force load inventory"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val inventoryService = plugin.serviceManager.inventoryService
         val groupService = plugin.serviceManager.groupService
@@ -53,7 +53,7 @@ class LoadCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> Bukkit.getOnlinePlayers()
                 .map { it.name }

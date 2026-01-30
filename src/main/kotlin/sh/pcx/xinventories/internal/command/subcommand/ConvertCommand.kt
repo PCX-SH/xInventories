@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.StorageType
 import org.bukkit.command.CommandSender
 
@@ -15,7 +15,7 @@ class ConvertCommand : Subcommand {
     override val usage = "/xinv convert <from> <to>"
     override val description = "Convert between storage types"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val migrationService = plugin.serviceManager.migrationService
 
@@ -82,7 +82,7 @@ class ConvertCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         val types = listOf("yaml", "sqlite", "mysql")
 
         return when (args.size) {

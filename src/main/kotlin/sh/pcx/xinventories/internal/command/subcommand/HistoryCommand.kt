@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.command.subcommand
 
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import java.time.format.DateTimeFormatter
 import java.time.ZoneId
 
@@ -21,7 +21,7 @@ class HistoryCommand : Subcommand {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         .withZone(ZoneId.systemDefault())
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val versioningService = plugin.serviceManager.versioningService
 
@@ -88,7 +88,7 @@ class HistoryCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> Bukkit.getOnlinePlayers()
                 .map { it.name }

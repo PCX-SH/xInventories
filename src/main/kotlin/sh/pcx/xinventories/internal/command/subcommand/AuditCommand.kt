@@ -6,7 +6,7 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.AuditAction
 import sh.pcx.xinventories.internal.model.AuditEntry
 import java.io.File
@@ -35,7 +35,7 @@ class AuditCommand : Subcommand {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     private val timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val auditService = plugin.serviceManager.auditService
 
         if (auditService == null || !auditService.isEnabled) {
@@ -58,7 +58,7 @@ class AuditCommand : Subcommand {
         return true
     }
 
-    private suspend fun handlePlayerLookup(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handlePlayerLookup(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         val auditService = plugin.serviceManager.auditService ?: return
 
         val playerName = args[0]
@@ -89,7 +89,7 @@ class AuditCommand : Subcommand {
         sender.sendMessage(Component.text("----------------------------------------", NamedTextColor.DARK_GRAY))
     }
 
-    private suspend fun handleSearch(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleSearch(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         val auditService = plugin.serviceManager.auditService ?: return
 
         if (args.isEmpty()) {
@@ -127,7 +127,7 @@ class AuditCommand : Subcommand {
         sender.sendMessage(Component.text("----------------------------------------", NamedTextColor.DARK_GRAY))
     }
 
-    private suspend fun handleExport(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleExport(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         val auditService = plugin.serviceManager.auditService ?: return
 
         if (args.isEmpty()) {
@@ -155,7 +155,7 @@ class AuditCommand : Subcommand {
             return
         }
 
-        val outputFile = File(plugin.dataFolder, "exports/$fileName")
+        val outputFile = File(plugin.plugin.dataFolder, "exports/$fileName")
         val success = auditService.exportToCsv(entries, outputFile)
 
         if (success) {
@@ -165,7 +165,7 @@ class AuditCommand : Subcommand {
         }
     }
 
-    private suspend fun handleStats(plugin: XInventories, sender: CommandSender) {
+    private suspend fun handleStats(plugin: PluginContext, sender: CommandSender) {
         val auditService = plugin.serviceManager.auditService ?: return
 
         val entryCount = auditService.getEntryCount()
@@ -249,7 +249,7 @@ class AuditCommand : Subcommand {
         sender.sendMessage(Component.text("    View audit log statistics", NamedTextColor.GRAY))
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> {
                 val suggestions = mutableListOf("search", "export", "stats")

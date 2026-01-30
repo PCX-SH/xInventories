@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.isValidRegex
 import org.bukkit.command.CommandSender
 
@@ -15,7 +15,7 @@ class PatternCommand : Subcommand {
     override val usage = "/xinv pattern <add|remove|list> <group> [pattern]"
     override val description = "Manage group patterns"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val groupService = plugin.serviceManager.groupService
 
@@ -113,7 +113,7 @@ class PatternCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> listOf("add", "remove", "list")
                 .filter { it.startsWith(args[0].lowercase()) }

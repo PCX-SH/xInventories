@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.command.subcommand
 
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 
 /**
  * Command to restore a player's inventory from a version.
@@ -16,7 +16,7 @@ class RestoreCommand : Subcommand {
     override val usage = "/xinv restore <player> <version-id>"
     override val description = "Restore inventory from a version"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val versioningService = plugin.serviceManager.versioningService
 
@@ -76,7 +76,7 @@ class RestoreCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> Bukkit.getOnlinePlayers()
                 .map { it.name }

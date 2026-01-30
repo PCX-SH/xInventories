@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import org.bukkit.command.CommandSender
 
 /**
@@ -13,7 +13,7 @@ class ReloadCommand : Subcommand {
     override val usage = "/xinv reload"
     override val description = "Reload configuration files"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
 
         val success = plugin.reload()

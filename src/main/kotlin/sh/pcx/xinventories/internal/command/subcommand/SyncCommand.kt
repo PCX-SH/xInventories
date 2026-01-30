@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.command.subcommand
 
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -31,7 +31,7 @@ class SyncCommand : Subcommand {
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
         .withZone(ZoneId.systemDefault())
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val syncService = plugin.serviceManager.syncService
 
         if (syncService == null || !syncService.isEnabled) {
@@ -59,7 +59,7 @@ class SyncCommand : Subcommand {
         return true
     }
 
-    private fun showStatus(plugin: XInventories, sender: CommandSender, syncService: sh.pcx.xinventories.internal.service.SyncService) {
+    private fun showStatus(plugin: PluginContext, sender: CommandSender, syncService: sh.pcx.xinventories.internal.service.SyncService) {
         sender.sendMessage("§6§l=== xInventories Sync Status ===")
         sender.sendMessage("")
         sender.sendMessage("§7Server ID: §f${syncService.serverId}")
@@ -162,7 +162,7 @@ class SyncCommand : Subcommand {
         }
     }
 
-    private suspend fun forceUnlock(sender: CommandSender, plugin: XInventories, playerName: String?) {
+    private suspend fun forceUnlock(sender: CommandSender, plugin: PluginContext, playerName: String?) {
         if (!sender.hasPermission("xinventories.command.sync.unlock")) {
             sender.sendMessage("§cYou don't have permission to force unlock players.")
             return
@@ -194,7 +194,7 @@ class SyncCommand : Subcommand {
         sender.sendMessage("§aForce released lock for $playerName ($uuid)")
     }
 
-    private fun invalidateCache(sender: CommandSender, plugin: XInventories, playerName: String?) {
+    private fun invalidateCache(sender: CommandSender, plugin: PluginContext, playerName: String?) {
         if (playerName == null) {
             sender.sendMessage("§cUsage: /xinv sync invalidate <player>")
             return
@@ -248,7 +248,7 @@ class SyncCommand : Subcommand {
         }
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> listOf("status", "servers", "locks", "lock", "unlock", "invalidate", "stats")
                 .filter { it.startsWith(args[0].lowercase()) }

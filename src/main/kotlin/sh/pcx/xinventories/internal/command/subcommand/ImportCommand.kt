@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.import.ImportService
 import sh.pcx.xinventories.internal.model.ImportMapping
 import sh.pcx.xinventories.internal.model.ImportOptions
@@ -23,7 +23,7 @@ class ImportCommand(private val importService: ImportService) : Subcommand {
     override val usage = "/xinv import detect | preview <plugin> | <plugin> [--confirm] | <plugin> mapping"
     override val description = "Import data from other inventory plugins"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
 
         if (args.isEmpty()) {
@@ -320,7 +320,7 @@ class ImportCommand(private val importService: ImportService) : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> {
                 val options = mutableListOf("detect", "preview", "mapping", "report")

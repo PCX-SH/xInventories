@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -15,7 +15,7 @@ class SaveCommand : Subcommand {
     override val usage = "/xinv save [player]"
     override val description = "Force save inventory"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val inventoryService = plugin.serviceManager.inventoryService
 
@@ -55,7 +55,7 @@ class SaveCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         if (args.size == 1 && sender.hasPermission("xinventories.command.save.others")) {
             return Bukkit.getOnlinePlayers()
                 .map { it.name }

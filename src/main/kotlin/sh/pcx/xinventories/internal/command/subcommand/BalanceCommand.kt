@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.service.EconomyService
 import sh.pcx.xinventories.internal.service.GroupService
 import org.bukkit.Bukkit
@@ -26,7 +26,7 @@ class BalanceCommand(
     override val usage = "/xinv balance <player> [group] | set <group> <amount> | transfer <from> <to> <amount>"
     override val description = "Manage per-group economy balances"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
 
         if (!economyService.isEnabled()) {
@@ -271,7 +271,7 @@ class BalanceCommand(
         return String.format("$%.2f", amount)
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> {
                 // Player names or subcommands

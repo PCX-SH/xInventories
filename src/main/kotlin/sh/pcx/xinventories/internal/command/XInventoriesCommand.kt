@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
@@ -17,7 +17,7 @@ import org.bukkit.command.TabCompleter
  * Main command executor for /xinventories (/xinv).
  */
 class XInventoriesCommand(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val commandManager: CommandManager
 ) : CommandExecutor, TabCompleter {
 
@@ -74,7 +74,7 @@ class XInventoriesCommand(
             try {
                 subcommand.execute(plugin, sender, subArgs)
             } catch (e: Exception) {
-                plugin.logger.severe("Error executing command ${subcommand.name}: ${e.message}")
+                plugin.plugin.logger.severe("Error executing command ${subcommand.name}: ${e.message}")
                 e.printStackTrace()
                 messages.send(sender, "command-error")
             }

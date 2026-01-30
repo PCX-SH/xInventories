@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.GameMode
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.menu.BulkOperationsGUI
 import sh.pcx.xinventories.internal.gui.menu.DeathRecoveryGUI
 import sh.pcx.xinventories.internal.gui.menu.GroupBrowserGUI
@@ -49,7 +49,7 @@ class GUICommand : Subcommand {
 
     private val subcommands = listOf("compare", "templates", "groups", "bulk", "search", "lookup", "editor", "versions", "deaths")
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         if (sender !is Player) {
             sender.sendMessage("This command can only be used by players.")
             return true
@@ -80,7 +80,7 @@ class GUICommand : Subcommand {
         return true
     }
 
-    private fun handleTemplates(plugin: XInventories, sender: Player) {
+    private fun handleTemplates(plugin: PluginContext, sender: Player) {
         if (!sender.hasPermission("xinventories.admin.templates")) {
             sender.sendMessage(Component.text("You don't have permission to manage templates.", NamedTextColor.RED))
             return
@@ -88,7 +88,7 @@ class GUICommand : Subcommand {
         TemplateManagerGUI(plugin).open(sender)
     }
 
-    private fun handleGroups(plugin: XInventories, sender: Player) {
+    private fun handleGroups(plugin: PluginContext, sender: Player) {
         if (!sender.hasPermission("xinventories.admin.groups")) {
             sender.sendMessage(Component.text("You don't have permission to browse groups.", NamedTextColor.RED))
             return
@@ -96,7 +96,7 @@ class GUICommand : Subcommand {
         GroupBrowserGUI(plugin).open(sender)
     }
 
-    private fun handleBulk(plugin: XInventories, sender: Player) {
+    private fun handleBulk(plugin: PluginContext, sender: Player) {
         if (!sender.hasPermission("xinventories.admin.bulk")) {
             sender.sendMessage(Component.text("You don't have permission to use bulk operations.", NamedTextColor.RED))
             return
@@ -104,7 +104,7 @@ class GUICommand : Subcommand {
         BulkOperationsGUI(plugin).open(sender)
     }
 
-    private fun handleSearch(plugin: XInventories, sender: Player, args: Array<String>) {
+    private fun handleSearch(plugin: PluginContext, sender: Player, args: Array<String>) {
         if (!sender.hasPermission("xinventories.admin.search")) {
             sender.sendMessage(Component.text("You don't have permission to search inventories.", NamedTextColor.RED))
             return
@@ -159,14 +159,14 @@ class GUICommand : Subcommand {
         }
     }
 
-    private fun handleLookup(plugin: XInventories, sender: Player, args: Array<String>) {
+    private fun handleLookup(plugin: PluginContext, sender: Player, args: Array<String>) {
         val searchQuery = if (args.isNotEmpty()) args.joinToString(" ") else ""
         val gui = PlayerLookupGUI(plugin, searchQuery)
         gui.setupForAdmin(sender.uniqueId)
         gui.open(sender)
     }
 
-    private fun handleEditor(plugin: XInventories, sender: Player, args: Array<String>) {
+    private fun handleEditor(plugin: PluginContext, sender: Player, args: Array<String>) {
         if (!sender.hasPermission("xinventories.admin.edit")) {
             sender.sendMessage(Component.text("You don't have permission to edit inventories.", NamedTextColor.RED))
             return
@@ -205,7 +205,7 @@ class GUICommand : Subcommand {
         ).open(sender)
     }
 
-    private fun handleVersions(plugin: XInventories, sender: Player, args: Array<String>) {
+    private fun handleVersions(plugin: PluginContext, sender: Player, args: Array<String>) {
         if (!sender.hasPermission("xinventories.admin.versions")) {
             sender.sendMessage(Component.text("You don't have permission to view versions.", NamedTextColor.RED))
             return
@@ -234,7 +234,7 @@ class GUICommand : Subcommand {
         ).open(sender)
     }
 
-    private fun handleDeaths(plugin: XInventories, sender: Player, args: Array<String>) {
+    private fun handleDeaths(plugin: PluginContext, sender: Player, args: Array<String>) {
         if (!sender.hasPermission("xinventories.admin.deaths")) {
             sender.sendMessage(Component.text("You don't have permission to view death records.", NamedTextColor.RED))
             return
@@ -260,7 +260,7 @@ class GUICommand : Subcommand {
         ).open(sender)
     }
 
-    private suspend fun handleCompare(plugin: XInventories, sender: Player, args: Array<String>) {
+    private suspend fun handleCompare(plugin: PluginContext, sender: Player, args: Array<String>) {
         if (!sender.hasPermission("xinventories.admin.compare")) {
             sender.sendMessage(Component.text("You don't have permission to compare inventories.", NamedTextColor.RED))
             return
@@ -312,7 +312,7 @@ class GUICommand : Subcommand {
         ).open(sender)
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> subcommands.filter { it.startsWith(args[0], ignoreCase = true) }
             2 -> when (args[0].lowercase()) {

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.menu.MergePreviewGUI
 import sh.pcx.xinventories.internal.service.MergeStrategy
 import org.bukkit.Bukkit
@@ -24,7 +24,7 @@ class MergeCommand : Subcommand {
     override val description = "Merge inventories between groups"
     override val playerOnly = false
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val mergeService = plugin.serviceManager.mergeService
 
@@ -239,7 +239,7 @@ class MergeCommand : Subcommand {
         sender.sendMessage("    Open merge preview GUI for manual resolution")
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> {
                 val options = mutableListOf("confirm", "cancel", "gui")

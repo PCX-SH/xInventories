@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.TemporaryGroupRemoveEvent
 import sh.pcx.xinventories.internal.model.TemporaryGroupAssignment
 import org.bukkit.Bukkit
@@ -26,7 +26,7 @@ class TempGroupCommand : Subcommand {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         .withZone(ZoneId.systemDefault())
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val tempGroupService = plugin.serviceManager.temporaryGroupService
 
@@ -48,7 +48,7 @@ class TempGroupCommand : Subcommand {
     }
 
     private suspend fun handleAssign(
-        plugin: XInventories,
+        plugin: PluginContext,
         sender: CommandSender,
         args: Array<String>,
         tempGroupService: sh.pcx.xinventories.internal.service.TemporaryGroupService
@@ -111,7 +111,7 @@ class TempGroupCommand : Subcommand {
     }
 
     private suspend fun handleRemove(
-        plugin: XInventories,
+        plugin: PluginContext,
         sender: CommandSender,
         args: Array<String>,
         tempGroupService: sh.pcx.xinventories.internal.service.TemporaryGroupService
@@ -155,7 +155,7 @@ class TempGroupCommand : Subcommand {
     }
 
     private fun handleList(
-        plugin: XInventories,
+        plugin: PluginContext,
         sender: CommandSender,
         args: Array<String>,
         tempGroupService: sh.pcx.xinventories.internal.service.TemporaryGroupService
@@ -207,7 +207,7 @@ class TempGroupCommand : Subcommand {
     }
 
     private suspend fun handleExtend(
-        plugin: XInventories,
+        plugin: PluginContext,
         sender: CommandSender,
         args: Array<String>,
         tempGroupService: sh.pcx.xinventories.internal.service.TemporaryGroupService
@@ -264,7 +264,7 @@ class TempGroupCommand : Subcommand {
     }
 
     private fun handleInfo(
-        plugin: XInventories,
+        plugin: PluginContext,
         sender: CommandSender,
         args: Array<String>,
         tempGroupService: sh.pcx.xinventories.internal.service.TemporaryGroupService
@@ -352,7 +352,7 @@ class TempGroupCommand : Subcommand {
         return null
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> listOf("assign", "remove", "list", "extend", "info")
                 .filter { it.startsWith(args[0].lowercase()) }

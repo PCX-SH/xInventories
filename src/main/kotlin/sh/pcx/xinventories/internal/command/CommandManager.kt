@@ -1,13 +1,13 @@
 package sh.pcx.xinventories.internal.command
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.command.subcommand.*
 import org.bukkit.command.PluginCommand
 
 /**
  * Manages command registration and subcommands.
  */
-class CommandManager(private val plugin: XInventories) {
+class CommandManager(private val plugin: PluginContext) {
 
     private val subcommands = mutableMapOf<String, Subcommand>()
     private val aliases = mutableMapOf<String, String>()
@@ -67,13 +67,13 @@ class CommandManager(private val plugin: XInventories) {
         registerSubcommand(TempGroupCommand())
 
         // Register main command executor
-        val command: PluginCommand? = plugin.getCommand("xinventories")
+        val command: PluginCommand? = plugin.plugin.getCommand("xinventories")
         if (command != null) {
             val executor = XInventoriesCommand(plugin, this)
             command.setExecutor(executor)
             command.tabCompleter = executor
         } else {
-            plugin.logger.severe("Failed to register /xinventories command!")
+            plugin.plugin.logger.severe("Failed to register /xinventories command!")
         }
     }
 

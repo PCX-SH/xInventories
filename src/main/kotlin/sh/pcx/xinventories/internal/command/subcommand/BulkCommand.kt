@@ -3,7 +3,7 @@ package sh.pcx.xinventories.internal.command.subcommand
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.command.CommandSender
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.service.BulkOperationStatus
 import java.io.File
 import java.util.UUID
@@ -37,7 +37,7 @@ class BulkCommand : Subcommand {
         fun isExpired(): Boolean = System.currentTimeMillis() - timestamp > 30_000 // 30 seconds
     }
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         if (args.isEmpty()) {
             sendUsage(sender)
             return true
@@ -62,7 +62,7 @@ class BulkCommand : Subcommand {
         return true
     }
 
-    private suspend fun handleClear(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleClear(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         if (args.isEmpty()) {
             sender.sendMessage(Component.text("Usage: /xinv bulk clear <group> [--confirm]", NamedTextColor.RED))
             return
@@ -119,7 +119,7 @@ class BulkCommand : Subcommand {
         pendingConfirmations.remove(senderId)
     }
 
-    private suspend fun handleApplyTemplate(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleApplyTemplate(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         if (args.size < 2) {
             sender.sendMessage(Component.text("Usage: /xinv bulk apply-template <group> <template> [--confirm]", NamedTextColor.RED))
             return
@@ -179,7 +179,7 @@ class BulkCommand : Subcommand {
         pendingConfirmations.remove(senderId)
     }
 
-    private suspend fun handleResetStats(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleResetStats(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         if (args.isEmpty()) {
             sender.sendMessage(Component.text("Usage: /xinv bulk reset-stats <group> [--confirm]", NamedTextColor.RED))
             return
@@ -231,7 +231,7 @@ class BulkCommand : Subcommand {
         pendingConfirmations.remove(senderId)
     }
 
-    private suspend fun handleExport(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleExport(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         if (args.size < 2) {
             sender.sendMessage(Component.text("Usage: /xinv bulk export <group> <file>", NamedTextColor.RED))
             return
@@ -250,7 +250,7 @@ class BulkCommand : Subcommand {
             fileName += ".json"
         }
 
-        val outputFile = File(plugin.dataFolder, "exports/$fileName")
+        val outputFile = File(plugin.plugin.dataFolder, "exports/$fileName")
 
         sender.sendMessage(Component.text("Starting bulk export for group '$groupName'...", NamedTextColor.YELLOW))
 
@@ -277,7 +277,7 @@ class BulkCommand : Subcommand {
         }
     }
 
-    private fun handleStatus(plugin: XInventories, sender: CommandSender) {
+    private fun handleStatus(plugin: PluginContext, sender: CommandSender) {
         val activeOps = plugin.serviceManager.bulkOperationService.getActiveOperations()
 
         if (activeOps.isEmpty()) {
@@ -292,7 +292,7 @@ class BulkCommand : Subcommand {
         }
     }
 
-    private suspend fun handleCancel(plugin: XInventories, sender: CommandSender, args: Array<String>) {
+    private suspend fun handleCancel(plugin: PluginContext, sender: CommandSender, args: Array<String>) {
         if (args.isEmpty()) {
             sender.sendMessage(Component.text("Usage: /xinv bulk cancel <operation-id>", NamedTextColor.RED))
             return
@@ -326,7 +326,7 @@ class BulkCommand : Subcommand {
         }
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> listOf("clear", "apply-template", "reset-stats", "export", "status", "cancel")
                 .filter { it.startsWith(args[0], ignoreCase = true) }

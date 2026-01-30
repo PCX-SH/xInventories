@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -19,7 +19,7 @@ class UnlockCommand : Subcommand {
     override val usage = "/xinv unlock <player>"
     override val description = "Unlock a player's inventory"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val lockingService = plugin.serviceManager.lockingService
         val config = plugin.configManager.mainConfig.locking
@@ -73,7 +73,7 @@ class UnlockCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         if (args.size != 1) return emptyList()
 
         val lockingService = plugin.serviceManager.lockingService

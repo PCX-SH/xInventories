@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.toReadableSize
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -27,7 +27,7 @@ class ExportCommand : Subcommand {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         .withZone(ZoneId.systemDefault())
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val exportService = plugin.serviceManager.exportService
 
@@ -173,7 +173,7 @@ class ExportCommand : Subcommand {
         sender.sendMessage("Files are saved to: plugins/xInventories/exports/")
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> {
                 val options = mutableListOf("all", "list")

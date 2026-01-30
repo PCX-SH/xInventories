@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 
@@ -20,7 +20,7 @@ class ImportJsonCommand : Subcommand {
     override val usage = "/xinv importjson <player|validate|bulk> <file> [group] [--overwrite]"
     override val description = "Import player inventory data from JSON"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val exportService = plugin.serviceManager.exportService
 
@@ -222,7 +222,7 @@ class ImportJsonCommand : Subcommand {
         sender.sendMessage("Or specify an absolute path")
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         val exportService = plugin.serviceManager.exportService
 
         return when (args.size) {

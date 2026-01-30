@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import org.bukkit.command.CommandSender
 
 /**
@@ -14,7 +14,7 @@ class GroupCommand : Subcommand {
     override val usage = "/xinv group <create|delete|list|info> [name]"
     override val description = "Manage inventory groups"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val groupService = plugin.serviceManager.groupService
 
@@ -110,7 +110,7 @@ class GroupCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> listOf("create", "delete", "list", "info")
                 .filter { it.startsWith(args[0].lowercase()) }

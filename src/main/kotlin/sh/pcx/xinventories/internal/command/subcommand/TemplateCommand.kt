@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.menu.TemplateEditorGUI
 import sh.pcx.xinventories.internal.model.TemplateApplyTrigger
 import sh.pcx.xinventories.internal.util.Logging
@@ -33,7 +33,7 @@ class TemplateCommand : Subcommand {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         .withZone(ZoneId.systemDefault())
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val messages = plugin.serviceManager.messageService
         val templateService = plugin.serviceManager.templateService
 
@@ -287,7 +287,7 @@ class TemplateCommand : Subcommand {
         return true
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         val templateService = plugin.serviceManager.templateService
 
         return when (args.size) {

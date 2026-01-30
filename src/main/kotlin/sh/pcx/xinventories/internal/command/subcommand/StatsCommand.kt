@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.command.CommandSender
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 
 /**
  * Command for viewing plugin statistics and metrics.
@@ -23,7 +23,7 @@ class StatsCommand : Subcommand {
     override val usage = "/xinv stats [cache|storage|performance]"
     override val description = "View plugin statistics"
 
-    override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {
+    override suspend fun execute(plugin: PluginContext, sender: CommandSender, args: Array<String>): Boolean {
         val metricsService = plugin.serviceManager.metricsService
 
         when (args.getOrNull(0)?.lowercase()) {
@@ -36,7 +36,7 @@ class StatsCommand : Subcommand {
         return true
     }
 
-    private suspend fun showOverview(plugin: XInventories, sender: CommandSender, metricsService: sh.pcx.xinventories.internal.service.MetricsService) {
+    private suspend fun showOverview(plugin: PluginContext, sender: CommandSender, metricsService: sh.pcx.xinventories.internal.service.MetricsService) {
         val metrics = metricsService.getMetrics()
 
         sender.sendMessage(Component.empty())
@@ -200,7 +200,7 @@ class StatsCommand : Subcommand {
         }
     }
 
-    override fun tabComplete(plugin: XInventories, sender: CommandSender, args: Array<String>): List<String> {
+    override fun tabComplete(plugin: PluginContext, sender: CommandSender, args: Array<String>): List<String> {
         return when (args.size) {
             1 -> listOf("cache", "storage", "performance")
                 .filter { it.startsWith(args[0], ignoreCase = true) }
