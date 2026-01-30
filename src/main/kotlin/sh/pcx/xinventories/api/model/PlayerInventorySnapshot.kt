@@ -3,6 +3,7 @@ package sh.pcx.xinventories.api.model
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
+import sh.pcx.xinventories.internal.util.AttributeCompat
 import java.time.Instant
 import java.util.UUID
 
@@ -57,9 +58,8 @@ data class PlayerInventorySnapshot(
         /**
          * Creates a snapshot from a player's current state.
          */
-        @Suppress("UnstableApiUsage")
         fun fromPlayer(player: Player, group: String): PlayerInventorySnapshot {
-            val maxHealth = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)?.value ?: 20.0
+            val maxHealth = AttributeCompat.getMaxHealthValue(player)
 
             return PlayerInventorySnapshot(
                 uuid = player.uniqueId,

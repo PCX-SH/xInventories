@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/BANNER.png" alt="xInventories Banner">
 </p>
 
-A powerful per-world inventory management plugin for Paper 1.21.11+ servers. Separate player inventories, experience, health, and more across different worlds or world groups.
+A powerful per-world inventory management plugin for Paper 1.21+ servers. Separate player inventories, experience, health, and more across different worlds or world groups.
 
 ## Features
 
@@ -45,7 +45,7 @@ A powerful per-world inventory management plugin for Paper 1.21.11+ servers. Sep
 
 ## Requirements
 
-- **Paper 1.21.11+** (not compatible with Spigot)
+- **Paper 1.21+** (not compatible with Spigot)
 - **Java 21+**
 
 ## Installation

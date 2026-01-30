@@ -2,8 +2,8 @@ package sh.pcx.xinventories.internal.model
 
 import sh.pcx.xinventories.api.model.InventoryContents
 import sh.pcx.xinventories.api.model.PlayerInventorySnapshot
+import sh.pcx.xinventories.internal.util.AttributeCompat
 import org.bukkit.GameMode
-import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
@@ -129,7 +129,7 @@ class PlayerData(
 
         // State
         health = player.health
-        maxHealth = player.getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0
+        maxHealth = AttributeCompat.getMaxHealth(player)?.value ?: 20.0
         foodLevel = player.foodLevel
         saturation = player.saturation
         exhaustion = player.exhaustion
@@ -178,11 +178,11 @@ class PlayerData(
 
         // Apply state based on settings
         if (settings.saveHealth) {
-            val maxHealthAttr = player.getAttribute(Attribute.MAX_HEALTH)
+            val maxHealthAttr = AttributeCompat.getMaxHealth(player)
             if (maxHealthAttr != null) {
                 maxHealthAttr.baseValue = maxHealth
             }
-            player.health = health.coerceIn(0.0, player.getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0)
+            player.health = health.coerceIn(0.0, AttributeCompat.getMaxHealth(player)?.value ?: 20.0)
         }
 
         if (settings.saveHunger) {
