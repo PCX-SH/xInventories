@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Commands: `/xinv death list`, `/xinv death restore`, `/xinv death preview`
   - Automatic cleanup of old records
 
+#### Player State Separation
+- **Statistics Separation** - Per-group player statistics (kills, deaths, blocks mined, etc.)
+- **Advancements Separation** - Per-group advancement/achievement progress
+- **Recipes Separation** - Per-group unlocked recipe tracking
+- All existing state (ender chest, XP, potion effects, health/hunger) now fully per-group
+
 #### Content Control
 - **Templates** - Pre-defined inventory templates for groups
   - Apply templates on first join or group entry
@@ -28,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Whitelist or blacklist modes with material patterns
   - Actions: prevent, drop, or clear restricted items
   - Per-group restriction configurations
+- **NBT Filters** - Advanced item filtering by NBT data
+  - Filter by enchantments (with level ranges)
+  - Filter by custom model data
+  - Filter by display name/lore patterns (regex)
 - **Shared Slots** - Share specific inventory slots across groups
   - Configure shared slots, armor slots, or offhand
   - Real-time sync across group transitions
@@ -38,16 +48,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Schedule-based: Time ranges with timezone support
   - Cron-based: Complex schedules like "weekends only"
   - PlaceholderAPI: Evaluate placeholders for group selection
+- **World Group Inheritance** - Groups inherit settings from parent groups
+  - Reduces configuration duplication
+  - Child groups override parent settings
+  - Circular inheritance detection
+- **Temporary Groups** - Time-limited group assignments
+  - Assign players to groups for events/minigames
+  - Auto-restore original group on expiration
+  - Commands: `/xinv tempgroup assign`, `/xinv tempgroup remove`, `/xinv tempgroup list`
+  - Events: `TemporaryGroupExpireEvent`, `TemporaryGroupAssignEvent`
 - **Inventory Locking** - Temporarily lock player inventories
   - Commands: `/xinv lock`, `/xinv unlock`, `/xinv lock list`
   - Configurable duration, scope (all/group/slots), and bypass permissions
   - Events: `InventoryLockEvent`, `InventoryUnlockEvent`
+
+#### Admin Tools
+- **Audit Logging** - Track all inventory modifications
+  - Who modified what, when, and what changed
+  - Commands: `/xinv audit <player>`, `/xinv audit search`, `/xinv audit export`
+  - Configurable retention and action filtering
+- **Bulk Operations** - Apply actions to all players in a group
+  - Commands: `/xinv bulk clear`, `/xinv bulk apply-template`, `/xinv bulk reset-stats`
+  - Progress tracking and cancellation support
+- **Anti-Dupe Detection** - Detect potential item duplication exploits
+  - Rapid switch detection, item count anomaly detection
+  - Configurable sensitivity (LOW, MEDIUM, HIGH)
+  - Admin notifications and optional inventory freeze
+- **Statistics Dashboard** - Plugin performance metrics
+  - Commands: `/xinv stats`, `/xinv stats cache`, `/xinv stats performance`
+  - Storage usage, cache hit rates, operation timing
+- **Inventory Comparison** - Side-by-side player inventory comparison GUI
+- **Inventory Search** - Search across all player inventories for specific items
+- **Inventory Expiration** - Auto-delete inactive player data
+  - Configurable inactivity threshold
+  - Exclusion by permission or UUID
+  - Commands: `/xinv expiration status`, `/xinv expiration preview`, `/xinv expiration run`
 
 #### External Integrations
 - **Vault Economy** - Per-group economy balances
   - Separate balances per inventory group
   - Transfer money between groups
   - Full Vault provider compatibility
+- **LuckPerms Contexts** - Expose current group as LuckPerms context
+  - Context key: `xinventories:group`
+  - Enables permission tracks based on inventory group
+- **Folia Support** - Multi-threaded server compatibility
+  - Region-based scheduling for player operations
+  - Runtime detection and automatic adaptation
+- **PlaceholderAPI Expansion** - Extended placeholders
+  - `%xinventories_group%`, `%xinventories_item_count%`, `%xinventories_empty_slots%`
+  - `%xinventories_version_count%`, `%xinventories_death_count%`, `%xinventories_balance%`
+  - `%xinventories_locked%`, `%xinventories_lock_reason%`, `%xinventories_last_save%`
 - **Plugin Import** - Import data from other inventory plugins
   - PerWorldInventory (PWI) support
   - MultiVerse-Inventories (MVI) support
@@ -61,6 +112,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Configurable conflict resolution strategies (latest-wins, merge)
   - Server heartbeat monitoring
   - Cache invalidation across servers
+
+#### Quality of Life
+- **Inventory Merge** - Merge two groups' inventories
+  - Strategies: COMBINE, REPLACE, KEEP_HIGHER, MANUAL
+  - Preview and conflict resolution GUI
+  - Commands: `/xinv merge`, `/xinv merge confirm`, `/xinv merge cancel`
+- **Export/Import JSON** - Export inventories for external tools
+  - Commands: `/xinv export`, `/xinv export all`, `/xinv importjson`
+  - Full inventory data including effects, XP, statistics
+- **Config Versioning** - Automatic config migration on updates
+  - Preserves user settings during upgrades
+  - Automatic backup before migration
+- **Startup Branding** - ASCII art logo and colorized console output
+  - Displays version, storage type, groups loaded, sync status
+
+#### GUI Enhancements (20+ new screens)
+- **Core Management**: Player Lookup, Inventory Editor, Version Browser, Death Recovery Panel
+- **Administration**: Template Manager, Group Browser, Bulk Operations Panel, Inventory Search
+- **Configuration**: Item Restrictions Editor, Shared Slots Editor, Lock Manager, Conditional Groups Editor
+- **Monitoring**: Audit Log Viewer, Statistics Dashboard, Economy Overview
+- **Utilities**: Backup Manager, Import Wizard, Export Tool, GUI Customization
 
 #### CI/CD & Code Quality
 - **Nightly Builds** - Automatic development builds on every push to main
@@ -77,9 +149,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dependabot** - Automated dependency updates
 
 ### Changed
-- Updated test suite to 1578 tests (up from 991)
+- Updated test suite to 2485 tests (up from 991)
 - Added `version` field to PlayerData for sync conflict detection
 - Added `balances` field to PlayerData for per-group economy
+- Added `statistics`, `advancements`, `recipes` fields to PlayerData
 - Enhanced CronExpression to properly handle day-of-week wildcards
 - Changed `mainThreadDispatcher` property type to `CoroutineDispatcher` for better testability
 - **Reduced jar size from 6.6MB to 1.7MB** using Paper's library loader
@@ -90,6 +163,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Handles `GENERIC_MAX_HEALTH` -> `MAX_HEALTH` rename in Paper 1.21.2+
   - Created `VersionDetector` for Minecraft version detection at runtime
   - Updated `api-version` to 1.20 for broader compatibility
+- Expanded MainMenuGUI to 45 slots with new feature access
 
 ### Fixed
 - Fixed CronExpression day matching when only day-of-week is specified

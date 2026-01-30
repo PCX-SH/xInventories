@@ -42,14 +42,28 @@ Whether you're running a survival server with a creative world, a minigame netwo
 [LIST]
 [*][B]Inventory Versioning[/B] - Automatic version history with rollback capability
 [*][B]Death Recovery[/B] - Recover inventories lost on death
+[*][B]Player State Separation[/B] - Per-group statistics, advancements, and recipes
 [*][B]Templates[/B] - Pre-defined inventory templates for starter kits and loadouts
 [*][B]Item Restrictions[/B] - Whitelist/blacklist items per group
+[*][B]NBT Filters[/B] - Advanced filtering by enchantments, custom model data, name/lore patterns
 [*][B]Shared Slots[/B] - Share specific slots across all groups
 [*][B]Conditional Groups[/B] - Dynamic groups based on permissions, time, or PlaceholderAPI
+[*][B]World Group Inheritance[/B] - Groups inherit settings from parent groups
+[*][B]Temporary Groups[/B] - Time-limited group assignments for events/minigames
 [*][B]Inventory Locking[/B] - Temporarily lock inventories with bypass permissions
+[*][B]Audit Logging[/B] - Track all inventory modifications with full history
+[*][B]Bulk Operations[/B] - Apply actions to all players in a group
+[*][B]Anti-Dupe Detection[/B] - Detect potential item duplication exploits
+[*][B]Inventory Search[/B] - Search across all player inventories
+[*][B]Statistics Dashboard[/B] - Plugin performance metrics
 [*][B]Vault Economy[/B] - Per-group economy balances
+[*][B]LuckPerms Contexts[/B] - Current group as LuckPerms context
+[*][B]Folia Support[/B] - Multi-threaded server compatibility
 [*][B]Plugin Import[/B] - Import from PerWorldInventory, MultiVerse-Inventories, MyWorlds
 [*][B]Cross-Server Sync[/B] - Redis-based sync for BungeeCord/Velocity networks
+[*][B]Inventory Merge[/B] - Merge two groups' inventories with conflict resolution
+[*][B]Export/Import JSON[/B] - Export inventories for external tools or backup
+[*][B]20+ GUI Screens[/B] - Comprehensive admin interface for all features
 [/LIST]
 
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Requirements ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
@@ -243,8 +257,18 @@ For BungeeCord/Velocity networks, xInventories supports real-time inventory sync
 [SPOILER="Available Placeholders"]
 [LIST]
 [*][FONT=Courier New]%xinventories_group%[/FONT] - Current inventory group
+[*][FONT=Courier New]%xinventories_group_display%[/FONT] - Current group display name
 [*][FONT=Courier New]%xinventories_bypass%[/FONT] - Bypass status
 [*][FONT=Courier New]%xinventories_groups_count%[/FONT] - Total groups
+[*][FONT=Courier New]%xinventories_item_count%[/FONT] - Total items in inventory
+[*][FONT=Courier New]%xinventories_empty_slots%[/FONT] - Empty inventory slots
+[*][FONT=Courier New]%xinventories_armor_count%[/FONT] - Equipped armor pieces
+[*][FONT=Courier New]%xinventories_version_count%[/FONT] - Number of saved versions
+[*][FONT=Courier New]%xinventories_death_count%[/FONT] - Number of death records
+[*][FONT=Courier New]%xinventories_balance%[/FONT] - Per-group economy balance
+[*][FONT=Courier New]%xinventories_last_save%[/FONT] - Last save timestamp
+[*][FONT=Courier New]%xinventories_locked%[/FONT] - Whether inventory is locked
+[*][FONT=Courier New]%xinventories_lock_reason%[/FONT] - Lock reason if locked
 [*][FONT=Courier New]%xinventories_storage_type%[/FONT] - Storage backend
 [*][FONT=Courier New]%xinventories_cache_size%[/FONT] - Cache entries
 [*][FONT=Courier New]%xinventories_cache_max%[/FONT] - Max cache size

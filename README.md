@@ -51,23 +51,44 @@ A powerful per-world inventory management plugin for Paper 1.20.5+ servers. Sepa
 #### Data Foundation
 - **Inventory Versioning** - Automatic version history with rollback capability
 - **Death Recovery** - Recover inventories lost on death
+- **Player State Separation** - Per-group statistics, advancements, and recipes
 
 #### Content Control
 - **Templates** - Pre-defined inventory templates for groups (starter kits, loadouts)
 - **Item Restrictions** - Whitelist/blacklist items per group
+- **NBT Filters** - Advanced filtering by enchantments, custom model data, name/lore patterns
 - **Shared Slots** - Share specific slots across all groups
 
 #### Advanced Groups
 - **Conditional Groups** - Dynamic groups based on permissions, time, cron schedules, or PlaceholderAPI
+- **World Group Inheritance** - Groups inherit settings from parent groups
+- **Temporary Groups** - Time-limited group assignments for events/minigames
 - **Inventory Locking** - Temporarily lock inventories with bypass permissions
+
+#### Admin Tools
+- **Audit Logging** - Track all inventory modifications with full history
+- **Bulk Operations** - Apply actions to all players in a group
+- **Anti-Dupe Detection** - Detect potential item duplication exploits
+- **Inventory Search** - Search across all player inventories
+- **Inventory Comparison** - Side-by-side player inventory comparison
+- **Statistics Dashboard** - Plugin performance metrics
 
 #### External Integrations
 - **Vault Economy** - Per-group economy balances
+- **LuckPerms Contexts** - Current group as LuckPerms context
+- **Folia Support** - Multi-threaded server compatibility
+- **PlaceholderAPI Expansion** - 15+ placeholders for inventory info
 - **Plugin Import** - Import from PerWorldInventory, MultiVerse-Inventories, MyWorlds
 
 #### Network Sync
 - **Cross-Server Sync** - Redis-based sync for BungeeCord/Velocity networks
 - **Distributed Locking** - Prevent data conflicts across servers
+
+#### Quality of Life
+- **Inventory Merge** - Merge two groups' inventories with conflict resolution
+- **Export/Import JSON** - Export inventories for external tools or backup
+- **Config Versioning** - Automatic config migration on updates
+- **20+ GUI Screens** - Comprehensive admin interface for all features
 
 ## Requirements
 
@@ -119,6 +140,14 @@ All commands use `/xinventories` (aliases: `/xinv`, `/xi`)
 | `/xinv unlock <player>` | Unlock player inventory | `xinventories.command.lock` |
 | `/xinv import <detect\|plugin> [args]` | Import from other plugins | `xinventories.command.import` |
 | `/xinv sync <status\|force> [player]` | Network sync status | `xinventories.command.sync` |
+| `/xinv bulk <clear\|apply-template\|reset-stats> <group>` | Bulk operations | `xinventories.command.bulk` |
+| `/xinv audit <player> [--limit]` | View audit log | `xinventories.command.audit` |
+| `/xinv stats [cache\|storage\|performance]` | Plugin statistics | `xinventories.command.stats` |
+| `/xinv merge <player> <source> <target> [strategy]` | Merge inventories | `xinventories.command.merge` |
+| `/xinv export <player> [group] [file]` | Export to JSON | `xinventories.command.export` |
+| `/xinv importjson <player> <file> [group]` | Import from JSON | `xinventories.command.import` |
+| `/xinv expiration <status\|preview\|run>` | Data expiration | `xinventories.command.expiration` |
+| `/xinv tempgroup <assign\|remove\|list> [player] [group] [duration]` | Temporary groups | `xinventories.command.tempgroup` |
 
 ## Permissions
 
@@ -339,8 +368,18 @@ messages:
 | Placeholder | Description |
 |-------------|-------------|
 | `%xinventories_group%` | Player's current inventory group |
+| `%xinventories_group_display%` | Current group display name |
 | `%xinventories_bypass%` | Whether player has bypass enabled |
 | `%xinventories_groups_count%` | Total number of configured groups |
+| `%xinventories_item_count%` | Total items in inventory |
+| `%xinventories_empty_slots%` | Empty inventory slots |
+| `%xinventories_armor_count%` | Equipped armor pieces |
+| `%xinventories_version_count%` | Number of saved versions |
+| `%xinventories_death_count%` | Number of death records |
+| `%xinventories_balance%` | Per-group economy balance |
+| `%xinventories_last_save%` | Last save timestamp |
+| `%xinventories_locked%` | Whether inventory is locked |
+| `%xinventories_lock_reason%` | Lock reason if locked |
 | `%xinventories_storage_type%` | Current storage backend type |
 | `%xinventories_cache_size%` | Current cache entry count |
 | `%xinventories_cache_max%` | Maximum cache size |
@@ -441,9 +480,9 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 
 | Category | Tests | Description |
 |----------|-------|-------------|
-| **Unit Tests** | 700+ | Serializers, models, cache, configuration, sync messages |
-| **Integration Tests** | 850+ | Storage backends, services, API, economy, templates |
-| **Total** | **1578 passing** | 23 skipped (MockBukkit limitations) |
+| **Unit Tests** | 1500+ | Serializers, models, cache, configuration, GUI logic, services |
+| **Integration Tests** | 950+ | Storage backends, services, API, economy, templates |
+| **Total** | **2485 passing** | 23 skipped (MockBukkit limitations) |
 
 ### Running Tests
 
