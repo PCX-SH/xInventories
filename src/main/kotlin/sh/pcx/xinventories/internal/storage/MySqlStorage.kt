@@ -113,6 +113,9 @@ class MySqlStorage(
                     stmt.setString(18, sqlData["potion_effects"] as String)
                     stmt.setString(19, sqlData["balances"] as? String ?: "")
                     stmt.setLong(20, sqlData["version"] as? Long ?: 0)
+                    stmt.setString(21, sqlData["statistics"] as? String ?: "")
+                    stmt.setString(22, sqlData["advancements"] as? String ?: "")
+                    stmt.setString(23, sqlData["recipes"] as? String ?: "")
 
                     stmt.executeUpdate()
                 }
@@ -353,6 +356,9 @@ class MySqlStorage(
                             stmt.setString(18, sqlData["potion_effects"] as String)
                             stmt.setString(19, sqlData["balances"] as? String ?: "")
                             stmt.setLong(20, sqlData["version"] as? Long ?: 0)
+                            stmt.setString(21, sqlData["statistics"] as? String ?: "")
+                            stmt.setString(22, sqlData["advancements"] as? String ?: "")
+                            stmt.setString(23, sqlData["recipes"] as? String ?: "")
 
                             stmt.addBatch()
                             count++
@@ -395,12 +401,26 @@ class MySqlStorage(
                 "ender_chest" to rs.getString("ender_chest"),
                 "potion_effects" to rs.getString("potion_effects"),
                 "balances" to rs.getString("balances"),
-                "version" to rs.getLong("version")
+                "version" to rs.getLong("version"),
+                "statistics" to getStringOrNull(rs, "statistics"),
+                "advancements" to getStringOrNull(rs, "advancements"),
+                "recipes" to getStringOrNull(rs, "recipes")
             )
 
             PlayerDataSerializer.fromSqlMap(row)
         } catch (e: Exception) {
             Logging.error("Failed to parse player data from result set", e)
+            null
+        }
+    }
+
+    /**
+     * Safely gets a string column that may not exist in older databases.
+     */
+    private fun getStringOrNull(rs: ResultSet, columnName: String): String? {
+        return try {
+            rs.getString(columnName)
+        } catch (e: Exception) {
             null
         }
     }

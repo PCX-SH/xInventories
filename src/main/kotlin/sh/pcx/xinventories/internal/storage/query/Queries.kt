@@ -16,8 +16,8 @@ object Queries {
             health, max_health, food_level, saturation, exhaustion,
             experience, level, total_experience,
             main_inventory, armor_inventory, offhand, ender_chest, potion_effects,
-            balances, version
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            balances, version, statistics, advancements, recipes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(uuid, group_name, gamemode) DO UPDATE SET
             player_name = excluded.player_name,
             timestamp = excluded.timestamp,
@@ -35,7 +35,10 @@ object Queries {
             ender_chest = excluded.ender_chest,
             potion_effects = excluded.potion_effects,
             balances = excluded.balances,
-            version = excluded.version
+            version = excluded.version,
+            statistics = excluded.statistics,
+            advancements = excluded.advancements,
+            recipes = excluded.recipes
     """.trimIndent()
 
     /**
@@ -47,8 +50,8 @@ object Queries {
             health, max_health, food_level, saturation, exhaustion,
             experience, level, total_experience,
             main_inventory, armor_inventory, offhand, ender_chest, potion_effects,
-            balances, version
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            balances, version, statistics, advancements, recipes
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             player_name = VALUES(player_name),
             timestamp = VALUES(timestamp),
@@ -66,7 +69,10 @@ object Queries {
             ender_chest = VALUES(ender_chest),
             potion_effects = VALUES(potion_effects),
             balances = VALUES(balances),
-            version = VALUES(version)
+            version = VALUES(version),
+            statistics = VALUES(statistics),
+            advancements = VALUES(advancements),
+            recipes = VALUES(recipes)
     """.trimIndent()
 
     /**

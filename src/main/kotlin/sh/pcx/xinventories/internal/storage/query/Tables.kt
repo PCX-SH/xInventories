@@ -33,6 +33,9 @@ object Tables {
             potion_effects TEXT,
             balances TEXT,
             version INTEGER NOT NULL DEFAULT 0,
+            statistics TEXT,
+            advancements TEXT,
+            recipes TEXT,
             UNIQUE(uuid, group_name, gamemode)
         )
     """.trimIndent()
@@ -63,6 +66,9 @@ object Tables {
             potion_effects TEXT,
             balances TEXT,
             version BIGINT NOT NULL DEFAULT 0,
+            statistics MEDIUMTEXT,
+            advancements MEDIUMTEXT,
+            recipes MEDIUMTEXT,
             UNIQUE KEY unique_player_group (uuid, group_name, gamemode),
             INDEX idx_uuid (uuid),
             INDEX idx_group (group_name)
@@ -184,5 +190,49 @@ object Tables {
     val CREATE_DEATHS_INDEXES_SQLITE = listOf(
         "CREATE INDEX IF NOT EXISTS idx_deaths_player ON $DEATH_RECORDS (player_uuid)",
         "CREATE INDEX IF NOT EXISTS idx_deaths_timestamp ON $DEATH_RECORDS (timestamp)"
+    )
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Temporary Group Assignment Tables
+    // ═══════════════════════════════════════════════════════════════════
+
+    const val TEMP_GROUPS = "xinventories_temp_groups"
+
+    /**
+     * SQLite table for temporary group assignments.
+     */
+    val CREATE_TEMP_GROUPS_SQLITE = """
+        CREATE TABLE IF NOT EXISTS $TEMP_GROUPS (
+            player_uuid TEXT PRIMARY KEY,
+            temp_group TEXT NOT NULL,
+            original_group TEXT NOT NULL,
+            expires_at INTEGER NOT NULL,
+            assigned_by TEXT,
+            assigned_at INTEGER NOT NULL,
+            reason TEXT
+        )
+    """.trimIndent()
+
+    /**
+     * MySQL table for temporary group assignments.
+     */
+    val CREATE_TEMP_GROUPS_MYSQL = """
+        CREATE TABLE IF NOT EXISTS $TEMP_GROUPS (
+            player_uuid VARCHAR(36) PRIMARY KEY,
+            temp_group VARCHAR(64) NOT NULL,
+            original_group VARCHAR(64) NOT NULL,
+            expires_at BIGINT NOT NULL,
+            assigned_by VARCHAR(64),
+            assigned_at BIGINT NOT NULL,
+            reason VARCHAR(255),
+            INDEX idx_temp_expires (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    """.trimIndent()
+
+    /**
+     * Index creation for temporary groups (SQLite).
+     */
+    val CREATE_TEMP_GROUPS_INDEXES_SQLITE = listOf(
+        "CREATE INDEX IF NOT EXISTS idx_temp_expires ON $TEMP_GROUPS (expires_at)"
     )
 }
