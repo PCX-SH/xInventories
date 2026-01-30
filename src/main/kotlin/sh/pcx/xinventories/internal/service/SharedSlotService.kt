@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.model.SharedSlotEntry
 import sh.pcx.xinventories.internal.model.SharedSlotsConfig
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  * from player modification or synced across all groups.
  */
 class SharedSlotService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) : Listener {
 
@@ -47,7 +47,7 @@ class SharedSlotService(
         this.config = config
 
         if (config.enabled) {
-            plugin.server.pluginManager.registerEvents(this, plugin)
+            plugin.plugin.server.pluginManager.registerEvents(this, plugin.plugin)
             Logging.info("SharedSlotService initialized with ${config.slots.size} slot entries")
         } else {
             Logging.debug { "SharedSlotService disabled" }

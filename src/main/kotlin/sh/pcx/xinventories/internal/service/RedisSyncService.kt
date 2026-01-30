@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.service
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.ServerInfo
 import sh.pcx.xinventories.internal.model.SyncMessage
 import sh.pcx.xinventories.internal.sync.RedisClient
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong
  * Uses Redis pub/sub for messaging and Redis keys for distributed locking.
  */
 class RedisSyncService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val config: SyncConfig
 ) : SyncService {
@@ -82,7 +82,7 @@ class RedisSyncService(
             intervalSeconds = config.heartbeat.intervalSeconds,
             timeoutSeconds = config.heartbeat.timeoutSeconds,
             scope = scope,
-            playerCountProvider = { plugin.server.onlinePlayers.size }
+            playerCountProvider = { plugin.plugin.server.onlinePlayers.size }
         )
 
         // Subscribe to sync channel

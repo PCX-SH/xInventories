@@ -7,7 +7,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.model.VersionTrigger
@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Handles creating, retrieving, restoring, and pruning versions.
  */
 class VersioningService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService
 ) {
@@ -221,7 +221,7 @@ class VersioningService(
         val settings = group?.settings ?: sh.pcx.xinventories.api.model.GroupSettings()
 
         // Apply the version data to the player
-        plugin.server.scheduler.runTask(plugin, Runnable {
+        plugin.plugin.server.scheduler.runTask(plugin.plugin, Runnable {
             version.data.applyToPlayer(player, settings)
         })
 

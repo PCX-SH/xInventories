@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.CronExpression
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
  * for players who haven't been active for a configurable number of days.
  */
 class ExpirationService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService,
     private val backupService: BackupService
@@ -80,7 +80,7 @@ class ExpirationService(
      * Loads configuration from the plugin config.
      */
     private fun loadConfig() {
-        val mainConfig = plugin.config
+        val mainConfig = plugin.plugin.config
 
         config = ExpirationConfig(
             enabled = mainConfig.getBoolean("expiration.enabled", false),
@@ -189,8 +189,8 @@ class ExpirationService(
      * Saves the excluded players list to config.
      */
     private fun saveExcludedPlayers() {
-        plugin.config.set("expiration.excluded-players", excludedPlayers.map { it.toString() })
-        plugin.saveConfig()
+        plugin.plugin.config.set("expiration.excluded-players", excludedPlayers.map { it.toString() })
+        plugin.plugin.saveConfig()
     }
 
     /**

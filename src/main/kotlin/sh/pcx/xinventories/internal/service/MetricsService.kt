@@ -5,7 +5,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.CacheStatistics
 import sh.pcx.xinventories.internal.util.Logging
 import java.time.Duration
@@ -152,7 +152,7 @@ data class PerformanceMetrics(
  * Provides comprehensive statistics for monitoring and debugging.
  */
 class MetricsService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     private val startTime = Instant.now()
@@ -263,7 +263,7 @@ class MetricsService(
 
         return PluginMetrics(
             totalPlayersWithData = playerCount,
-            onlinePlayers = plugin.server.onlinePlayers.size,
+            onlinePlayers = plugin.plugin.server.onlinePlayers.size,
             storageType = storageService.storageType.name,
             storageSizeBytes = storageSizeBytes,
             entryCount = entryCount,

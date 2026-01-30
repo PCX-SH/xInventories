@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.util.Logging
@@ -21,7 +21,7 @@ import java.util.UUID
  * Handles capturing deaths, retrieving death records, and restoring inventories.
  */
 class DeathRecoveryService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService
 ) {
@@ -187,7 +187,7 @@ class DeathRecoveryService(
         val settings = group?.settings ?: sh.pcx.xinventories.api.model.GroupSettings()
 
         // Apply the inventory data to the player
-        plugin.server.scheduler.runTask(plugin, Runnable {
+        plugin.plugin.server.scheduler.runTask(plugin.plugin, Runnable {
             deathRecord.inventoryData.applyToPlayer(player, settings)
         })
 

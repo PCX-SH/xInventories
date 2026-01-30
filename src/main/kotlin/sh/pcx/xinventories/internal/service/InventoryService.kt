@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.GroupChangeEvent
 import sh.pcx.xinventories.api.event.InventoryLoadEvent
 import sh.pcx.xinventories.api.event.InventorySaveEvent
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Core service for inventory operations.
  */
 class InventoryService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService,
     private val groupService: GroupService,
@@ -205,14 +205,14 @@ class InventoryService(
 
         // Fire event - always sync since we may be on main thread
         // Paper requires async events to be called from async threads
-        val isAsync = !plugin.server.isPrimaryThread
+        val isAsync = !plugin.plugin.server.isPrimaryThread
         val event = InventorySaveEvent(
             player,
             groupObj.toApiModel(),
             data.toSnapshot(),
             isAsync
         )
-        plugin.server.pluginManager.callEvent(event)
+        plugin.plugin.server.pluginManager.callEvent(event)
 
         val success = storageService.savePlayerData(data)
 
@@ -247,7 +247,7 @@ class InventoryService(
         // Fire load event on main thread (Paper requires sync events on main thread)
         val eventResult = withContext(plugin.mainThreadDispatcher) {
             val event = InventoryLoadEvent(player, group, snapshot, reason)
-            plugin.server.pluginManager.callEvent(event)
+            plugin.plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) null else event.snapshot
         }
 
@@ -319,7 +319,7 @@ class InventoryService(
                 currentSnapshot,
                 reason
             )
-            plugin.server.pluginManager.callEvent(event)
+            plugin.plugin.server.pluginManager.callEvent(event)
             if (event.isCancelled) null else event
         }
 
@@ -366,7 +366,7 @@ class InventoryService(
                 toGroup,
                 GroupChangeEvent.ChangeReason.WORLD_CHANGE
             )
-            plugin.server.pluginManager.callEvent(groupChangeEvent)
+            plugin.plugin.server.pluginManager.callEvent(groupChangeEvent)
 
             // Signal LuckPerms context update (if available)
             plugin.hookManager.signalLuckPermsContextUpdate(player)
@@ -467,14 +467,14 @@ class InventoryService(
 
     private fun applyInventory(player: Player, data: PlayerData, settings: GroupSettings) {
         // Run on player's region thread (Folia) or main thread (Paper/Spigot)
-        SchedulerCompat.runTask(plugin, player) { p ->
+        SchedulerCompat.runTask(plugin.plugin, player) { p ->
             data.applyToPlayer(p, settings)
         }
     }
 
     private fun clearPlayerInventory(player: Player, settings: GroupSettings) {
         // Run on player's region thread (Folia) or main thread (Paper/Spigot)
-        SchedulerCompat.runTask(plugin, player) { p ->
+        SchedulerCompat.runTask(plugin.plugin, player) { p ->
             // Only clear inventory if save-inventory is enabled
             if (settings.saveInventory) {
                 p.inventory.clear()

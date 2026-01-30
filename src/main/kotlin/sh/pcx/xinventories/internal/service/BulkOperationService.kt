@@ -12,7 +12,7 @@ import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.AuditAction
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.util.Logging
@@ -100,7 +100,7 @@ data class BulkOperationResult(
  * Operations are executed asynchronously with progress reporting.
  */
 class BulkOperationService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     private val activeOperations = ConcurrentHashMap<String, Pair<BulkOperationProgress, Job>>()

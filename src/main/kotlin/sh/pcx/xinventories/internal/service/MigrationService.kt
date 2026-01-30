@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.MigrationError
 import sh.pcx.xinventories.api.model.MigrationReport
 import sh.pcx.xinventories.api.model.StorageType
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Service for migrating data between storage backends.
  */
 class MigrationService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val storageService: StorageService
 ) {
     private val migrationInProgress = AtomicBoolean(false)

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.ItemRestrictionEvent
 import sh.pcx.xinventories.api.model.InventoryGroup
 import sh.pcx.xinventories.internal.model.ConfiscatedItem
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Handles pattern parsing, item matching, and violation handling.
  */
 class RestrictionService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val messageService: MessageService
 ) {
@@ -249,7 +249,7 @@ class RestrictionService(
                                         Logging.debug { "Confiscated item ${item.type.name} from ${player.name} (id: $id)" }
                                     } else {
                                         Logging.warning("Failed to store confiscated item, dropping instead")
-                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                        plugin.plugin.server.scheduler.runTask(plugin.plugin, Runnable {
                                             player.world.dropItemNaturally(player.location, item)
                                         })
                                     }

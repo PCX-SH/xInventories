@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.integration.PlaceholderAPIIntegration
 import sh.pcx.xinventories.internal.model.Group
 import sh.pcx.xinventories.internal.model.GroupConditions
@@ -52,7 +52,7 @@ private data class ConditionCacheKey(
  * Service for evaluating group conditions.
  * Handles permission, schedule, cron, and placeholder conditions with caching.
  */
-class ConditionEvaluator(private val plugin: XInventories) {
+class ConditionEvaluator(private val plugin: PluginContext) {
 
     // PlaceholderAPI integration
     val placeholderIntegration = PlaceholderAPIIntegration(plugin)

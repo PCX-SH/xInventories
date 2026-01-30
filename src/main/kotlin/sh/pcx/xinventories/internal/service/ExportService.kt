@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.util.InventorySerializer
 import sh.pcx.xinventories.internal.util.Logging
@@ -127,12 +127,12 @@ data class BulkExportData(
  * - Partial imports
  */
 class ExportService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService
 ) {
     private val exportDir: File by lazy {
-        File(plugin.dataFolder, "exports").also { it.mkdirs() }
+        File(plugin.plugin.dataFolder, "exports").also { it.mkdirs() }
     }
 
     private val json = Json {

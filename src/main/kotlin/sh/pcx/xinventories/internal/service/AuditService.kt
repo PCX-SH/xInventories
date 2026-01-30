@@ -7,7 +7,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.config.AuditConfig
 import sh.pcx.xinventories.internal.model.AuditAction
 import sh.pcx.xinventories.internal.model.AuditEntry
@@ -23,7 +23,7 @@ import java.util.UUID
  * Provides comprehensive logging of all inventory operations for security and debugging.
  */
 class AuditService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     private lateinit var storage: AuditStorage

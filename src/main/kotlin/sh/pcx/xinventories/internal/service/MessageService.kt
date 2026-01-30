@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.miniMessage
 import sh.pcx.xinventories.internal.util.toComponent
 import net.kyori.adventure.text.Component
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player
 /**
  * Service for handling message formatting and sending using MiniMessage.
  */
-class MessageService(private val plugin: XInventories) {
+class MessageService(private val plugin: PluginContext) {
 
     private val config get() = plugin.configManager.messagesConfig
 
@@ -89,7 +89,7 @@ class MessageService(private val plugin: XInventories) {
      */
     fun broadcast(permission: String, key: String, vararg placeholders: Pair<String, String>) {
         val message = getWithPrefix(key, *placeholders)
-        plugin.server.onlinePlayers
+        plugin.plugin.server.onlinePlayers
             .filter { it.hasPermission(permission) }
             .forEach { it.sendMessage(message) }
     }
@@ -99,7 +99,7 @@ class MessageService(private val plugin: XInventories) {
      */
     fun broadcastAll(key: String, vararg placeholders: Pair<String, String>) {
         val message = getWithPrefix(key, *placeholders)
-        plugin.server.onlinePlayers.forEach { it.sendMessage(message) }
+        plugin.plugin.server.onlinePlayers.forEach { it.sendMessage(message) }
     }
 
     /**
@@ -109,7 +109,7 @@ class MessageService(private val plugin: XInventories) {
         if (!plugin.configManager.mainConfig.features.adminNotifications) return
 
         val component = get("admin-error", "message" to message)
-        plugin.server.onlinePlayers
+        plugin.plugin.server.onlinePlayers
             .filter { it.hasPermission("xinventories.admin") }
             .forEach { it.sendMessage(component) }
     }
@@ -121,7 +121,7 @@ class MessageService(private val plugin: XInventories) {
         if (!plugin.configManager.mainConfig.features.adminNotifications) return
 
         val component = get("admin-warning", "message" to message)
-        plugin.server.onlinePlayers
+        plugin.plugin.server.onlinePlayers
             .filter { it.hasPermission("xinventories.admin") }
             .forEach { it.sendMessage(component) }
     }

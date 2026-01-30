@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.InventoryLockEvent
 import sh.pcx.xinventories.api.event.InventoryUnlockEvent
 import sh.pcx.xinventories.internal.config.LockingConfig
@@ -26,7 +26,7 @@ import org.yaml.snakeyaml.Yaml
  * Provides lock/unlock operations, expiration handling, and persistence.
  */
 class LockingService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     // Active locks stored in memory
@@ -55,7 +55,7 @@ class LockingService(
         loadLocks()
 
         // Start expiration checker (runs every second)
-        expirationTask = plugin.server.scheduler.runTaskTimer(plugin, Runnable {
+        expirationTask = plugin.plugin.server.scheduler.runTaskTimer(plugin.plugin, Runnable {
             checkExpiredLocks()
         }, 20L, 20L) // Every second
 
@@ -246,7 +246,7 @@ class LockingService(
      * Gets the data file for persisting locks.
      */
     private fun getLocksFile(): File {
-        return File(plugin.dataFolder, "data/locks.yml")
+        return File(plugin.plugin.dataFolder, "data/locks.yml")
     }
 
     /**
@@ -343,7 +343,7 @@ class LockingService(
         expirationTask?.cancel()
 
         if (config.enabled) {
-            expirationTask = plugin.server.scheduler.runTaskTimer(plugin, Runnable {
+            expirationTask = plugin.plugin.server.scheduler.runTaskTimer(plugin.plugin, Runnable {
                 checkExpiredLocks()
             }, 20L, 20L)
         }

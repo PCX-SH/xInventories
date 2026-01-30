@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Integration point: PlayerData.balances: MutableMap<String, Double> = mutableMapOf()
  */
 class EconomyService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val storageService: StorageService,
     private val groupService: GroupService
 ) {

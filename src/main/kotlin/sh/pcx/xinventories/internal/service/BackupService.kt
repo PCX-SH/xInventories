@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.BackupMetadata
 import sh.pcx.xinventories.api.model.StorageType
 import sh.pcx.xinventories.internal.util.Logging
@@ -27,7 +27,7 @@ import java.util.zip.GZIPOutputStream
  * Service for backup and restore operations.
  */
 class BackupService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService
 ) {
@@ -42,7 +42,7 @@ class BackupService(
      * Initializes the backup service.
      */
     fun initialize() {
-        backupDir = File(plugin.dataFolder, config.directory)
+        backupDir = File(plugin.plugin.dataFolder, config.directory)
         if (!backupDir.exists()) {
             backupDir.mkdirs()
         }

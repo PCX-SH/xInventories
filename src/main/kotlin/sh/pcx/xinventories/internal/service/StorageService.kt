@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.StorageType
 import sh.pcx.xinventories.internal.cache.PlayerDataCache
 import sh.pcx.xinventories.internal.model.PlayerData
@@ -22,7 +22,7 @@ import java.util.UUID
  * Service orchestrating storage operations with caching.
  */
 class StorageService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     lateinit var storage: Storage

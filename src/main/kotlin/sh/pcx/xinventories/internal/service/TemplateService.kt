@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.TemplateApplyEvent
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.InventoryGroup
@@ -30,15 +30,15 @@ import java.util.concurrent.ConcurrentHashMap
  * Templates are stored as YAML files in plugins/xInventories/templates/
  */
 class TemplateService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     private val templates = ConcurrentHashMap<String, InventoryTemplate>()
-    private val templatesDir: File = File(plugin.dataFolder, "templates")
+    private val templatesDir: File = File(plugin.plugin.dataFolder, "templates")
 
     // Track first-join per player per group
     private val firstJoinTracker = ConcurrentHashMap<String, MutableSet<String>>()
-    private val firstJoinFile: File = File(plugin.dataFolder, "first-joins.yml")
+    private val firstJoinFile: File = File(plugin.plugin.dataFolder, "first-joins.yml")
 
     /**
      * Initializes the template service.
@@ -383,7 +383,7 @@ class TemplateService(
         return withContext(Dispatchers.Default) {
             try {
                 // Run on main thread
-                Bukkit.getScheduler().callSyncMethod(plugin) {
+                Bukkit.getScheduler().callSyncMethod(plugin.plugin) {
                     if (event.clearInventoryFirst) {
                         player.inventory.clear()
                         player.enderChest.clear()

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.InventoryGroup
 import sh.pcx.xinventories.internal.model.FilterAction
 import sh.pcx.xinventories.internal.model.NBTFilter
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
  * NBT data such as enchantments, custom model data, display names, and lore.
  */
 class NBTFilterService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val messageService: MessageService
 ) {

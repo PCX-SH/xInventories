@@ -4,7 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.DupeDetectionEvent
 import sh.pcx.xinventories.internal.config.AntiDupeConfig
 import sh.pcx.xinventories.internal.config.DupeSensitivity
@@ -48,7 +48,7 @@ enum class DupeSeverity {
  * Monitors player inventory patterns and group switching behavior.
  */
 class AntiDupeService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope
 ) {
     private val lastSwitchTimes = ConcurrentHashMap<UUID, Long>()

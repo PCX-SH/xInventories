@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.GroupModifier
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.InventoryGroup
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Service for managing inventory groups.
  */
-class GroupService(private val plugin: XInventories) {
+class GroupService(private val plugin: PluginContext) {
 
     private val groups = ConcurrentHashMap<String, Group>()
     private var defaultGroupName: String = "survival"

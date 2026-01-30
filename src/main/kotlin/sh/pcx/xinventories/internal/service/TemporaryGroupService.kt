@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.service
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.InventorySwitchEvent
 import sh.pcx.xinventories.api.event.TemporaryGroupAssignEvent
 import sh.pcx.xinventories.api.event.TemporaryGroupExpireEvent
@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
  * original group.
  */
 class TemporaryGroupService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService,
     private val groupService: GroupService,
