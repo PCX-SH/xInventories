@@ -1,6 +1,10 @@
 # CodeQL workflow - Security vulnerability scanning
 # Scans for security issues in Kotlin/Java code
 # Runs on pushes, PRs, and weekly schedule for comprehensive coverage
+#
+# TODO: Re-enable when CodeQL supports Kotlin 2.3.0
+# Currently disabled because CodeQL only supports Kotlin < 2.2.30
+# Track: https://github.com/github/codeql/issues
 
 name: CodeQL
 
@@ -16,6 +20,8 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    # Temporarily skip until CodeQL supports Kotlin 2.3.0
+    if: false
 
     permissions:
       # Required for CodeQL analysis
