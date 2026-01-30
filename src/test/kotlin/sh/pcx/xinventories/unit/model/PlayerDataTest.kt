@@ -1585,4 +1585,164 @@ class PlayerDataTest {
             assertEquals(27, playerData.enderChest.size)
         }
     }
+
+    // ============================================================
+    // Extended Data Tests (Statistics, Advancements, Recipes)
+    // ============================================================
+
+    @Nested
+    @DisplayName("Extended Data Fields")
+    inner class ExtendedDataTests {
+
+        private lateinit var playerData: PlayerData
+
+        @BeforeEach
+        fun setUpPlayerData() {
+            playerData = PlayerData.empty(UUID.randomUUID(), "Test", "default", GameMode.SURVIVAL)
+        }
+
+        @Test
+        @DisplayName("should have null statistics by default")
+        fun statisticsNullByDefault() {
+            Assertions.assertNull(playerData.statistics)
+        }
+
+        @Test
+        @DisplayName("should have null advancements by default")
+        fun advancementsNullByDefault() {
+            Assertions.assertNull(playerData.advancements)
+        }
+
+        @Test
+        @DisplayName("should have null recipes by default")
+        fun recipesNullByDefault() {
+            Assertions.assertNull(playerData.recipes)
+        }
+
+        @Test
+        @DisplayName("should store and retrieve statistics")
+        fun storeAndRetrieveStatistics() {
+            val stats = sh.pcx.xinventories.internal.model.PlayerStatistics(mapOf(
+                "DEATHS" to 5,
+                "MINE_BLOCK:DIAMOND_ORE" to 100
+            ))
+            playerData.statistics = stats
+
+            Assertions.assertNotNull(playerData.statistics)
+            assertEquals(5, playerData.statistics!!.get("DEATHS"))
+            assertEquals(100, playerData.statistics!!.get("MINE_BLOCK:DIAMOND_ORE"))
+        }
+
+        @Test
+        @DisplayName("should store and retrieve advancements")
+        fun storeAndRetrieveAdvancements() {
+            val advancements = sh.pcx.xinventories.internal.model.PlayerAdvancements(setOf(
+                "minecraft:story/mine_stone",
+                "minecraft:nether/return_to_sender"
+            ))
+            playerData.advancements = advancements
+
+            Assertions.assertNotNull(playerData.advancements)
+            assertTrue(playerData.advancements!!.isCompleted("minecraft:story/mine_stone"))
+            assertTrue(playerData.advancements!!.isCompleted("minecraft:nether/return_to_sender"))
+        }
+
+        @Test
+        @DisplayName("should store and retrieve recipes")
+        fun storeAndRetrieveRecipes() {
+            val recipes = setOf("minecraft:oak_planks", "minecraft:crafting_table")
+            playerData.recipes = recipes
+
+            Assertions.assertNotNull(playerData.recipes)
+            assertTrue(playerData.recipes!!.contains("minecraft:oak_planks"))
+            assertTrue(playerData.recipes!!.contains("minecraft:crafting_table"))
+        }
+
+        @Test
+        @DisplayName("should reset extended data on resetState")
+        fun resetExtendedDataOnResetState() {
+            playerData.statistics = sh.pcx.xinventories.internal.model.PlayerStatistics(mapOf("DEATHS" to 5))
+            playerData.advancements = sh.pcx.xinventories.internal.model.PlayerAdvancements(setOf("minecraft:story/mine_stone"))
+            playerData.recipes = setOf("minecraft:oak_planks")
+
+            playerData.resetState()
+
+            Assertions.assertNull(playerData.statistics)
+            Assertions.assertNull(playerData.advancements)
+            Assertions.assertNull(playerData.recipes)
+        }
+    }
+
+    // ============================================================
+    // Extended Data with Group Settings Tests
+    // ============================================================
+
+    @Nested
+    @DisplayName("Extended Data with Group Settings")
+    inner class ExtendedDataWithSettingsTests {
+
+        private lateinit var playerData: PlayerData
+
+        @BeforeEach
+        fun setUpPlayerData() {
+            playerData = PlayerData.empty(player.uniqueId, player.name, "default", GameMode.SURVIVAL)
+        }
+
+        @Test
+        @DisplayName("should not apply statistics when saveStatistics is false")
+        fun notApplyStatisticsWhenDisabled() {
+            playerData.statistics = sh.pcx.xinventories.internal.model.PlayerStatistics(mapOf("DEATHS" to 100))
+
+            val settings = GroupSettings(saveStatistics = false)
+            playerData.applyToPlayer(player, settings)
+
+            // Statistics should not be applied (player statistics remain unchanged)
+            // Note: We can't directly verify player statistics in MockBukkit without
+            // setting them first, so we just verify no exception is thrown
+        }
+
+        @Test
+        @DisplayName("should not apply advancements when saveAdvancements is false")
+        fun notApplyAdvancementsWhenDisabled() {
+            playerData.advancements = sh.pcx.xinventories.internal.model.PlayerAdvancements(
+                setOf("minecraft:story/mine_stone")
+            )
+
+            val settings = GroupSettings(saveAdvancements = false)
+            playerData.applyToPlayer(player, settings)
+
+            // Advancements should not be applied
+            // Verify no exception is thrown
+        }
+
+        @Test
+        @DisplayName("should not apply recipes when saveRecipes is false")
+        fun notApplyRecipesWhenDisabled() {
+            playerData.recipes = setOf("minecraft:oak_planks")
+
+            val settings = GroupSettings(saveRecipes = false)
+            playerData.applyToPlayer(player, settings)
+
+            // Recipes should not be applied
+            // Verify no exception is thrown
+        }
+
+        @Test
+        @DisplayName("should handle null extended data gracefully when settings enabled")
+        fun handleNullExtendedDataGracefully() {
+            // Extended data is null
+            Assertions.assertNull(playerData.statistics)
+            Assertions.assertNull(playerData.advancements)
+            Assertions.assertNull(playerData.recipes)
+
+            val settings = GroupSettings(
+                saveStatistics = true,
+                saveAdvancements = true,
+                saveRecipes = true
+            )
+
+            // Should not throw exception
+            playerData.applyToPlayer(player, settings)
+        }
+    }
 }

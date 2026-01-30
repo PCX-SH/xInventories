@@ -2,7 +2,12 @@ package sh.pcx.xinventories.internal.util
 
 import sh.pcx.xinventories.api.model.InventoryContents
 import sh.pcx.xinventories.api.model.PlayerInventorySnapshot
+import sh.pcx.xinventories.internal.model.PlayerAdvancements
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.PlayerStatistics
+import sh.pcx.xinventories.internal.serializer.AdvancementSerializer
+import sh.pcx.xinventories.internal.serializer.RecipeSerializer
+import sh.pcx.xinventories.internal.serializer.StatisticsSerializer
 import org.bukkit.GameMode
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
@@ -53,6 +58,30 @@ object PlayerDataSerializer {
 
         // Version for sync
         section.set("version", data.version)
+
+        // Statistics (optional - only if present)
+        data.statistics?.let { stats ->
+            if (stats.isNotEmpty()) {
+                val statsSection = section.createSection("statistics")
+                stats.statistics.forEach { (key, value) ->
+                    statsSection.set(key, value)
+                }
+            }
+        }
+
+        // Advancements (optional - only if present)
+        data.advancements?.let { advs ->
+            if (advs.isNotEmpty()) {
+                section.set("advancements", AdvancementSerializer.serializeToList(advs))
+            }
+        }
+
+        // Recipes (optional - only if present)
+        data.recipes?.let { recs ->
+            if (recs.isNotEmpty()) {
+                section.set("recipes", RecipeSerializer.serializeToList(recs))
+            }
+        }
     }
 
     /**
@@ -108,6 +137,26 @@ object PlayerDataSerializer {
 
             // Version for sync
             data.version = section.getLong("version", 0)
+
+            // Statistics (optional)
+            section.getConfigurationSection("statistics")?.let { statsSection ->
+                val statsMap = statsSection.getKeys(false).associateWith { key ->
+                    statsSection.getInt(key)
+                }
+                if (statsMap.isNotEmpty()) {
+                    data.statistics = PlayerStatistics(statsMap)
+                }
+            }
+
+            // Advancements (optional)
+            section.getStringList("advancements").takeIf { it.isNotEmpty() }?.let { advList ->
+                data.advancements = AdvancementSerializer.deserializeFromList(advList)
+            }
+
+            // Recipes (optional)
+            section.getStringList("recipes").takeIf { it.isNotEmpty() }?.let { recList ->
+                data.recipes = RecipeSerializer.deserializeFromList(recList)
+            }
 
             data
         } catch (e: Exception) {
@@ -176,6 +225,26 @@ object PlayerDataSerializer {
             // Version for sync
             data.version = section.getLong("version", 0)
 
+            // Statistics (optional)
+            section.getConfigurationSection("statistics")?.let { statsSection ->
+                val statsMap = statsSection.getKeys(false).associateWith { key ->
+                    statsSection.getInt(key)
+                }
+                if (statsMap.isNotEmpty()) {
+                    data.statistics = PlayerStatistics(statsMap)
+                }
+            }
+
+            // Advancements (optional)
+            section.getStringList("advancements").takeIf { it.isNotEmpty() }?.let { advList ->
+                data.advancements = AdvancementSerializer.deserializeFromList(advList)
+            }
+
+            // Recipes (optional)
+            section.getStringList("recipes").takeIf { it.isNotEmpty() }?.let { recList ->
+                data.recipes = RecipeSerializer.deserializeFromList(recList)
+            }
+
             data
         } catch (e: Exception) {
             Logging.error("Failed to deserialize player data from YAML section", e)
@@ -207,7 +276,10 @@ object PlayerDataSerializer {
             "ender_chest" to InventorySerializer.serializeInventoryMap(data.enderChest),
             "potion_effects" to PotionSerializer.serializeEffectsToString(data.potionEffects),
             "balances" to serializeBalancesMap(data.balances),
-            "version" to data.version
+            "version" to data.version,
+            "statistics" to (data.statistics?.let { StatisticsSerializer.serializeToString(it) } ?: ""),
+            "advancements" to (data.advancements?.let { AdvancementSerializer.serializeToString(it) } ?: ""),
+            "recipes" to (data.recipes?.let { RecipeSerializer.serializeToString(it) } ?: "")
         )
     }
 
@@ -276,6 +348,24 @@ object PlayerDataSerializer {
 
             // Version for sync
             data.version = (row["version"] as? Number)?.toLong() ?: 0
+
+            // Statistics (optional)
+            val statsStr = row["statistics"] as? String
+            if (!statsStr.isNullOrBlank()) {
+                data.statistics = StatisticsSerializer.deserializeFromString(statsStr)
+            }
+
+            // Advancements (optional)
+            val advsStr = row["advancements"] as? String
+            if (!advsStr.isNullOrBlank()) {
+                data.advancements = AdvancementSerializer.deserializeFromString(advsStr)
+            }
+
+            // Recipes (optional)
+            val recsStr = row["recipes"] as? String
+            if (!recsStr.isNullOrBlank()) {
+                data.recipes = RecipeSerializer.deserializeFromString(recsStr)
+            }
 
             data
         } catch (e: Exception) {

@@ -71,6 +71,26 @@ object PotionSerializer {
     }
 
     /**
+     * Deserializes a single potion effect from its components.
+     */
+    fun deserializeEffect(
+        typeKey: String,
+        duration: Int,
+        amplifier: Int,
+        ambient: Boolean,
+        particles: Boolean,
+        icon: Boolean
+    ): PotionEffect? {
+        return try {
+            val type = parsePotionEffectType(typeKey) ?: return null
+            PotionEffect(type, duration, amplifier, ambient, particles, icon)
+        } catch (e: Exception) {
+            Logging.debug { "Failed to deserialize potion effect: ${e.message}" }
+            null
+        }
+    }
+
+    /**
      * Serializes effects to a compact string format for SQL storage.
      */
     fun serializeEffectsToString(effects: List<PotionEffect>): String {

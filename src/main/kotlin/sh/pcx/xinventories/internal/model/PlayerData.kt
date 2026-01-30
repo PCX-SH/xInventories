@@ -3,6 +3,9 @@ package sh.pcx.xinventories.internal.model
 import sh.pcx.xinventories.api.model.InventoryContents
 import sh.pcx.xinventories.api.model.PlayerInventorySnapshot
 import sh.pcx.xinventories.internal.compat.AttributeCompat
+import sh.pcx.xinventories.internal.serializer.AdvancementSerializer
+import sh.pcx.xinventories.internal.serializer.RecipeSerializer
+import sh.pcx.xinventories.internal.serializer.StatisticsSerializer
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -49,6 +52,18 @@ class PlayerData(
     // Map of group name to balance - used when separateEconomy is enabled per group
     val balances: MutableMap<String, Double> = mutableMapOf()
 
+    // Per-group player statistics (opt-in)
+    // Stored as a map of statistic keys to values
+    var statistics: PlayerStatistics? = null
+
+    // Per-group player advancements (opt-in)
+    // Stored as a set of completed advancement keys
+    var advancements: PlayerAdvancements? = null
+
+    // Per-group discovered recipes (opt-in)
+    // Stored as a set of recipe keys
+    var recipes: Set<String>? = null
+
     /**
      * Clears all inventory contents.
      */
@@ -81,6 +96,9 @@ class PlayerData(
         level = 0
         totalExperience = 0
         potionEffects.clear()
+        statistics = null
+        advancements = null
+        recipes = null
         dirty = true
     }
 
@@ -141,8 +159,30 @@ class PlayerData(
         potionEffects.clear()
         potionEffects.addAll(player.activePotionEffects)
 
+        // Note: Statistics, advancements, and recipes are loaded separately
+        // via loadFromPlayerExtended() when their respective settings are enabled.
+        // This is to avoid performance impact when these features are disabled.
+
         timestamp = Instant.now()
         dirty = false
+    }
+
+    /**
+     * Loads extended player data (statistics, advancements, recipes) based on settings.
+     * This is separate from loadFromPlayer() for performance reasons.
+     */
+    fun loadFromPlayerExtended(player: Player, settings: sh.pcx.xinventories.api.model.GroupSettings) {
+        if (settings.saveStatistics) {
+            statistics = StatisticsSerializer.collectFromPlayer(player)
+        }
+
+        if (settings.saveAdvancements) {
+            advancements = AdvancementSerializer.collectFromPlayer(player)
+        }
+
+        if (settings.saveRecipes) {
+            recipes = RecipeSerializer.collectFromPlayer(player)
+        }
     }
 
     /**
@@ -216,6 +256,21 @@ class PlayerData(
 
         if (settings.saveGameMode) {
             player.gameMode = gameMode
+        }
+
+        // Apply statistics if enabled and saved
+        if (settings.saveStatistics && statistics != null) {
+            StatisticsSerializer.applyToPlayer(player, statistics!!)
+        }
+
+        // Apply advancements if enabled and saved
+        if (settings.saveAdvancements && advancements != null) {
+            AdvancementSerializer.applyToPlayer(player, advancements!!)
+        }
+
+        // Apply recipes if enabled and saved
+        if (settings.saveRecipes && recipes != null) {
+            RecipeSerializer.applyToPlayer(player, recipes!!)
         }
     }
 
