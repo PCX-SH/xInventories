@@ -4,6 +4,7 @@ import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.TemporaryGroupAssignment
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.GameMode
 import java.time.Instant
@@ -401,4 +402,90 @@ abstract class AbstractStorage(
     protected abstract suspend fun doLoadDeathRecord(deathId: String): DeathRecord?
     protected abstract suspend fun doDeleteDeathRecord(deathId: String): Boolean
     protected abstract suspend fun doPruneDeathRecords(olderThan: Instant): Int
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Temporary Group Assignment Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Saves a temporary group assignment.
+     */
+    override suspend fun saveTempGroupAssignment(assignment: TemporaryGroupAssignment): Boolean {
+        if (!initialized) {
+            Logging.warning("Cannot save temp group assignment - storage not initialized")
+            return false
+        }
+
+        return try {
+            doSaveTempGroupAssignment(assignment)
+            true
+        } catch (e: Exception) {
+            Logging.error("Failed to save temp group assignment for ${assignment.playerUuid}", e)
+            false
+        }
+    }
+
+    /**
+     * Loads a temporary group assignment for a player.
+     */
+    override suspend fun loadTempGroupAssignment(playerUuid: UUID): TemporaryGroupAssignment? {
+        if (!initialized) return null
+
+        return try {
+            doLoadTempGroupAssignment(playerUuid)
+        } catch (e: Exception) {
+            Logging.error("Failed to load temp group assignment for $playerUuid", e)
+            null
+        }
+    }
+
+    /**
+     * Loads all temporary group assignments.
+     */
+    override suspend fun loadAllTempGroupAssignments(): List<TemporaryGroupAssignment> {
+        if (!initialized) return emptyList()
+
+        return try {
+            doLoadAllTempGroupAssignments()
+        } catch (e: Exception) {
+            Logging.error("Failed to load all temp group assignments", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Deletes a temporary group assignment.
+     */
+    override suspend fun deleteTempGroupAssignment(playerUuid: UUID): Boolean {
+        if (!initialized) return false
+
+        return try {
+            doDeleteTempGroupAssignment(playerUuid)
+            true
+        } catch (e: Exception) {
+            Logging.error("Failed to delete temp group assignment for $playerUuid", e)
+            false
+        }
+    }
+
+    /**
+     * Deletes expired temporary group assignments.
+     */
+    override suspend fun pruneExpiredTempGroups(): Int {
+        if (!initialized) return 0
+
+        return try {
+            doPruneExpiredTempGroups()
+        } catch (e: Exception) {
+            Logging.error("Failed to prune expired temp groups", e)
+            0
+        }
+    }
+
+    // Abstract methods for temporary group storage
+    protected abstract suspend fun doSaveTempGroupAssignment(assignment: TemporaryGroupAssignment)
+    protected abstract suspend fun doLoadTempGroupAssignment(playerUuid: UUID): TemporaryGroupAssignment?
+    protected abstract suspend fun doLoadAllTempGroupAssignments(): List<TemporaryGroupAssignment>
+    protected abstract suspend fun doDeleteTempGroupAssignment(playerUuid: UUID)
+    protected abstract suspend fun doPruneExpiredTempGroups(): Int
 }

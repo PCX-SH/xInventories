@@ -4,6 +4,7 @@ import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.TemporaryGroupAssignment
 import sh.pcx.xinventories.internal.model.VersionTrigger
 import sh.pcx.xinventories.internal.util.Logging
 import sh.pcx.xinventories.internal.util.PlayerDataSerializer
@@ -37,12 +38,14 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
 
     private lateinit var versionsDir: File
     private lateinit var deathsDir: File
+    private lateinit var tempGroupsDir: File
 
     override suspend fun doInitialize() {
         dataDir = File(plugin.dataFolder, "data")
         playersDir = File(dataDir, "players")
         versionsDir = File(dataDir, "versions")
         deathsDir = File(dataDir, "deaths")
+        tempGroupsDir = File(dataDir, "temp_groups")
 
         withContext(Dispatchers.IO) {
             if (!playersDir.exists()) {
@@ -53,6 +56,9 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
             }
             if (!deathsDir.exists()) {
                 deathsDir.mkdirs()
+            }
+            if (!tempGroupsDir.exists()) {
+                tempGroupsDir.mkdirs()
             }
         }
     }
@@ -418,9 +424,13 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
         val id = yaml.getString("id") ?: return null
         val playerUuid = yaml.getString("playerUuid")?.let { UUID.fromString(it) } ?: return null
         val group = yaml.getString("group") ?: return null
-        val gameMode = yaml.getString("gameMode")?.let { GameMode.valueOf(it) }
+        val gameMode = yaml.getString("gameMode")?.let {
+            try { GameMode.valueOf(it) } catch (e: IllegalArgumentException) { null }
+        }
         val timestamp = Instant.ofEpochMilli(yaml.getLong("timestamp"))
-        val trigger = yaml.getString("trigger")?.let { VersionTrigger.valueOf(it) } ?: VersionTrigger.MANUAL
+        val trigger = yaml.getString("trigger")?.let {
+            try { VersionTrigger.valueOf(it) } catch (e: IllegalArgumentException) { VersionTrigger.MANUAL }
+        } ?: VersionTrigger.MANUAL
 
         @Suppress("UNCHECKED_CAST")
         val metadata = yaml.getConfigurationSection("metadata")?.getValues(false)
@@ -588,5 +598,114 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
             id, playerUuid, timestamp, world, x, y, z,
             deathCause, killerName, killerUuid, group, gameMode, inventoryData
         )
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Temporary Group Assignment Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun doSaveTempGroupAssignment(assignment: TemporaryGroupAssignment) {
+        val file = File(tempGroupsDir, "${assignment.playerUuid}.yml")
+
+        withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                val yaml = YamlConfiguration()
+                yaml.set("playerUuid", assignment.playerUuid.toString())
+                yaml.set("temporaryGroup", assignment.temporaryGroup)
+                yaml.set("originalGroup", assignment.originalGroup)
+                yaml.set("expiresAt", assignment.expiresAt.toEpochMilli())
+                yaml.set("assignedBy", assignment.assignedBy)
+                yaml.set("assignedAt", assignment.assignedAt.toEpochMilli())
+                yaml.set("reason", assignment.reason)
+                yaml.save(file)
+            }
+        }
+    }
+
+    override suspend fun doLoadTempGroupAssignment(playerUuid: UUID): TemporaryGroupAssignment? {
+        val file = File(tempGroupsDir, "$playerUuid.yml")
+        if (!file.exists()) return null
+
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                try {
+                    val yaml = YamlConfiguration.loadConfiguration(file)
+                    parseTempGroupAssignmentFromYaml(yaml)
+                } catch (e: Exception) {
+                    Logging.error("Failed to load temp group assignment for $playerUuid", e)
+                    null
+                }
+            }
+        }
+    }
+
+    override suspend fun doLoadAllTempGroupAssignments(): List<TemporaryGroupAssignment> {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                val assignments = mutableListOf<TemporaryGroupAssignment>()
+
+                tempGroupsDir.listFiles { file -> file.extension == "yml" }?.forEach { file ->
+                    try {
+                        val yaml = YamlConfiguration.loadConfiguration(file)
+                        parseTempGroupAssignmentFromYaml(yaml)?.let { assignments.add(it) }
+                    } catch (e: Exception) {
+                        Logging.error("Failed to parse temp group assignment from ${file.name}", e)
+                    }
+                }
+
+                assignments
+            }
+        }
+    }
+
+    override suspend fun doDeleteTempGroupAssignment(playerUuid: UUID) {
+        val file = File(tempGroupsDir, "$playerUuid.yml")
+
+        withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                if (file.exists()) {
+                    file.delete()
+                }
+            }
+        }
+    }
+
+    override suspend fun doPruneExpiredTempGroups(): Int {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                var deleted = 0
+                val now = Instant.now().toEpochMilli()
+
+                tempGroupsDir.listFiles { file -> file.extension == "yml" }?.forEach { file ->
+                    try {
+                        val yaml = YamlConfiguration.loadConfiguration(file)
+                        val expiresAt = yaml.getLong("expiresAt")
+                        if (expiresAt < now) {
+                            if (file.delete()) deleted++
+                        }
+                    } catch (e: Exception) {
+                        Logging.error("Failed to check temp group expiration in ${file.name}", e)
+                    }
+                }
+
+                deleted
+            }
+        }
+    }
+
+    private fun parseTempGroupAssignmentFromYaml(yaml: YamlConfiguration): TemporaryGroupAssignment? {
+        return try {
+            TemporaryGroupAssignment(
+                playerUuid = UUID.fromString(yaml.getString("playerUuid")),
+                temporaryGroup = yaml.getString("temporaryGroup") ?: return null,
+                originalGroup = yaml.getString("originalGroup") ?: return null,
+                expiresAt = Instant.ofEpochMilli(yaml.getLong("expiresAt")),
+                assignedBy = yaml.getString("assignedBy") ?: "UNKNOWN",
+                assignedAt = Instant.ofEpochMilli(yaml.getLong("assignedAt")),
+                reason = yaml.getString("reason")
+            )
+        } catch (e: Exception) {
+            null
+        }
     }
 }

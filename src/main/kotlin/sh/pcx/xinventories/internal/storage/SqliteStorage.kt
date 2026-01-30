@@ -4,6 +4,7 @@ import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.TemporaryGroupAssignment
 import sh.pcx.xinventories.internal.model.VersionTrigger
 import sh.pcx.xinventories.internal.storage.query.Queries
 import sh.pcx.xinventories.internal.storage.query.Tables
@@ -61,6 +62,12 @@ class SqliteStorage(
                 // Create death tables
                 stmt.execute(Tables.CREATE_DEATHS_SQLITE)
                 Tables.CREATE_DEATHS_INDEXES_SQLITE.forEach { index ->
+                    stmt.execute(index)
+                }
+
+                // Create temporary groups table
+                stmt.execute(Tables.CREATE_TEMP_GROUPS_SQLITE)
+                Tables.CREATE_TEMP_GROUPS_INDEXES_SQLITE.forEach { index ->
                     stmt.execute(index)
                 }
             }
@@ -581,7 +588,7 @@ class SqliteStorage(
 
             conn.prepareStatement(Queries.DELETE_VERSIONS_OLDER_THAN).use { stmt ->
                 stmt.setLong(1, olderThan.toEpochMilli())
-                stmt.executeUpdate()
+                return@withContext stmt.executeUpdate()
             }
         }
     }
@@ -591,9 +598,16 @@ class SqliteStorage(
             val id = rs.getString("id")
             val playerUuid = UUID.fromString(rs.getString("player_uuid"))
             val group = rs.getString("group_name")
-            val gameMode = rs.getString("gamemode")?.let { GameMode.valueOf(it) }
+            val gameMode = rs.getString("gamemode")?.let {
+                try { GameMode.valueOf(it) } catch (e: IllegalArgumentException) { null }
+            }
             val timestamp = Instant.ofEpochMilli(rs.getLong("timestamp"))
-            val trigger = VersionTrigger.valueOf(rs.getString("trigger_type"))
+            val trigger = try {
+                VersionTrigger.valueOf(rs.getString("trigger_type"))
+            } catch (e: IllegalArgumentException) {
+                Logging.warning("Invalid trigger type in database, defaulting to MANUAL")
+                VersionTrigger.MANUAL
+            }
             val dataString = rs.getString("data")
             val metadataString = rs.getString("metadata") ?: ""
 
@@ -713,7 +727,7 @@ class SqliteStorage(
 
             conn.prepareStatement(Queries.DELETE_DEATHS_OLDER_THAN).use { stmt ->
                 stmt.setLong(1, olderThan.toEpochMilli())
-                stmt.executeUpdate()
+                return@withContext stmt.executeUpdate()
             }
         }
     }
@@ -746,6 +760,100 @@ class SqliteStorage(
             )
         } catch (e: Exception) {
             Logging.error("Failed to parse death record from result set", e)
+            null
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Temporary Group Assignment Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun doSaveTempGroupAssignment(assignment: TemporaryGroupAssignment) {
+        withContext(Dispatchers.IO) {
+            val conn = connection ?: throw IllegalStateException("Database not connected")
+
+            conn.prepareStatement(Queries.UPSERT_TEMP_GROUP_SQLITE).use { stmt ->
+                stmt.setString(1, assignment.playerUuid.toString())
+                stmt.setString(2, assignment.temporaryGroup)
+                stmt.setString(3, assignment.originalGroup)
+                stmt.setLong(4, assignment.expiresAt.toEpochMilli())
+                stmt.setString(5, assignment.assignedBy)
+                stmt.setLong(6, assignment.assignedAt.toEpochMilli())
+                stmt.setString(7, assignment.reason)
+                stmt.executeUpdate()
+            }
+        }
+    }
+
+    override suspend fun doLoadTempGroupAssignment(playerUuid: UUID): TemporaryGroupAssignment? {
+        return withContext(Dispatchers.IO) {
+            val conn = connection ?: throw IllegalStateException("Database not connected")
+
+            conn.prepareStatement(Queries.SELECT_TEMP_GROUP).use { stmt ->
+                stmt.setString(1, playerUuid.toString())
+                stmt.executeQuery().use { rs ->
+                    if (rs.next()) {
+                        resultSetToTempGroupAssignment(rs)
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun doLoadAllTempGroupAssignments(): List<TemporaryGroupAssignment> {
+        return withContext(Dispatchers.IO) {
+            val conn = connection ?: throw IllegalStateException("Database not connected")
+            val assignments = mutableListOf<TemporaryGroupAssignment>()
+
+            conn.prepareStatement(Queries.SELECT_ALL_TEMP_GROUPS).use { stmt ->
+                stmt.executeQuery().use { rs ->
+                    while (rs.next()) {
+                        resultSetToTempGroupAssignment(rs)?.let { assignments.add(it) }
+                    }
+                }
+            }
+
+            assignments
+        }
+    }
+
+    override suspend fun doDeleteTempGroupAssignment(playerUuid: UUID) {
+        withContext(Dispatchers.IO) {
+            val conn = connection ?: throw IllegalStateException("Database not connected")
+
+            conn.prepareStatement(Queries.DELETE_TEMP_GROUP).use { stmt ->
+                stmt.setString(1, playerUuid.toString())
+                stmt.executeUpdate()
+            }
+        }
+    }
+
+    override suspend fun doPruneExpiredTempGroups(): Int {
+        return withContext(Dispatchers.IO) {
+            val conn = connection ?: throw IllegalStateException("Database not connected")
+
+            conn.prepareStatement(Queries.DELETE_EXPIRED_TEMP_GROUPS).use { stmt ->
+                stmt.setLong(1, Instant.now().toEpochMilli())
+                return@withContext stmt.executeUpdate()
+            }
+        }
+    }
+
+    private fun resultSetToTempGroupAssignment(rs: ResultSet): TemporaryGroupAssignment? {
+        return try {
+            TemporaryGroupAssignment(
+                playerUuid = UUID.fromString(rs.getString("player_uuid")),
+                temporaryGroup = rs.getString("temp_group"),
+                originalGroup = rs.getString("original_group"),
+                expiresAt = Instant.ofEpochMilli(rs.getLong("expires_at")),
+                assignedBy = rs.getString("assigned_by"),
+                assignedAt = Instant.ofEpochMilli(rs.getLong("assigned_at")),
+                reason = rs.getString("reason")
+            )
+        } catch (e: Exception) {
+            Logging.error("Failed to parse temp group assignment from result set", e)
             null
         }
     }

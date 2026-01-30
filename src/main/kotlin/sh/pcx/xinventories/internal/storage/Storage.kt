@@ -3,6 +3,7 @@ package sh.pcx.xinventories.internal.storage
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.TemporaryGroupAssignment
 import org.bukkit.GameMode
 import java.time.Instant
 import java.util.UUID
@@ -225,4 +226,46 @@ interface Storage {
      * @return Number of records deleted
      */
     suspend fun pruneDeathRecords(olderThan: Instant): Int
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Temporary Group Assignment Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Saves a temporary group assignment.
+     *
+     * @param assignment The assignment to save
+     * @return true if successful
+     */
+    suspend fun saveTempGroupAssignment(assignment: TemporaryGroupAssignment): Boolean
+
+    /**
+     * Loads a temporary group assignment for a player.
+     *
+     * @param playerUuid Player UUID
+     * @return The assignment, or null if not found
+     */
+    suspend fun loadTempGroupAssignment(playerUuid: UUID): TemporaryGroupAssignment?
+
+    /**
+     * Loads all temporary group assignments.
+     *
+     * @return List of all assignments
+     */
+    suspend fun loadAllTempGroupAssignments(): List<TemporaryGroupAssignment>
+
+    /**
+     * Deletes a temporary group assignment.
+     *
+     * @param playerUuid Player UUID
+     * @return true if deleted
+     */
+    suspend fun deleteTempGroupAssignment(playerUuid: UUID): Boolean
+
+    /**
+     * Deletes all expired temporary group assignments.
+     *
+     * @return Number of assignments deleted
+     */
+    suspend fun pruneExpiredTempGroups(): Int
 }

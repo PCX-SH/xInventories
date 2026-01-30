@@ -296,4 +296,73 @@ object Queries {
         DELETE FROM $DEATHS_TABLE
         WHERE timestamp < ?
     """.trimIndent()
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Temporary Group Queries
+    // ═══════════════════════════════════════════════════════════════════
+
+    private const val TEMP_GROUPS_TABLE = Tables.TEMP_GROUPS
+
+    /**
+     * Insert or update temporary group assignment (SQLite).
+     */
+    val UPSERT_TEMP_GROUP_SQLITE = """
+        INSERT INTO $TEMP_GROUPS_TABLE (
+            player_uuid, temp_group, original_group, expires_at, assigned_by, assigned_at, reason
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(player_uuid) DO UPDATE SET
+            temp_group = excluded.temp_group,
+            original_group = excluded.original_group,
+            expires_at = excluded.expires_at,
+            assigned_by = excluded.assigned_by,
+            assigned_at = excluded.assigned_at,
+            reason = excluded.reason
+    """.trimIndent()
+
+    /**
+     * Insert or update temporary group assignment (MySQL).
+     */
+    val UPSERT_TEMP_GROUP_MYSQL = """
+        INSERT INTO $TEMP_GROUPS_TABLE (
+            player_uuid, temp_group, original_group, expires_at, assigned_by, assigned_at, reason
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            temp_group = VALUES(temp_group),
+            original_group = VALUES(original_group),
+            expires_at = VALUES(expires_at),
+            assigned_by = VALUES(assigned_by),
+            assigned_at = VALUES(assigned_at),
+            reason = VALUES(reason)
+    """.trimIndent()
+
+    /**
+     * Select temporary group assignment by player UUID.
+     */
+    val SELECT_TEMP_GROUP = """
+        SELECT * FROM $TEMP_GROUPS_TABLE
+        WHERE player_uuid = ?
+    """.trimIndent()
+
+    /**
+     * Select all temporary group assignments.
+     */
+    val SELECT_ALL_TEMP_GROUPS = """
+        SELECT * FROM $TEMP_GROUPS_TABLE
+    """.trimIndent()
+
+    /**
+     * Delete temporary group assignment by player UUID.
+     */
+    val DELETE_TEMP_GROUP = """
+        DELETE FROM $TEMP_GROUPS_TABLE
+        WHERE player_uuid = ?
+    """.trimIndent()
+
+    /**
+     * Delete expired temporary group assignments.
+     */
+    val DELETE_EXPIRED_TEMP_GROUPS = """
+        DELETE FROM $TEMP_GROUPS_TABLE
+        WHERE expires_at < ?
+    """.trimIndent()
 }

@@ -343,18 +343,14 @@ class TemporaryGroupService(
      * Loads assignments from the database.
      */
     private suspend fun loadAssignmentsFromStorage(): List<TemporaryGroupAssignment> {
-        // This would be implemented based on the storage backend
-        // For now, we'll use a simple in-memory approach
-        // In a full implementation, this would query the xinv_temp_groups table
-        return emptyList()
+        return storageService.storage.loadAllTempGroupAssignments()
     }
 
     /**
      * Saves an assignment to persistent storage.
      */
     private suspend fun saveAssignment(assignment: TemporaryGroupAssignment) {
-        // This would be implemented based on the storage backend
-        // In a full implementation, this would upsert to the xinv_temp_groups table
+        storageService.storage.saveTempGroupAssignment(assignment)
         Logging.debug { "Saved temporary group assignment for ${assignment.playerUuid}" }
     }
 
@@ -362,8 +358,7 @@ class TemporaryGroupService(
      * Deletes an assignment from persistent storage.
      */
     private suspend fun deleteAssignment(playerUuid: UUID) {
-        // This would be implemented based on the storage backend
-        // In a full implementation, this would delete from the xinv_temp_groups table
+        storageService.storage.deleteTempGroupAssignment(playerUuid)
         Logging.debug { "Deleted temporary group assignment for $playerUuid" }
     }
 
