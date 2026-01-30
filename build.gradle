@@ -13,6 +13,16 @@ plugins {
 group = 'sh.pcx'
 version = '1.1.0'
 
+// Library versions - used in both dependencies and plugin.yml
+ext {
+    kotlinVersion = '2.3.0'
+    coroutinesVersion = '1.10.2'
+    serializationVersion = '1.10.0'
+    caffeineVersion = '3.2.3'
+    hikariVersion = '7.0.2'
+    jedisVersion = '7.2.1'
+}
+
 repositories {
     mavenCentral()
     maven { url = 'https://repo.papermc.io/repository/maven-public/' }
@@ -30,19 +40,19 @@ dependencies {
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib'
 
     // Coroutines - downloaded by Paper's library loader at runtime
-    compileOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}"
 
     // Serialization - downloaded by Paper's library loader at runtime
-    compileOnly 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0'
+    compileOnly "org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}"
 
     // Caching - downloaded by Paper's library loader at runtime
-    compileOnly 'com.github.ben-manes.caffeine:caffeine:3.2.3'
+    compileOnly "com.github.ben-manes.caffeine:caffeine:${caffeineVersion}"
 
     // Database - downloaded by Paper's library loader at runtime
-    compileOnly 'com.zaxxer:HikariCP:7.0.2'
+    compileOnly "com.zaxxer:HikariCP:${hikariVersion}"
 
     // Redis client for cross-server sync - downloaded by Paper's library loader at runtime
-    compileOnly 'redis.clients:jedis:7.2.1'
+    compileOnly "redis.clients:jedis:${jedisVersion}"
 
     // Soft dependencies
     compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') {
@@ -68,17 +78,17 @@ dependencies {
     }
 
     // Testing - use kotlin-test-junit5 to bridge kotlin.test to JUnit 5
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5:2.3.0'
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:${kotlinVersion}"
     testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
     testImplementation 'io.mockk:mockk:1.14.9'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesVersion}"
 
     // Runtime dependencies needed for tests (downloaded by Paper's library loader at runtime)
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0'
-    testImplementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
-    testImplementation 'com.zaxxer:HikariCP:7.0.2'
-    testImplementation 'redis.clients:jedis:7.2.1'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}"
+    testImplementation "com.github.ben-manes.caffeine:caffeine:${caffeineVersion}"
+    testImplementation "com.zaxxer:HikariCP:${hikariVersion}"
+    testImplementation "redis.clients:jedis:${jedisVersion}"
     testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.101.0') {
         exclude group: 'org.jetbrains.kotlin'
@@ -103,7 +113,15 @@ kotlin {
 }
 
 processResources {
-    def props = [version: version]
+    def props = [
+        version: version,
+        kotlinVersion: kotlinVersion,
+        coroutinesVersion: coroutinesVersion,
+        serializationVersion: serializationVersion,
+        caffeineVersion: caffeineVersion,
+        hikariVersion: hikariVersion,
+        jedisVersion: jedisVersion
+    ]
     inputs.properties(props)
     filesMatching('plugin.yml') {
         expand(props)
