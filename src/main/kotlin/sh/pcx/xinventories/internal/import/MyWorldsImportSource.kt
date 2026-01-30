@@ -248,6 +248,34 @@ class MyWorldsImportSource(private val plugin: XInventories) : ImportSource {
 
             val playerName = Bukkit.getOfflinePlayer(uuid).name ?: uuid.toString()
 
+            // PWI-style player state from NBT
+            val fallDistance = try {
+                (getFloatMethod.invoke(nbt, "FallDistance") as? Float) ?: 0.0f
+            } catch (e: Exception) { 0.0f }
+
+            val fireTicks = try {
+                (getShortMethod.invoke(nbt, "Fire") as? Short)?.toInt() ?: 0
+            } catch (e: Exception) { 0 }
+
+            val remainingAir = try {
+                (getShortMethod.invoke(nbt, "Air") as? Short)?.toInt() ?: 300
+            } catch (e: Exception) { 300 }
+
+            // Flying state is in abilities compound
+            var isFlying = false
+            var allowFlight = false
+            try {
+                val getCompoundMethod = nbt.javaClass.getMethod("getCompound", String::class.java)
+                val abilities = getCompoundMethod.invoke(nbt, "abilities")
+                if (abilities != null) {
+                    val getByteMethod = abilities.javaClass.getMethod("getByte", String::class.java)
+                    isFlying = (getByteMethod.invoke(abilities, "flying") as? Byte)?.toInt() == 1
+                    allowFlight = (getByteMethod.invoke(abilities, "mayfly") as? Byte)?.toInt() == 1
+                }
+            } catch (e: Exception) {
+                Logging.debug { "Failed to parse abilities from NBT: ${e.message}" }
+            }
+
             ImportedPlayerData(
                 uuid = uuid,
                 playerName = playerName,
@@ -270,7 +298,12 @@ class MyWorldsImportSource(private val plugin: XInventories) : ImportSource {
                 sourceTimestamp = try {
                     Instant.ofEpochMilli(file.lastModified())
                 } catch (e: Exception) { null },
-                sourceId = id
+                sourceId = id,
+                isFlying = isFlying,
+                allowFlight = allowFlight,
+                fallDistance = fallDistance,
+                fireTicks = fireTicks,
+                remainingAir = remainingAir
             )
         } catch (e: Exception) {
             Logging.debug { "Failed to parse NBT with BKCommonLib: ${e.message}" }
@@ -313,6 +346,17 @@ class MyWorldsImportSource(private val plugin: XInventories) : ImportSource {
             val xpP = (nbt["XpP"] as? Float) ?: 0.0f
             val xpTotal = (nbt["XpTotal"] as? Int) ?: 0
 
+            // PWI-style player state
+            val fallDistance = (nbt["FallDistance"] as? Float) ?: 0.0f
+            val fireTicks = (nbt["Fire"] as? Short)?.toInt() ?: 0
+            val remainingAir = (nbt["Air"] as? Short)?.toInt() ?: 300
+
+            // Flying state from abilities compound
+            @Suppress("UNCHECKED_CAST")
+            val abilities = nbt["abilities"] as? Map<String, Any>
+            val isFlying = (abilities?.get("flying") as? Byte)?.toInt() == 1
+            val allowFlight = (abilities?.get("mayfly") as? Byte)?.toInt() == 1
+
             val playerName = Bukkit.getOfflinePlayer(uuid).name ?: uuid.toString()
 
             // Note: Full inventory parsing requires complete NBT support
@@ -338,7 +382,12 @@ class MyWorldsImportSource(private val plugin: XInventories) : ImportSource {
                 balance = null,
                 sourceTimestamp = Instant.ofEpochMilli(file.lastModified()),
                 sourceId = id,
-                metadata = mapOf("warning" to "Basic NBT parsing - inventory may be incomplete")
+                metadata = mapOf("warning" to "Basic NBT parsing - inventory may be incomplete"),
+                isFlying = isFlying,
+                allowFlight = allowFlight,
+                fallDistance = fallDistance,
+                fireTicks = fireTicks,
+                remainingAir = remainingAir
             )
         } catch (e: Exception) {
             Logging.debug { "Failed to parse NBT data: ${e.message}" }

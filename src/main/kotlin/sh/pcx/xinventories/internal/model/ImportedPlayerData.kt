@@ -114,7 +114,43 @@ data class ImportedPlayerData(
     /**
      * Additional metadata from the source.
      */
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
+
+    // PWI-style player state fields
+    /**
+     * Whether the player is currently flying.
+     */
+    val isFlying: Boolean = false,
+
+    /**
+     * Whether the player is allowed to fly.
+     */
+    val allowFlight: Boolean = false,
+
+    /**
+     * The player's display name (if different from player name).
+     */
+    val displayName: String? = null,
+
+    /**
+     * The player's current fall distance.
+     */
+    val fallDistance: Float = 0.0f,
+
+    /**
+     * The player's fire ticks remaining.
+     */
+    val fireTicks: Int = 0,
+
+    /**
+     * The player's maximum air level.
+     */
+    val maximumAir: Int = 300,
+
+    /**
+     * The player's remaining air level.
+     */
+    val remainingAir: Int = 300
 ) {
 
     /**
@@ -158,6 +194,15 @@ data class ImportedPlayerData(
 
         // Copy potion effects
         playerData.potionEffects.addAll(potionEffects)
+
+        // Copy PWI-style player state
+        playerData.isFlying = isFlying
+        playerData.allowFlight = allowFlight
+        playerData.displayName = displayName
+        playerData.fallDistance = fallDistance
+        playerData.fireTicks = fireTicks
+        playerData.maximumAir = maximumAir
+        playerData.remainingAir = remainingAir
 
         // Set timestamp
         playerData.timestamp = sourceTimestamp ?: Instant.now()

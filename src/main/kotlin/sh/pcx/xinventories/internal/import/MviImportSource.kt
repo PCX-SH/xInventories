@@ -400,7 +400,13 @@ class MviImportSource(private val plugin: XInventories) : ImportSource {
                 } catch (e: Exception) {
                     null
                 },
-                sourceId = id
+                sourceId = id,
+                // MVI player state fields (if available)
+                isFlying = section.getBoolean("flying", false),
+                allowFlight = section.getBoolean("allowFlight", false),
+                fallDistance = section.getDouble("fallDistance", 0.0).toFloat(),
+                fireTicks = section.getInt("fireTicks", 0),
+                remainingAir = section.getInt("remainingAir", 300)
             )
         } catch (e: Exception) {
             Logging.error("Failed to parse MVI player file: ${file.absolutePath}", e)

@@ -361,7 +361,15 @@ class PwiImportSource(private val plugin: XInventories) : ImportSource {
                 } catch (e: Exception) {
                     null
                 },
-                sourceId = id
+                sourceId = id,
+                // PWI-style player state fields
+                isFlying = section.getBoolean("flying", false),
+                allowFlight = section.getBoolean("allow-flight", false),
+                displayName = section.getString("display-name"),
+                fallDistance = section.getDouble("fall-distance", 0.0).toFloat(),
+                fireTicks = section.getInt("fire-ticks", 0),
+                maximumAir = section.getInt("max-air", 300),
+                remainingAir = section.getInt("remaining-air", 300)
             )
         } catch (e: Exception) {
             Logging.error("Failed to parse PWI player file: ${playerFile.absolutePath}", e)
