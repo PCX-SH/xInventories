@@ -200,3 +200,41 @@ messages:
   death-inventory-restored: "<green>Restored death inventory <aqua>{death_id}</aqua> for <aqua>{player}</aqua>."
   death-restore-failed: "<red>Failed to restore death inventory for <aqua>{player}</aqua>: {error}"
   your-death-inventory-restored: "<green>Your death inventory has been restored."
+
+  # ═══════════════════════════════════════
+  # Inventory Merge
+  # ═══════════════════════════════════════
+  merge-no-pending: "<gray>No pending merge operation. Use <aqua>/xinv merge</aqua> to start one."
+  merge-unresolved-conflicts: "<red>{count} conflict(s) still unresolved. Use the GUI or resolve all conflicts before confirming."
+  merge-confirmed: "<green>Merge completed! <aqua>{player}</aqua>'s inventory merged from <aqua>{source}</aqua> to <aqua>{target}</aqua>."
+  merge-overflow-warning: "<yellow>Warning: <aqua>{count}</aqua> item(s) could not fit and were dropped."
+  merge-failed: "<red>Merge failed: {error}"
+  merge-cancelled: "<gray>Merge operation cancelled."
+  merge-same-group: "<red>Source and target groups cannot be the same."
+  merge-preview-header: "<gold><bold>Merge Preview</bold></gold> <gray>({player})</gray>"
+  merge-conflicts-found: "<yellow>Conflicts found: <aqua>{count}</aqua>"
+  merge-overflow-preview: "<yellow>Items that won't fit: <aqua>{count}</aqua>"
+  merge-use-gui: "<gray>Use <aqua>/xinv merge gui</aqua> to resolve conflicts manually."
+  merge-confirm-prompt: "<gray>Use <aqua>/xinv merge confirm</aqua> to execute the merge, or <aqua>/xinv merge cancel</aqua> to cancel."
+
+  # ═══════════════════════════════════════
+  # Export/Import JSON
+  # ═══════════════════════════════════════
+  export-list-header: "<gold><bold>Available Exports</bold></gold>"
+  export-list-empty: "<gray>No export files found."
+  export-list-entry: "<gray>• <aqua>{name}</aqua> <gray>({time}, {size})</gray>"
+  export-in-progress: "<gray>Exporting {target}..."
+  export-success: "<green>Export complete! <aqua>{count}</aqua> player(s) exported."
+  export-player-success: "<green>Exported <aqua>{player}</aqua> (group: <aqua>{group}</aqua>) to file."
+  export-failed: "<red>Export failed: {error}"
+  export-group-required: "<red>Player is offline. Please specify a group: <aqua>/xinv export <player> <group></aqua>"
+
+  import-validating: "<gray>Validating file: <aqua>{file}</aqua>..."
+  import-validation-success: "<green>File is valid!"
+  import-validation-failed: "<red>File validation failed."
+  import-in-progress: "<gray>Importing from <aqua>{file}</aqua>..."
+  import-success: "<green>Import complete! Imported: <aqua>{imported}</aqua>, Skipped: <aqua>{skipped}</aqua>, Failed: <aqua>{failed}</aqua>"
+  import-failed: "<red>Import failed: {error}"
+  import-player-in-progress: "<gray>Importing <aqua>{player}</aqua> from <aqua>{file}</aqua>..."
+  import-player-success: "<green>Successfully imported <aqua>{player}</aqua> to group <aqua>{group}</aqua>."
+  import-player-skipped: "<yellow>Skipped <aqua>{player}</aqua> (data already exists, use --overwrite to replace)."

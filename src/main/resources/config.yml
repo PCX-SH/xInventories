@@ -205,6 +205,51 @@ sync:
     # Timeout in seconds before considering a server dead
     timeout-seconds: 90
 
+# ============================================================
+# Audit Logging
+# ============================================================
+# Track all inventory modifications for security and debugging.
+audit:
+  # Enable audit logging
+  enabled: true
+  # Number of days to keep audit entries
+  retention-days: 30
+  # Log when admins view player inventories (can generate many entries)
+  log-views: false
+  # Log automatic inventory saves
+  log-saves: true
+
+# ============================================================
+# Anti-Dupe Detection
+# ============================================================
+# Detect potential item duplication exploits.
+anti-dupe:
+  # Enable anti-dupe detection
+  enabled: true
+  # Sensitivity level: LOW, MEDIUM, HIGH
+  # LOW: Only obvious dupes, minimal false positives
+  # MEDIUM: Balanced detection (recommended)
+  # HIGH: Aggressive detection, may have false positives
+  sensitivity: MEDIUM
+  # Minimum milliseconds between group switches (faster is suspicious)
+  min-switch-interval-ms: 500
+  # Freeze player inventory when high-severity dupe is detected
+  freeze-on-detection: false
+  # Notify online admins when dupe is detected
+  notify-admins: true
+  # Log all detections to console
+  log-detections: true
+
+# ============================================================
+# Startup Branding
+# ============================================================
+# Configure the startup banner and statistics display.
+startup:
+  # Show the ASCII art banner on startup
+  show-banner: true
+  # Show plugin statistics (storage type, groups, sync status) on startup
+  show-stats: true
+
 # Enable bStats metrics collection (https://bstats.org/plugin/bukkit/xInventories)
 # This helps us understand how the plugin is used and improve it.
 # All data is anonymous and no personal information is collected.
@@ -212,3 +257,9 @@ metrics: true
 
 # Debug mode (verbose logging)
 debug: false
+
+# ============================================================
+# Internal Configuration
+# ============================================================
+# DO NOT MODIFY THIS VALUE - it is used for automatic config migration
+config-version: 1

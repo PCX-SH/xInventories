@@ -24,6 +24,9 @@ data class MainConfig(
     val sharedSlots: SharedSlotsConfigSection = SharedSlotsConfigSection(),
     val economy: EconomyConfig = EconomyConfig(),
     val sync: NetworkSyncConfig = NetworkSyncConfig(),
+    val startup: StartupConfig = StartupConfig(),
+    val gui: GUIConfigSection = GUIConfigSection(),
+    val configVersion: Int = 1,
     val metrics: Boolean = true,
     val debug: Boolean = false
 )
@@ -256,3 +259,74 @@ data class HeartbeatSyncConfig(
     val intervalSeconds: Int = 30,
     val timeoutSeconds: Int = 90
 )
+
+// ============================================================
+// GUI Configuration
+// ============================================================
+
+/**
+ * Configuration section for GUI customization in config.yml.
+ */
+data class GUIConfigSection(
+    /** The color theme for GUIs */
+    val theme: String = "DEFAULT",
+    /** Sound settings for GUI interactions */
+    val sounds: GUISoundsConfigSection = GUISoundsConfigSection()
+) {
+    /**
+     * Converts to the internal GUIConfig model.
+     */
+    fun toGUIConfig(): GUIConfig {
+        val guiTheme = try {
+            GUITheme.valueOf(theme.uppercase())
+        } catch (e: IllegalArgumentException) {
+            GUITheme.DEFAULT
+        }
+
+        return GUIConfig(
+            theme = guiTheme,
+            sounds = sounds.toGUISoundConfig()
+        )
+    }
+}
+
+/**
+ * Sound configuration section for GUI interactions.
+ */
+data class GUISoundsConfigSection(
+    /** Sound played when clicking a button */
+    val click: String = "UI_BUTTON_CLICK",
+    /** Sound played on successful action */
+    val success: String = "ENTITY_PLAYER_LEVELUP",
+    /** Sound played on error */
+    val error: String = "ENTITY_VILLAGER_NO"
+) {
+    /**
+     * Converts to the internal GUISoundConfig model.
+     */
+    fun toGUISoundConfig(): GUISoundConfig {
+        val clickSound = try {
+            org.bukkit.Sound.valueOf(click)
+        } catch (e: IllegalArgumentException) {
+            org.bukkit.Sound.UI_BUTTON_CLICK
+        }
+
+        val successSound = try {
+            org.bukkit.Sound.valueOf(success)
+        } catch (e: IllegalArgumentException) {
+            org.bukkit.Sound.ENTITY_PLAYER_LEVELUP
+        }
+
+        val errorSound = try {
+            org.bukkit.Sound.valueOf(error)
+        } catch (e: IllegalArgumentException) {
+            org.bukkit.Sound.ENTITY_VILLAGER_NO
+        }
+
+        return GUISoundConfig(
+            click = clickSound,
+            success = successSound,
+            error = errorSound
+        )
+    }
+}

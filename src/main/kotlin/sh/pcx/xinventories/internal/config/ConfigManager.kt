@@ -26,12 +26,22 @@ class ConfigManager(private val plugin: XInventories) {
 
     private val groupsFile: File = File(plugin.dataFolder, "groups.yml")
     private val messagesFile: File = File(plugin.dataFolder, "messages.yml")
+    private val configFile: File = File(plugin.dataFolder, "config.yml")
+
+    /**
+     * The config migrator instance for handling version migrations.
+     */
+    val configMigrator: ConfigMigrator = ConfigMigrator(plugin)
 
     /**
      * Loads all configuration files.
+     * Performs config migration if needed before loading.
      */
     fun loadAll(): Boolean {
         return try {
+            // Check and apply migrations for main config
+            migrateConfigIfNeeded()
+
             loadMainConfig()
             loadGroupsConfig()
             loadMessagesConfig()
@@ -39,6 +49,32 @@ class ConfigManager(private val plugin: XInventories) {
         } catch (e: Exception) {
             Logging.error("Failed to load configuration", e)
             false
+        }
+    }
+
+    /**
+     * Checks if the main config needs migration and applies migrations if necessary.
+     */
+    private fun migrateConfigIfNeeded() {
+        if (!configFile.exists()) {
+            return
+        }
+
+        val result = configMigrator.migrate(configFile)
+        when (result) {
+            is MigrationResult.Success -> {
+                if (result.migrationsApplied > 0) {
+                    Logging.info("Config migration completed: v${result.fromVersion} -> v${result.toVersion}")
+                    // Reload the Bukkit config to pick up migrated values
+                    plugin.reloadConfig()
+                }
+            }
+            is MigrationResult.Failure -> {
+                Logging.error("Config migration failed: ${result.error}")
+                if (result.lastSuccessfulVersion != null) {
+                    Logging.warning("Last successful migration version: ${result.lastSuccessfulVersion}")
+                }
+            }
         }
     }
 
@@ -243,6 +279,11 @@ class ConfigManager(private val plugin: XInventories) {
                 separateByGroup = config.getBoolean("economy.separate-by-group", true)
             ),
             sync = loadSyncConfig(config),
+            startup = StartupConfig(
+                showBanner = config.getBoolean("startup.show-banner", true),
+                showStats = config.getBoolean("startup.show-stats", true)
+            ),
+            configVersion = config.getInt("config-version", 1),
             debug = config.getBoolean("debug", false)
         )
 
@@ -371,7 +412,10 @@ class ConfigManager(private val plugin: XInventories) {
             saveGameMode = section.getBoolean("save-gamemode", false),
             separateGameModeInventories = section.getBoolean("separate-gamemode-inventories", true),
             clearOnDeath = section.getBoolean("clear-on-death", false),
-            clearOnJoin = section.getBoolean("clear-on-join", false)
+            clearOnJoin = section.getBoolean("clear-on-join", false),
+            saveStatistics = section.getBoolean("save-statistics", false),
+            saveAdvancements = section.getBoolean("save-advancements", false),
+            saveRecipes = section.getBoolean("save-recipes", false)
         )
     }
 
@@ -387,6 +431,9 @@ class ConfigManager(private val plugin: XInventories) {
         section.set("separate-gamemode-inventories", settings.separateGameModeInventories)
         section.set("clear-on-death", settings.clearOnDeath)
         section.set("clear-on-join", settings.clearOnJoin)
+        section.set("save-statistics", settings.saveStatistics)
+        section.set("save-advancements", settings.saveAdvancements)
+        section.set("save-recipes", settings.saveRecipes)
     }
 
     private fun loadMessagesConfig() {
@@ -473,6 +520,46 @@ class ConfigManager(private val plugin: XInventories) {
             MergeRule.valueOf(value?.uppercase() ?: "NEWER")
         } catch (e: Exception) {
             MergeRule.NEWER
+        }
+    }
+
+    /**
+     * Saves the main configuration to config.yml.
+     * Note: This only saves certain runtime-modifiable settings.
+     */
+    fun saveMainConfig(updatedConfig: MainConfig) {
+        try {
+            val config = plugin.config
+
+            // Update shared slots configuration
+            config.set("shared-slots.enabled", updatedConfig.sharedSlots.enabled)
+            val slotsList = updatedConfig.sharedSlots.slots.map { entry ->
+                val map = mutableMapOf<String, Any?>()
+                entry.slot?.let { map["slot"] = it }
+                entry.slots?.let { map["slots"] = it }
+                map["mode"] = entry.mode
+                entry.item?.let { item ->
+                    val itemMap = mutableMapOf<String, Any?>(
+                        "type" to item.type,
+                        "amount" to item.amount
+                    )
+                    item.displayName?.let { itemMap["display-name"] = it }
+                    item.lore?.let { itemMap["lore"] = it }
+                    map["item"] = itemMap
+                }
+                map
+            }
+            config.set("shared-slots.slots", slotsList)
+
+            // Save the config file
+            plugin.saveConfig()
+
+            // Update the internal config reference
+            mainConfig = updatedConfig
+
+            Logging.debug { "Saved main configuration" }
+        } catch (e: Exception) {
+            Logging.error("Failed to save main configuration", e)
         }
     }
 
