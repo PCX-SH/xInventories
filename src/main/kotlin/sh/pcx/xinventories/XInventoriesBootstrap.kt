@@ -20,20 +20,23 @@ import sh.pcx.xinventories.internal.util.AsyncStorageDispatcher
 import sh.pcx.xinventories.internal.util.BukkitMainThreadDispatcher
 import sh.pcx.xinventories.internal.util.Logging
 import sh.pcx.xinventories.internal.util.StartupBanner
+import sh.pcx.xinventories.loader.LoaderBootstrap
 
 /**
- * Main plugin class for xInventories. Provides advanced per-world inventory management for Paper
- * servers.
+ * Bootstrap implementation for xInventories.
  *
- * This class can be used directly when dependencies are provided by the server (Paper 1.21+
- * with library loader), or loaded through [sh.pcx.xinventories.loader.XInventoriesLoader]
- * when dependencies need to be downloaded at runtime.
+ * This class is instantiated by the [sh.pcx.xinventories.loader.XInventoriesLoader]
+ * after dependencies have been downloaded and loaded. It contains the actual
+ * plugin logic and delegates lifecycle methods from the loader.
  */
-class XInventories : JavaPlugin(), PluginContext {
+class XInventoriesBootstrap : LoaderBootstrap, PluginContext {
+
+    // Reference to the loader plugin
+    private lateinit var loader: JavaPlugin
 
     // PluginContext implementation
     override val plugin: JavaPlugin
-        get() = this
+        get() = loader
 
     // Coroutine dispatchers
     override lateinit var mainThreadDispatcher: CoroutineDispatcher
@@ -78,20 +81,25 @@ class XInventories : JavaPlugin(), PluginContext {
     override val scope: CoroutineScope
         get() = this
 
+    override fun onLoad(loader: JavaPlugin) {
+        this.loader = loader
+        // Nothing to do on load currently
+    }
+
     @Suppress("DEPRECATION")
-    override fun onEnable() {
+    override fun onEnable(loader: JavaPlugin) {
+        this.loader = loader
+
         // Initialize logging
-        Logging.init(logger, false)
-        Logging.info("Enabling xInventories v${description.version}")
+        Logging.init(loader.logger, false)
+        Logging.info("Enabling xInventories v${loader.description.version}")
 
         // Initialize dispatchers
-        mainThreadDispatcher = BukkitMainThreadDispatcher(this)
-        storageDispatcher =
-                AsyncStorageDispatcher(4) // Default pool size, will be updated from config
+        mainThreadDispatcher = BukkitMainThreadDispatcher(loader)
+        storageDispatcher = AsyncStorageDispatcher(4)
 
         // Save default config if it doesn't exist
-        saveDefaultConfig()
-        // Note: groups.yml and messages.yml are saved by ConfigManager if needed
+        loader.saveDefaultConfig()
 
         // Initialize ConfigManager
         configManager = ConfigManager(this)
@@ -146,7 +154,7 @@ class XInventories : JavaPlugin(), PluginContext {
         Logging.info("xInventories enabled successfully!")
     }
 
-    override fun onDisable() {
+    override fun onDisable(loader: JavaPlugin) {
         Logging.info("Disabling xInventories...")
 
         // Unregister hooks
@@ -174,7 +182,7 @@ class XInventories : JavaPlugin(), PluginContext {
             runBlocking {
                 try {
                     // Save online players
-                    server.onlinePlayers.forEach { player ->
+                    loader.server.onlinePlayers.forEach { player ->
                         try {
                             serviceManager.inventoryService.saveInventory(player)
                         } catch (e: Exception) {
@@ -238,56 +246,56 @@ class XInventories : JavaPlugin(), PluginContext {
         val pluginId = 29163
 
         try {
-            val metrics = Metrics(this, pluginId)
+            val metrics = Metrics(loader, pluginId)
 
             // Storage type chart
             metrics.addCustomChart(
-                    SimplePie("storage_type") {
-                        configManager.mainConfig.storage.type.name.lowercase()
-                    }
+                SimplePie("storage_type") {
+                    configManager.mainConfig.storage.type.name.lowercase()
+                }
             )
 
             // Number of groups chart
             metrics.addCustomChart(
-                    SimplePie("group_count") {
-                        val count = serviceManager.groupService.getAllGroups().size
-                        when {
-                            count <= 1 -> "1"
-                            count <= 3 -> "2-3"
-                            count <= 5 -> "4-5"
-                            count <= 10 -> "6-10"
-                            else -> "10+"
-                        }
+                SimplePie("group_count") {
+                    val count = serviceManager.groupService.getAllGroups().size
+                    when {
+                        count <= 1 -> "1"
+                        count <= 3 -> "2-3"
+                        count <= 5 -> "4-5"
+                        count <= 10 -> "6-10"
+                        else -> "10+"
                     }
+                }
             )
 
             // Sync enabled chart
             metrics.addCustomChart(
-                    SimplePie("sync_enabled") {
-                        if (configManager.mainConfig.sync.enabled) "enabled" else "disabled"
-                    }
+                SimplePie("sync_enabled") {
+                    if (configManager.mainConfig.sync.enabled) "enabled" else "disabled"
+                }
             )
 
             // Economy integration chart
             metrics.addCustomChart(
-                    SimplePie("economy_integration") {
-                        if (configManager.mainConfig.economy.enabled) "enabled" else "disabled"
-                    }
+                SimplePie("economy_integration") {
+                    if (configManager.mainConfig.economy.enabled) "enabled" else "disabled"
+                }
             )
 
             // Versioning enabled chart
             metrics.addCustomChart(
-                    SimplePie("versioning_enabled") {
-                        if (configManager.mainConfig.versioning.enabled) "enabled" else "disabled"
-                    }
+                SimplePie("versioning_enabled") {
+                    if (configManager.mainConfig.versioning.enabled) "enabled" else "disabled"
+                }
             )
 
             // Death recovery enabled chart
             metrics.addCustomChart(
-                    SimplePie("death_recovery_enabled") {
-                        if (configManager.mainConfig.deathRecovery.enabled) "enabled"
-                        else "disabled"
-                    }
+                SimplePie("death_recovery_enabled") {
+                    if (configManager.mainConfig.deathRecovery.enabled) "enabled"
+                    else "disabled"
+                }
             )
 
             Logging.debug { "bStats metrics initialized" }
@@ -297,10 +305,20 @@ class XInventories : JavaPlugin(), PluginContext {
     }
 
     companion object {
-        /** Gets the plugin instance. */
+        // Static reference for legacy compatibility
+        private var instance: XInventoriesBootstrap? = null
+
+        /**
+         * Gets the bootstrap instance.
+         * @throws IllegalStateException if called before plugin is enabled
+         */
         @JvmStatic
-        fun getInstance(): XInventories {
-            return getPlugin(XInventories::class.java)
+        fun getInstance(): XInventoriesBootstrap {
+            return instance ?: throw IllegalStateException("xInventories is not enabled")
+        }
+
+        internal fun setInstance(bootstrap: XInventoriesBootstrap?) {
+            instance = bootstrap
         }
     }
 }

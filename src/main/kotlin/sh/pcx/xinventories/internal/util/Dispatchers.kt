@@ -8,14 +8,22 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Custom coroutine dispatcher that runs tasks on the Bukkit main thread.
+ *
+ * This dispatcher handles plugin shutdown gracefully by checking if the plugin
+ * is still enabled before scheduling tasks. During shutdown, tasks are either
+ * executed directly (if on main thread) or silently dropped (if not).
  */
 class BukkitMainThreadDispatcher(private val plugin: Plugin) : CoroutineDispatcher() {
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         if (plugin.server.isPrimaryThread) {
+            // Already on main thread, run directly
             block.run()
-        } else {
+        } else if (plugin.isEnabled) {
+            // Plugin is enabled, schedule on main thread
             plugin.server.scheduler.runTask(plugin, block)
         }
+        // If plugin is disabled and not on main thread, silently drop the task
+        // This prevents IllegalPluginAccessException during shutdown
     }
 }
 
