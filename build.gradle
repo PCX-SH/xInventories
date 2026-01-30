@@ -42,7 +42,7 @@ dependencies {
     compileOnly 'com.zaxxer:HikariCP:7.0.2'
 
     // Redis client for cross-server sync - downloaded by Paper's library loader at runtime
-    compileOnly 'redis.clients:jedis:5.2.0'
+    compileOnly 'redis.clients:jedis:7.2.1'
 
     // Soft dependencies
     compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') {
@@ -77,7 +77,7 @@ dependencies {
     testImplementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0'
     testImplementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
     testImplementation 'com.zaxxer:HikariCP:7.0.2'
-    testImplementation 'redis.clients:jedis:5.2.0'
+    testImplementation 'redis.clients:jedis:7.2.1'
     testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.101.0') {
         exclude group: 'org.jetbrains.kotlin'
