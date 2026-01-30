@@ -1,5 +1,6 @@
 package sh.pcx.xinventories.internal.util
 
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.io.BukkitObjectInputStream
 import org.bukkit.util.io.BukkitObjectOutputStream
@@ -150,9 +151,27 @@ object InventorySerializer {
 
     /**
      * Converts a map back to an ItemStack.
+     * Handles MemorySection objects that may be present when reading from YAML.
      */
     fun mapToItemStack(map: Map<String, Any>?): ItemStack? {
-        return map?.let { ItemStack.deserialize(it) }
+        if (map == null) return null
+        val cleanedMap = convertToPlainMap(map)
+        return ItemStack.deserialize(cleanedMap)
+    }
+
+    /**
+     * Recursively converts a map containing ConfigurationSection objects to plain Maps.
+     * This is needed because YAML configuration returns MemorySection objects for nested data.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun convertToPlainMap(map: Map<String, Any>): Map<String, Any> {
+        return map.mapValues { (_, value) ->
+            when (value) {
+                is ConfigurationSection -> convertToPlainMap(value.getValues(false))
+                is Map<*, *> -> convertToPlainMap(value as Map<String, Any>)
+                else -> value
+            }
+        }
     }
 
     /**
@@ -165,6 +184,7 @@ object InventorySerializer {
 
     /**
      * Deserializes inventory contents from a YAML map.
+     * Handles both plain Maps and ConfigurationSection objects.
      */
     @Suppress("UNCHECKED_CAST")
     fun yamlMapToInventory(map: Map<String, Any>?): Map<Int, ItemStack> {
@@ -173,7 +193,11 @@ object InventorySerializer {
         return try {
             map.mapNotNull { (key, value) ->
                 val slot = key.toIntOrNull() ?: return@mapNotNull null
-                val itemMap = value as? Map<String, Any> ?: return@mapNotNull null
+                val itemMap = when (value) {
+                    is ConfigurationSection -> convertToPlainMap(value.getValues(false))
+                    is Map<*, *> -> convertToPlainMap(value as Map<String, Any>)
+                    else -> return@mapNotNull null
+                }
                 val item = ItemStack.deserialize(itemMap)
                 slot to item
             }.toMap()

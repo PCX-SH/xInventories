@@ -59,7 +59,7 @@ data class PlayerInventorySnapshot(
          */
         @Suppress("UnstableApiUsage")
         fun fromPlayer(player: Player, group: String): PlayerInventorySnapshot {
-            val maxHealth = player.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH)?.value ?: 20.0
+            val maxHealth = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH)?.value ?: 20.0
 
             return PlayerInventorySnapshot(
                 uuid = player.uniqueId,

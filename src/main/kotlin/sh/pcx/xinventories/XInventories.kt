@@ -1,5 +1,13 @@
 package sh.pcx.xinventories
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import org.bstats.bukkit.Metrics
+import org.bstats.charts.SimplePie
+import org.bukkit.plugin.java.JavaPlugin
 import sh.pcx.xinventories.api.XInventoriesProvider
 import sh.pcx.xinventories.internal.api.XInventoriesAPIImpl
 import sh.pcx.xinventories.internal.command.CommandManager
@@ -11,20 +19,15 @@ import sh.pcx.xinventories.internal.service.ServiceManager
 import sh.pcx.xinventories.internal.util.AsyncStorageDispatcher
 import sh.pcx.xinventories.internal.util.BukkitMainThreadDispatcher
 import sh.pcx.xinventories.internal.util.Logging
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.runBlocking
-import org.bukkit.plugin.java.JavaPlugin
 
 /**
- * Main plugin class for xInventories.
- * Provides advanced per-world inventory management for Paper servers.
+ * Main plugin class for xInventories. Provides advanced per-world inventory management for Paper
+ * servers.
  */
 class XInventories : JavaPlugin(), CoroutineScope {
 
     // Coroutine dispatchers
-    lateinit var mainThreadDispatcher: BukkitMainThreadDispatcher
+    lateinit var mainThreadDispatcher: CoroutineDispatcher
         private set
     lateinit var storageDispatcher: AsyncStorageDispatcher
         private set
@@ -59,10 +62,12 @@ class XInventories : JavaPlugin(), CoroutineScope {
 
     // Coroutine scope job
     private val job = SupervisorJob()
-    override val coroutineContext get() = job + mainThreadDispatcher
+    override val coroutineContext
+        get() = job + mainThreadDispatcher
 
     // Expose coroutine scope for external use
-    val scope: CoroutineScope get() = this
+    val scope: CoroutineScope
+        get() = this
 
     @Suppress("DEPRECATION")
     override fun onEnable() {
@@ -72,7 +77,8 @@ class XInventories : JavaPlugin(), CoroutineScope {
 
         // Initialize dispatchers
         mainThreadDispatcher = BukkitMainThreadDispatcher(this)
-        storageDispatcher = AsyncStorageDispatcher(4) // Default pool size, will be updated from config
+        storageDispatcher =
+                AsyncStorageDispatcher(4) // Default pool size, will be updated from config
 
         // Save default config if it doesn't exist
         saveDefaultConfig()
@@ -121,6 +127,9 @@ class XInventories : JavaPlugin(), CoroutineScope {
         // Initialize hooks (PlaceholderAPI, Vault)
         hookManager = HookManager(this)
         hookManager.registerHooks()
+
+        // Initialize bStats metrics
+        initializeMetrics()
 
         Logging.info("xInventories enabled successfully!")
     }
@@ -186,9 +195,7 @@ class XInventories : JavaPlugin(), CoroutineScope {
         Logging.info("xInventories disabled.")
     }
 
-    /**
-     * Reloads the plugin configuration.
-     */
+    /** Reloads the plugin configuration. */
     fun reload(): Boolean {
         Logging.info("Reloading xInventories configuration...")
 
@@ -207,10 +214,78 @@ class XInventories : JavaPlugin(), CoroutineScope {
         return configSuccess
     }
 
+    /** Initializes bStats metrics collection. */
+    private fun initializeMetrics() {
+        // Check if metrics are enabled in config
+        if (!configManager.mainConfig.metrics) {
+            Logging.debug { "bStats metrics disabled in config" }
+            return
+        }
+
+        // bStats plugin ID
+        val pluginId = 29163
+
+        try {
+            val metrics = Metrics(this, pluginId)
+
+            // Storage type chart
+            metrics.addCustomChart(
+                    SimplePie("storage_type") {
+                        configManager.mainConfig.storage.type.name.lowercase()
+                    }
+            )
+
+            // Number of groups chart
+            metrics.addCustomChart(
+                    SimplePie("group_count") {
+                        val count = serviceManager.groupService.getAllGroups().size
+                        when {
+                            count <= 1 -> "1"
+                            count <= 3 -> "2-3"
+                            count <= 5 -> "4-5"
+                            count <= 10 -> "6-10"
+                            else -> "10+"
+                        }
+                    }
+            )
+
+            // Sync enabled chart
+            metrics.addCustomChart(
+                    SimplePie("sync_enabled") {
+                        if (configManager.mainConfig.sync.enabled) "enabled" else "disabled"
+                    }
+            )
+
+            // Economy integration chart
+            metrics.addCustomChart(
+                    SimplePie("economy_integration") {
+                        if (configManager.mainConfig.economy.enabled) "enabled" else "disabled"
+                    }
+            )
+
+            // Versioning enabled chart
+            metrics.addCustomChart(
+                    SimplePie("versioning_enabled") {
+                        if (configManager.mainConfig.versioning.enabled) "enabled" else "disabled"
+                    }
+            )
+
+            // Death recovery enabled chart
+            metrics.addCustomChart(
+                    SimplePie("death_recovery_enabled") {
+                        if (configManager.mainConfig.deathRecovery.enabled) "enabled"
+                        else "disabled"
+                    }
+            )
+
+            Logging.debug { "bStats metrics initialized" }
+        } catch (e: Exception) {
+            Logging.debug { "Failed to initialize bStats: ${e.message}" }
+        }
+    }
+
     companion object {
-        /**
-         * Gets the plugin instance.
-         */
+        /** Gets the plugin instance. */
         @JvmStatic
         fun getInstance(): XInventories {
             return getPlugin(XInventories::class.java)

@@ -41,6 +41,14 @@ class PlayerData(
     var timestamp: Instant = Instant.now()
     var dirty: Boolean = false
 
+    // Version tracking for cross-server sync conflict detection
+    // Increment on each save for conflict resolution
+    var version: Long = 0
+
+    // Per-group economy balances
+    // Map of group name to balance - used when separateEconomy is enabled per group
+    val balances: MutableMap<String, Double> = mutableMapOf()
+
     /**
      * Clears all inventory contents.
      */
@@ -121,7 +129,7 @@ class PlayerData(
 
         // State
         health = player.health
-        maxHealth = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: 20.0
+        maxHealth = player.getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0
         foodLevel = player.foodLevel
         saturation = player.saturation
         exhaustion = player.exhaustion
@@ -170,11 +178,11 @@ class PlayerData(
 
         // Apply state based on settings
         if (settings.saveHealth) {
-            val maxHealthAttr = player.getAttribute(Attribute.GENERIC_MAX_HEALTH)
+            val maxHealthAttr = player.getAttribute(Attribute.MAX_HEALTH)
             if (maxHealthAttr != null) {
                 maxHealthAttr.baseValue = maxHealth
             }
-            player.health = health.coerceIn(0.0, player.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: 20.0)
+            player.health = health.coerceIn(0.0, player.getAttribute(Attribute.MAX_HEALTH)?.value ?: 20.0)
         }
 
         if (settings.saveHunger) {
