@@ -25,6 +25,31 @@ class CommandManager(private val plugin: XInventories) {
         registerSubcommand(ConvertCommand())
         registerSubcommand(DebugCommand())
         registerSubcommand(GUICommand())
+        registerSubcommand(SyncCommand())
+
+        // Data Foundation commands
+        registerSubcommand(HistoryCommand())
+        registerSubcommand(RestoreCommand())
+        registerSubcommand(SnapshotCommand())
+        registerSubcommand(DeathsCommand())
+
+        // Content Control commands
+        registerSubcommand(TemplateCommand())
+        registerSubcommand(RestrictCommand())
+        registerSubcommand(ResetCommand())
+
+        // Advanced Groups commands
+        registerSubcommand(ConditionsCommand())
+        registerSubcommand(WhoamiCommand())
+        registerSubcommand(LockCommand())
+        registerSubcommand(UnlockCommand())
+
+        // External Integrations commands
+        registerSubcommand(BalanceCommand(
+            plugin.serviceManager.economyService,
+            plugin.serviceManager.groupService
+        ))
+        registerSubcommand(ImportCommand(plugin.serviceManager.importService))
 
         // Register main command executor
         val command: PluginCommand? = plugin.getCommand("xinventories")
