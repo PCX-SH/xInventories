@@ -41,15 +41,10 @@ jobs:
           # Use extended queries for more thorough analysis
           queries: +security-extended
 
-      # Build the project (required for CodeQL to analyze compiled code)
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build project
-        run: ./gradlew compileKotlin compileTestKotlin
+      # Build the project using CodeQL's autobuild
+      # This ensures CodeQL can properly trace the compilation
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
 
       # Perform CodeQL analysis
       - name: Perform CodeQL Analysis
