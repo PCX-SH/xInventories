@@ -53,7 +53,7 @@ jobs:
 
       # Publish test results as PR comment/check
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v6
         if: always()
         with:
           report_paths: 'build/test-results/test/TEST-*.xml'
