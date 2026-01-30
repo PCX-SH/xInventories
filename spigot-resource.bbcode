@@ -44,7 +44,7 @@ Whether you're running a survival server with a creative world, a minigame netwo
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Requirements ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
 
 [LIST]
-[*][B]Paper 1.21+[/B] (not compatible with Spigot)
+[*][B]Paper 1.21+[/B] (1.21.0 - 1.21.11+ supported, not compatible with Spigot)
 [*][B]Java 21+[/B]
 [/LIST]
 
@@ -53,12 +53,14 @@ Whether you're running a survival server with a creative world, a minigame netwo
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Installation ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
 
 [LIST=1]
-[*]Download the jar file
+[*]Download the jar file (lightweight ~1.7MB)
 [*]Place it in your server's [FONT=Courier New]plugins/[/FONT] folder
-[*]Restart your server
+[*]Restart your server (Paper will automatically download required libraries)
 [*]Configure [FONT=Courier New]plugins/xInventories/config.yml[/FONT]
 [*]Set up world groups in [FONT=Courier New]plugins/xInventories/groups.yml[/FONT]
 [/LIST]
+
+[B]Note:[/B] xInventories uses Paper's library loader to automatically download dependencies at startup. This keeps the jar small and ensures compatible library versions.
 
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Commands ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
 

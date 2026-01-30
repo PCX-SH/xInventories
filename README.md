@@ -45,16 +45,18 @@ A powerful per-world inventory management plugin for Paper 1.21+ servers. Separa
 
 ## Requirements
 
-- **Paper 1.21+** (not compatible with Spigot)
+- **Paper 1.21+** (1.21.0 - 1.21.11+ supported, not compatible with Spigot)
 - **Java 21+**
 
 ## Installation
 
-1. Download `xInventories-1.1.0.jar`
+1. Download `xInventories-1.1.0.jar` (lightweight ~1.7MB)
 2. Place in your server's `plugins/` folder
-3. Restart your server
+3. Restart your server (Paper will automatically download required libraries)
 4. Configure `plugins/xInventories/config.yml` as needed
 5. Set up world groups in `plugins/xInventories/groups.yml`
+
+> **Note:** xInventories uses Paper's library loader to automatically download dependencies at startup. This keeps the jar small and ensures you always have compatible library versions.
 
 ## Commands
 
@@ -443,7 +445,7 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 ## FAQ
 
 **Q: Does this work with Spigot?**
-A: No, xInventories requires Paper 1.21.11 or higher. It uses Paper-specific APIs and the native Adventure library.
+A: No, xInventories requires Paper 1.21+ (1.21.0 - 1.21.11+ all supported). It uses Paper-specific APIs and the native Adventure library.
 
 **Q: How do I share inventories between servers?**
 A: For BungeeCord/Velocity networks, enable Redis sync in config.yml. This provides real-time synchronization with distributed locking to prevent conflicts. Alternatively, use MySQL storage with all servers pointing to the same database.
