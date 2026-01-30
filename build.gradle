@@ -68,7 +68,7 @@ dependencies {
 
     // Testing - use kotlin-test-junit5 to bridge kotlin.test to JUnit 5
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5:2.3.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
     testImplementation 'io.mockk:mockk:1.14.9'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
 
