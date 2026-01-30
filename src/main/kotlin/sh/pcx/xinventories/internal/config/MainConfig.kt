@@ -27,6 +27,8 @@ data class MainConfig(
     val sync: NetworkSyncConfig = NetworkSyncConfig(),
     val startup: StartupConfig = StartupConfig(),
     val gui: GUIConfigSection = GUIConfigSection(),
+    val audit: AuditConfig = AuditConfig(),
+    val antiDupe: AntiDupeConfig = AntiDupeConfig(),
     val configVersion: Int = 1,
     val metrics: Boolean = true,
     val debug: Boolean = false
@@ -384,3 +386,52 @@ data class GUISoundsConfigSection(
         )
     }
 }
+
+// ============================================================
+// Audit Configuration
+// ============================================================
+
+/**
+ * Configuration for audit logging.
+ */
+data class AuditConfig(
+    /** Whether audit logging is enabled */
+    val enabled: Boolean = true,
+    /** Number of days to keep audit entries */
+    val retentionDays: Int = 30,
+    /** Log when admins view player inventories */
+    val logViews: Boolean = false,
+    /** Log automatic inventory saves */
+    val logSaves: Boolean = true
+)
+
+// ============================================================
+// Anti-Dupe Configuration
+// ============================================================
+
+/**
+ * Sensitivity levels for dupe detection.
+ */
+enum class DupeSensitivity(val minSwitchIntervalMs: Long, val anomalyThreshold: Double) {
+    LOW(200, 3.0),      // Very lenient, only obvious dupes
+    MEDIUM(500, 2.0),   // Balanced detection
+    HIGH(1000, 1.5)     // Aggressive detection, may have false positives
+}
+
+/**
+ * Configuration for anti-dupe detection.
+ */
+data class AntiDupeConfig(
+    /** Enable anti-dupe detection */
+    val enabled: Boolean = true,
+    /** Sensitivity level for detection */
+    val sensitivity: DupeSensitivity = DupeSensitivity.MEDIUM,
+    /** Minimum milliseconds between group switches */
+    val minSwitchIntervalMs: Long = 500,
+    /** Freeze player inventory when high-severity dupe is detected */
+    val freezeOnDetection: Boolean = false,
+    /** Notify online admins when dupe is detected */
+    val notifyAdmins: Boolean = true,
+    /** Log all detections to console */
+    val logDetections: Boolean = true
+)

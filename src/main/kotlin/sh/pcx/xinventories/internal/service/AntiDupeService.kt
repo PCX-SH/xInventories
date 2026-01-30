@@ -6,31 +6,12 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.event.DupeDetectionEvent
+import sh.pcx.xinventories.internal.config.AntiDupeConfig
+import sh.pcx.xinventories.internal.config.DupeSensitivity
 import sh.pcx.xinventories.internal.util.Logging
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-
-/**
- * Sensitivity levels for dupe detection.
- */
-enum class DupeSensitivity(val minSwitchIntervalMs: Long, val anomalyThreshold: Double) {
-    LOW(200, 3.0),      // Very lenient, only obvious dupes
-    MEDIUM(500, 2.0),   // Balanced detection
-    HIGH(1000, 1.5)     // Aggressive detection, may have false positives
-}
-
-/**
- * Configuration for anti-dupe detection.
- */
-data class AntiDupeConfig(
-    val enabled: Boolean = true,
-    val sensitivity: DupeSensitivity = DupeSensitivity.MEDIUM,
-    val minSwitchIntervalMs: Long = 500,
-    val freezeOnDetection: Boolean = false,
-    val notifyAdmins: Boolean = true,
-    val logDetections: Boolean = true
-)
 
 /**
  * Information about a potential dupe detection.
@@ -115,23 +96,7 @@ class AntiDupeService(
     }
 
     private fun loadConfig() {
-        val configFile = plugin.config
-
-        val sensitivityStr = configFile.getString("anti-dupe.sensitivity", "MEDIUM") ?: "MEDIUM"
-        val sensitivity = try {
-            DupeSensitivity.valueOf(sensitivityStr.uppercase())
-        } catch (e: Exception) {
-            DupeSensitivity.MEDIUM
-        }
-
-        config = AntiDupeConfig(
-            enabled = configFile.getBoolean("anti-dupe.enabled", true),
-            sensitivity = sensitivity,
-            minSwitchIntervalMs = configFile.getLong("anti-dupe.min-switch-interval-ms", sensitivity.minSwitchIntervalMs),
-            freezeOnDetection = configFile.getBoolean("anti-dupe.freeze-on-detection", false),
-            notifyAdmins = configFile.getBoolean("anti-dupe.notify-admins", true),
-            logDetections = configFile.getBoolean("anti-dupe.log-detections", true)
-        )
+        config = plugin.configManager.mainConfig.antiDupe
     }
 
     // =========================================================================

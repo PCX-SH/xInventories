@@ -284,7 +284,11 @@ class ConfigManager(private val plugin: XInventories) {
                 showBanner = config.getBoolean("startup.show-banner", true),
                 showStats = config.getBoolean("startup.show-stats", true)
             ),
+            gui = loadGUIConfig(config),
+            audit = loadAuditConfig(config),
+            antiDupe = loadAntiDupeConfig(config),
             configVersion = config.getInt("config-version", 1),
+            metrics = config.getBoolean("metrics", true),
             debug = config.getBoolean("debug", false)
         )
 
@@ -613,6 +617,54 @@ class ConfigManager(private val plugin: XInventories) {
         } catch (e: Exception) {
             MergeRule.NEWER
         }
+    }
+
+    /**
+     * Loads GUI configuration from the main config.
+     */
+    private fun loadGUIConfig(config: org.bukkit.configuration.file.FileConfiguration): GUIConfigSection {
+        return GUIConfigSection(
+            theme = config.getString("gui.theme", "DEFAULT") ?: "DEFAULT",
+            sounds = GUISoundsConfigSection(
+                click = config.getString("gui.sounds.click", "UI_BUTTON_CLICK") ?: "UI_BUTTON_CLICK",
+                success = config.getString("gui.sounds.success", "ENTITY_PLAYER_LEVELUP") ?: "ENTITY_PLAYER_LEVELUP",
+                error = config.getString("gui.sounds.error", "ENTITY_VILLAGER_NO") ?: "ENTITY_VILLAGER_NO"
+            )
+        )
+    }
+
+    /**
+     * Loads audit configuration from the main config.
+     */
+    private fun loadAuditConfig(config: org.bukkit.configuration.file.FileConfiguration): AuditConfig {
+        return AuditConfig(
+            enabled = config.getBoolean("audit.enabled", true),
+            retentionDays = config.getInt("audit.retention-days", 30),
+            logViews = config.getBoolean("audit.log-views", false),
+            logSaves = config.getBoolean("audit.log-saves", true)
+        )
+    }
+
+    /**
+     * Loads anti-dupe configuration from the main config.
+     */
+    private fun loadAntiDupeConfig(config: org.bukkit.configuration.file.FileConfiguration): AntiDupeConfig {
+        val sensitivityStr = config.getString("anti-dupe.sensitivity", "MEDIUM") ?: "MEDIUM"
+        val sensitivity = try {
+            DupeSensitivity.valueOf(sensitivityStr.uppercase())
+        } catch (e: Exception) {
+            Logging.warning("Invalid anti-dupe sensitivity '$sensitivityStr', defaulting to MEDIUM")
+            DupeSensitivity.MEDIUM
+        }
+
+        return AntiDupeConfig(
+            enabled = config.getBoolean("anti-dupe.enabled", true),
+            sensitivity = sensitivity,
+            minSwitchIntervalMs = config.getLong("anti-dupe.min-switch-interval-ms", sensitivity.minSwitchIntervalMs),
+            freezeOnDetection = config.getBoolean("anti-dupe.freeze-on-detection", false),
+            notifyAdmins = config.getBoolean("anti-dupe.notify-admins", true),
+            logDetections = config.getBoolean("anti-dupe.log-detections", true)
+        )
     }
 
     /**

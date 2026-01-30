@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.internal.config.AuditConfig
 import sh.pcx.xinventories.internal.model.AuditAction
 import sh.pcx.xinventories.internal.model.AuditEntry
 import sh.pcx.xinventories.internal.storage.AuditStorage
@@ -16,16 +17,6 @@ import java.io.File
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-
-/**
- * Configuration for the audit service.
- */
-data class AuditConfig(
-    val enabled: Boolean = true,
-    val retentionDays: Int = 30,
-    val logViews: Boolean = false,
-    val logSaves: Boolean = true
-)
 
 /**
  * Service for tracking and querying audit log entries.
@@ -106,15 +97,7 @@ class AuditService(
     }
 
     private fun loadConfig() {
-        val mainConfig = plugin.configManager.mainConfig
-        // Audit config is loaded from mainConfig.audit section when available
-        // For now, use defaults since this is a new feature
-        config = AuditConfig(
-            enabled = plugin.config.getBoolean("audit.enabled", true),
-            retentionDays = plugin.config.getInt("audit.retention-days", 30),
-            logViews = plugin.config.getBoolean("audit.log-views", false),
-            logSaves = plugin.config.getBoolean("audit.log-saves", true)
-        )
+        config = plugin.configManager.mainConfig.audit
     }
 
     // =========================================================================

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import sh.pcx.xinventories.internal.service.AntiDupeConfig
+import sh.pcx.xinventories.internal.config.AntiDupeConfig
+import sh.pcx.xinventories.internal.config.DupeSensitivity
 import sh.pcx.xinventories.internal.service.DupeDetectionType
-import sh.pcx.xinventories.internal.service.DupeSensitivity
 import sh.pcx.xinventories.internal.service.DupeSeverity
 
 @DisplayName("AntiDupe Components")
