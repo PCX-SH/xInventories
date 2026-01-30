@@ -12,6 +12,7 @@ Whether you're running a survival server with a creative world, a minigame netwo
 
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Features ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
 
+[B][SIZE=4]Core Features[/SIZE][/B]
 [LIST]
 [*][B]Per-World Inventories[/B] - Separate inventories for different worlds or world groups
 [*][B]Per-GameMode Inventories[/B] - Optionally separate inventories by gamemode
@@ -24,7 +25,20 @@ Whether you're running a survival server with a creative world, a minigame netwo
 [*][B]Data Migration[/B] - Seamlessly migrate between storage backends
 [*][B]Full Developer API[/B] - Comprehensive API with events and subscriptions
 [*][B]PlaceholderAPI Support[/B] - Built-in placeholders for scoreboards and more
-[*][B]Async Operations[/B] - Non-blocking saves and loads for lag-free performance
+[/LIST]
+
+[B][SIZE=4]v1.1.0 Features[/SIZE][/B]
+[LIST]
+[*][B]Inventory Versioning[/B] - Automatic version history with rollback capability
+[*][B]Death Recovery[/B] - Recover inventories lost on death
+[*][B]Templates[/B] - Pre-defined inventory templates for starter kits and loadouts
+[*][B]Item Restrictions[/B] - Whitelist/blacklist items per group
+[*][B]Shared Slots[/B] - Share specific slots across all groups
+[*][B]Conditional Groups[/B] - Dynamic groups based on permissions, time, or PlaceholderAPI
+[*][B]Inventory Locking[/B] - Temporarily lock inventories with bypass permissions
+[*][B]Vault Economy[/B] - Per-group economy balances
+[*][B]Plugin Import[/B] - Import from PerWorldInventory, MultiVerse-Inventories, MyWorlds
+[*][B]Cross-Server Sync[/B] - Redis-based sync for BungeeCord/Velocity networks
 [/LIST]
 
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Requirements ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
@@ -58,31 +72,46 @@ Base command: [FONT=Courier New]/xinventories[/FONT] (aliases: [FONT=Courier New
 [*][FONT=Courier New]/xinv gui[/FONT] - Open admin GUI
 [*][FONT=Courier New]/xinv save [player][/FONT] - Save player inventory
 [*][FONT=Courier New]/xinv load <player> [group][/FONT] - Load player inventory
+[*][FONT=Courier New]/xinv whoami[/FONT] - Show current group and match reason
 [/LIST]
 
-[B]Management Commands[/B]
+[B]Group & World Management[/B]
 [LIST]
-[*][FONT=Courier New]/xinv group list[/FONT] - List all groups
-[*][FONT=Courier New]/xinv group info <name>[/FONT] - View group details
-[*][FONT=Courier New]/xinv group create <name>[/FONT] - Create a new group
-[*][FONT=Courier New]/xinv group delete <name>[/FONT] - Delete a group
-[*][FONT=Courier New]/xinv world assign <world> <group>[/FONT] - Assign world to group
-[*][FONT=Courier New]/xinv world unassign <world>[/FONT] - Remove world assignment
-[*][FONT=Courier New]/xinv world list[/FONT] - List world assignments
-[*][FONT=Courier New]/xinv pattern add <group> <regex>[/FONT] - Add pattern to group
-[*][FONT=Courier New]/xinv pattern remove <group> <regex>[/FONT] - Remove pattern
-[*][FONT=Courier New]/xinv pattern list <group>[/FONT] - List group patterns
+[*][FONT=Courier New]/xinv group list|info|create|delete|setdefault[/FONT] - Manage groups
+[*][FONT=Courier New]/xinv world assign|unassign|list[/FONT] - Manage world assignments
+[*][FONT=Courier New]/xinv pattern add|remove|list[/FONT] - Manage regex patterns
+[/LIST]
+
+[B]Version History & Death Recovery[/B]
+[LIST]
+[*][FONT=Courier New]/xinv version list|restore|diff[/FONT] - Inventory version history
+[*][FONT=Courier New]/xinv death list|restore|preview[/FONT] - Death recovery
+[/LIST]
+
+[B]Templates & Restrictions[/B]
+[LIST]
+[*][FONT=Courier New]/xinv template list|apply|create[/FONT] - Manage templates
+[*][FONT=Courier New]/xinv restrict list|add|remove[/FONT] - Item restrictions
+[/LIST]
+
+[B]Economy & Locking[/B]
+[LIST]
+[*][FONT=Courier New]/xinv lock <player> [reason] [duration][/FONT] - Lock inventory
+[*][FONT=Courier New]/xinv unlock <player>[/FONT] - Unlock inventory
+[*][FONT=Courier New]/xinv conditions <group>[/FONT] - View group conditions
+[/LIST]
+
+[B]Import & Sync[/B]
+[LIST]
+[*][FONT=Courier New]/xinv import detect|<plugin>[/FONT] - Import from other plugins
+[*][FONT=Courier New]/xinv sync status|force[/FONT] - Network sync status
 [/LIST]
 
 [B]Utility Commands[/B]
 [LIST]
-[*][FONT=Courier New]/xinv cache stats[/FONT] - View cache statistics
-[*][FONT=Courier New]/xinv cache clear[/FONT] - Clear the cache
-[*][FONT=Courier New]/xinv backup create [name][/FONT] - Create a backup
-[*][FONT=Courier New]/xinv backup restore <id>[/FONT] - Restore from backup
-[*][FONT=Courier New]/xinv backup list[/FONT] - List all backups
-[*][FONT=Courier New]/xinv backup delete <id>[/FONT] - Delete a backup
-[*][FONT=Courier New]/xinv convert <from> <to>[/FONT] - Migrate storage (yaml/sqlite/mysql)
+[*][FONT=Courier New]/xinv cache stats|clear[/FONT] - Manage cache
+[*][FONT=Courier New]/xinv backup create|restore|list|delete[/FONT] - Manage backups
+[*][FONT=Courier New]/xinv convert <from> <to>[/FONT] - Migrate storage
 [*][FONT=Courier New]/xinv debug[/FONT] - Debug information
 [/LIST]
 [/SPOILER]
@@ -108,6 +137,14 @@ Base command: [FONT=Courier New]/xinventories[/FONT] (aliases: [FONT=Courier New
 [*][FONT=Courier New]xinventories.command.backup[/FONT] - Manage backups (default: op)
 [*][FONT=Courier New]xinventories.command.convert[/FONT] - Migrate storage (default: op)
 [*][FONT=Courier New]xinventories.command.debug[/FONT] - Debug commands (default: op)
+[*][FONT=Courier New]xinventories.command.version[/FONT] - Version history (default: op)
+[*][FONT=Courier New]xinventories.command.death[/FONT] - Death recovery (default: op)
+[*][FONT=Courier New]xinventories.command.template[/FONT] - Manage templates (default: op)
+[*][FONT=Courier New]xinventories.command.restrict[/FONT] - Item restrictions (default: op)
+[*][FONT=Courier New]xinventories.command.conditions[/FONT] - View conditions (default: op)
+[*][FONT=Courier New]xinventories.command.lock[/FONT] - Lock/unlock inventories (default: op)
+[*][FONT=Courier New]xinventories.command.import[/FONT] - Import from plugins (default: op)
+[*][FONT=Courier New]xinventories.command.sync[/FONT] - Network sync (default: op)
 [*][FONT=Courier New]xinventories.gui[/FONT] - Access admin GUI (default: op)
 [/LIST]
 
@@ -115,6 +152,8 @@ Base command: [FONT=Courier New]/xinventories[/FONT] (aliases: [FONT=Courier New
 [LIST]
 [*][FONT=Courier New]xinventories.bypass[/FONT] - Bypass all inventory switching (default: false)
 [*][FONT=Courier New]xinventories.bypass.<group>[/FONT] - Bypass specific group (default: false)
+[*][FONT=Courier New]xinventories.lock.bypass[/FONT] - Bypass inventory locks (default: op)
+[*][FONT=Courier New]xinventories.restrict.bypass[/FONT] - Bypass item restrictions (default: op)
 [/LIST]
 [/SPOILER]
 
@@ -151,7 +190,14 @@ minigames:
   settings:
     saveHealth: false
     saveExperience: false
-    clearOnJoin: true[/CODE]
+    clearOnJoin: true
+
+# Conditional group example (VIP players)
+vip_survival:
+  priority: 15
+  worlds: []
+  conditions:
+    permission: "xinventories.group.vip"[/CODE]
 [/SPOILER]
 
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Storage Options ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
@@ -167,6 +213,18 @@ Best for large servers and networks. Required for multi-server setups.
 
 Migrate between backends with: [FONT=Courier New]/xinv convert <from> <to>[/FONT]
 
+[CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Network Sync ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
+
+For BungeeCord/Velocity networks, xInventories supports real-time inventory synchronization using Redis:
+
+[LIST]
+[*]Real-time sync across all servers
+[*]Distributed locking prevents data conflicts
+[*]Configurable conflict resolution (latest-wins or merge)
+[*]Server heartbeat monitoring
+[*]Automatic cache invalidation
+[/LIST]
+
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ PlaceholderAPI ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
 
 [SPOILER="Available Placeholders"]
@@ -176,6 +234,7 @@ Migrate between backends with: [FONT=Courier New]/xinv convert <from> <to>[/FONT
 [*][FONT=Courier New]%xinventories_groups_count%[/FONT] - Total groups
 [*][FONT=Courier New]%xinventories_storage_type%[/FONT] - Storage backend
 [*][FONT=Courier New]%xinventories_cache_size%[/FONT] - Cache entries
+[*][FONT=Courier New]%xinventories_cache_max%[/FONT] - Max cache size
 [*][FONT=Courier New]%xinventories_cache_hit_rate%[/FONT] - Cache hit rate
 [*][FONT=Courier New]%xinventories_version%[/FONT] - Plugin version
 [/LIST]
@@ -198,7 +257,13 @@ api.loadPlayerData(player, "creative")
 // Subscribe to events
 api.onInventorySwitch { context ->
     println("${context.player.name} switched groups")
-}[/CODE]
+}
+
+// Version history API
+api.versioning?.getVersions(player.uniqueId, "survival", 10)
+
+// Death recovery API
+api.deathRecovery?.getDeathRecords(player.uniqueId, 5)[/CODE]
 
 [CENTER][SIZE=5][COLOR=#5e4fa2][B]━━━━━━━━━━ Support ━━━━━━━━━━[/B][/COLOR][/SIZE][/CENTER]
 

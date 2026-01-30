@@ -8,6 +8,7 @@ A powerful per-world inventory management plugin for Paper 1.21.1+ servers. Sepa
 
 ## Features
 
+### Core Features
 - **Per-World Inventories** - Separate inventories for different worlds or world groups
 - **Per-GameMode Inventories** - Optionally separate inventories by gamemode (Survival, Creative, etc.)
 - **Multiple Storage Backends** - YAML (default), SQLite, or MySQL
@@ -19,6 +20,29 @@ A powerful per-world inventory management plugin for Paper 1.21.1+ servers. Sepa
 - **Full API** - Comprehensive developer API with events and subscriptions
 - **PlaceholderAPI Support** - Built-in placeholders for displaying inventory info
 
+### v1.1.0 Features
+
+#### Data Foundation
+- **Inventory Versioning** - Automatic version history with rollback capability
+- **Death Recovery** - Recover inventories lost on death
+
+#### Content Control
+- **Templates** - Pre-defined inventory templates for groups (starter kits, loadouts)
+- **Item Restrictions** - Whitelist/blacklist items per group
+- **Shared Slots** - Share specific slots across all groups
+
+#### Advanced Groups
+- **Conditional Groups** - Dynamic groups based on permissions, time, cron schedules, or PlaceholderAPI
+- **Inventory Locking** - Temporarily lock inventories with bypass permissions
+
+#### External Integrations
+- **Vault Economy** - Per-group economy balances
+- **Plugin Import** - Import from PerWorldInventory, MultiVerse-Inventories, MyWorlds
+
+#### Network Sync
+- **Cross-Server Sync** - Redis-based sync for BungeeCord/Velocity networks
+- **Distributed Locking** - Prevent data conflicts across servers
+
 ## Requirements
 
 - **Paper 1.21.1+** (not compatible with Spigot)
@@ -26,7 +50,7 @@ A powerful per-world inventory management plugin for Paper 1.21.1+ servers. Sepa
 
 ## Installation
 
-1. Download `xInventories-1.0.1.jar`
+1. Download `xInventories-1.1.0.jar`
 2. Place in your server's `plugins/` folder
 3. Restart your server
 4. Configure `plugins/xInventories/config.yml` as needed
@@ -50,6 +74,16 @@ All commands use `/xinventories` (aliases: `/xinv`, `/xi`)
 | `/xinv backup <create\|restore\|list\|delete> [name/id]` | Manage backups | `xinventories.command.backup` |
 | `/xinv convert <from> <to>` | Migrate storage (yaml/sqlite/mysql) | `xinventories.command.convert` |
 | `/xinv debug [info\|player\|storage] [player]` | Debug information | `xinventories.command.debug` |
+| `/xinv version <list\|restore\|diff> [player]` | Inventory version history | `xinventories.command.version` |
+| `/xinv death <list\|restore\|preview> [player]` | Death recovery | `xinventories.command.death` |
+| `/xinv template <list\|apply\|create> [name]` | Inventory templates | `xinventories.command.template` |
+| `/xinv restrict <list\|add\|remove> [group]` | Item restrictions | `xinventories.command.restrict` |
+| `/xinv conditions <group>` | View group conditions | `xinventories.command.conditions` |
+| `/xinv whoami` | Show current group and match reason | `xinventories.command` |
+| `/xinv lock <player> [reason] [duration]` | Lock player inventory | `xinventories.command.lock` |
+| `/xinv unlock <player>` | Unlock player inventory | `xinventories.command.lock` |
+| `/xinv import <detect\|plugin> [args]` | Import from other plugins | `xinventories.command.import` |
+| `/xinv sync <status\|force> [player]` | Network sync status | `xinventories.command.sync` |
 
 ## Permissions
 
@@ -74,12 +108,22 @@ All commands use `/xinventories` (aliases: `/xinv`, `/xi`)
 | `xinventories.command.convert` | Migrate storage | op |
 | `xinventories.command.debug` | Debug commands | op |
 | `xinventories.gui` | Open admin GUI | op |
+| `xinventories.command.version` | Version history | op |
+| `xinventories.command.death` | Death recovery | op |
+| `xinventories.command.template` | Manage templates | op |
+| `xinventories.command.restrict` | Manage restrictions | op |
+| `xinventories.command.conditions` | View conditions | op |
+| `xinventories.command.lock` | Lock/unlock inventories | op |
+| `xinventories.command.import` | Import from plugins | op |
+| `xinventories.command.sync` | Network sync | op |
 
 ### Bypass Permissions
 | Permission | Description | Default |
 |------------|-------------|---------|
 | `xinventories.bypass` | Bypass all inventory switching | false |
 | `xinventories.bypass.<group>` | Bypass switching for specific group | false |
+| `xinventories.lock.bypass` | Bypass inventory locks | op |
+| `xinventories.restrict.bypass` | Bypass item restrictions | op |
 
 ## Configuration
 
@@ -317,7 +361,7 @@ subscription.unsubscribe()
 
 ```kotlin
 // build.gradle.kts
-compileOnly(files("libs/xInventories-1.0.1.jar"))
+compileOnly(files("libs/xInventories-1.1.0.jar"))
 ```
 
 ```xml
@@ -325,7 +369,7 @@ compileOnly(files("libs/xInventories-1.0.1.jar"))
 <dependency>
     <groupId>sh.pcx</groupId>
     <artifactId>xInventories</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -362,9 +406,9 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 
 | Category | Tests | Description |
 |----------|-------|-------------|
-| **Unit Tests** | 400+ | Serializers, models, cache, configuration |
-| **Integration Tests** | 500+ | Storage backends, services, API |
-| **Total** | **991 passing** | 83 skipped (MockBukkit limitations) |
+| **Unit Tests** | 600+ | Serializers, models, cache, configuration, sync messages |
+| **Integration Tests** | 800+ | Storage backends, services, API, economy, templates |
+| **Total** | **1418 passing** | 83 skipped (MockBukkit limitations) |
 
 ### Running Tests
 
@@ -402,7 +446,7 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 A: No, xInventories requires Paper 1.21.1 or higher. It uses Paper-specific APIs and the native Adventure library.
 
 **Q: How do I share inventories between servers?**
-A: Use MySQL storage and configure all servers to use the same database.
+A: For BungeeCord/Velocity networks, enable Redis sync in config.yml. This provides real-time synchronization with distributed locking to prevent conflicts. Alternatively, use MySQL storage with all servers pointing to the same database.
 
 **Q: Can I have different inventories for Creative and Survival in the same world?**
 A: Yes! Enable `separateGameModeInventories: true` in the group settings.
@@ -418,6 +462,18 @@ A: Use regex patterns in groups.yml, e.g., `patterns: ["skyblock_.*"]` matches s
 
 **Q: Can I edit player inventories through the GUI?**
 A: Yes! Use `/xinv gui`, navigate to Player Management, select a player, and you can view and manage their inventories for each group.
+
+**Q: How do I recover a player's inventory after death?**
+A: Use `/xinv death list <player>` to see recent deaths, then `/xinv death restore <player> <id>` to restore.
+
+**Q: Can I have different balances per inventory group?**
+A: Yes! Enable Vault economy integration in config.yml with `economy.separateByGroup: true`.
+
+**Q: How do I import data from PerWorldInventory?**
+A: Run `/xinv import detect` to check for compatible plugins, then `/xinv import pwi` to start the import.
+
+**Q: How do I set up conditional groups?**
+A: In groups.yml, add a `conditions` section with permission, schedule, cron, or placeholder requirements.
 
 ## Support
 

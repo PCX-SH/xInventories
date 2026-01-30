@@ -37,6 +37,7 @@ run/
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
 bin/
+docs/
 
 # Test output
 out/
