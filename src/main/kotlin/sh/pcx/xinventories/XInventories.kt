@@ -19,6 +19,7 @@ import sh.pcx.xinventories.internal.service.ServiceManager
 import sh.pcx.xinventories.internal.util.AsyncStorageDispatcher
 import sh.pcx.xinventories.internal.util.BukkitMainThreadDispatcher
 import sh.pcx.xinventories.internal.util.Logging
+import sh.pcx.xinventories.internal.util.StartupBanner
 
 /**
  * Main plugin class for xInventories. Provides advanced per-world inventory management for Paper
@@ -130,6 +131,9 @@ class XInventories : JavaPlugin(), CoroutineScope {
 
         // Initialize bStats metrics
         initializeMetrics()
+
+        // Display startup banner
+        StartupBanner.display(this)
 
         Logging.info("xInventories enabled successfully!")
     }
