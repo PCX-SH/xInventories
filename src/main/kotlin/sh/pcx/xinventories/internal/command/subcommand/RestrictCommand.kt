@@ -17,13 +17,14 @@ import org.bukkit.entity.Player
  * - /xinv restrict <group> list - Show current restrictions
  * - /xinv restrict <group> mode <blacklist|whitelist|none> - Set restriction mode
  * - /xinv restrict <group> test - Test if held item is restricted
+ * - /xinv restrict <group> strip <add|remove> <pattern> - Manage strip-on-exit patterns
  */
 class RestrictCommand : Subcommand {
 
     override val name = "restrict"
     override val aliases = listOf("restriction", "restrictions")
     override val permission = "xinventories.command.restrict"
-    override val usage = "/xinv restrict <group> <add|remove|list|mode|test> [args...]"
+    override val usage = "/xinv restrict <group> <add|remove|list|mode|test|strip> [args...]"
     override val description = "Manage item restrictions for groups"
 
     override suspend fun execute(plugin: XInventories, sender: CommandSender, args: Array<String>): Boolean {

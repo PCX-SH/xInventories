@@ -20,13 +20,14 @@ import java.time.format.DateTimeFormatter
  * - /xinv template apply <name> <player> - Apply template to a player
  * - /xinv template delete <name> - Delete a template
  * - /xinv template edit <name> - Edit template (opens GUI)
+ * - /xinv template reload - Reload templates from disk
  */
 class TemplateCommand : Subcommand {
 
     override val name = "template"
     override val aliases = listOf("templates", "tmpl")
     override val permission = "xinventories.command.template"
-    override val usage = "/xinv template <list|view|create|apply|delete|edit> [args...]"
+    override val usage = "/xinv template <list|view|create|apply|delete|edit|reload> [args...]"
     override val description = "Manage inventory templates"
 
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")

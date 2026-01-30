@@ -588,19 +588,19 @@ class DeathPreviewGUI(
         )
 
         // Restore button (if target is online)
-        val targetOnline = Bukkit.getPlayer(targetUUID) != null
-        if (targetOnline) {
+        val targetPlayer = Bukkit.getPlayer(targetUUID)
+        if (targetPlayer != null) {
             setItem(52, GUIItemBuilder()
                 .material(Material.LIME_WOOL)
                 .name("Restore This Death", NamedTextColor.GREEN)
                 .lore("Click to restore this death")
                 .lore("inventory to the player")
+                .lore("")
+                .lore("Warning: This will overwrite")
+                .lore("their current inventory!")
                 .onClick { event ->
-                    val player = event.whoClicked as Player
-                    player.sendMessage(
-                        Component.text("Use the death list to restore. Right-click on the death record.", NamedTextColor.YELLOW)
-                    )
-                    DeathRecoveryGUI(plugin, targetUUID, targetName).open(player)
+                    val admin = event.whoClicked as Player
+                    showRestoreConfirmation(admin, targetPlayer)
                 }
                 .build()
             )
@@ -615,6 +615,67 @@ class DeathPreviewGUI(
             }
             .build()
         )
+    }
+
+    private fun showRestoreConfirmation(admin: Player, targetPlayer: Player) {
+        ConfirmationGUI(
+            plugin,
+            Component.text("Restore Death Inventory?", NamedTextColor.YELLOW),
+            "Restore inventory from death ${deathRecord.getRelativeTimeDescription()}",
+            "This will overwrite their current inventory!",
+            onConfirm = {
+                restoreDeathInventory(admin, targetPlayer)
+            },
+            onCancel = {
+                DeathPreviewGUI(plugin, targetUUID, targetName, deathRecord).open(admin)
+            }
+        ).open(admin)
+    }
+
+    private fun restoreDeathInventory(admin: Player, targetPlayer: Player) {
+        plugin.scope.launch(plugin.storageDispatcher) {
+            try {
+                val result = plugin.serviceManager.deathRecoveryService.restoreDeathInventory(
+                    player = targetPlayer,
+                    deathId = deathRecord.id
+                )
+
+                kotlinx.coroutines.withContext(plugin.mainThreadDispatcher) {
+                    if (result.isSuccess) {
+                        admin.sendMessage(
+                            Component.text("Successfully restored death inventory from ${deathRecord.getRelativeTimeDescription()}!", NamedTextColor.GREEN)
+                        )
+                        targetPlayer.sendMessage(
+                            Component.text("Your death inventory has been restored by ${admin.name}.", NamedTextColor.YELLOW)
+                        )
+
+                        // Log to audit
+                        plugin.serviceManager.auditService?.logDeathRestore(
+                            admin = admin,
+                            targetUuid = targetUUID,
+                            targetName = targetName,
+                            group = deathRecord.group,
+                            deathId = 0
+                        )
+                    } else {
+                        admin.sendMessage(
+                            Component.text("Failed to restore death inventory: ${result.exceptionOrNull()?.message}", NamedTextColor.RED)
+                        )
+                    }
+
+                    // Return to death list
+                    DeathRecoveryGUI(plugin, targetUUID, targetName).open(admin)
+                }
+            } catch (e: Exception) {
+                Logging.error("Failed to restore death inventory for $targetName", e)
+                kotlinx.coroutines.withContext(plugin.mainThreadDispatcher) {
+                    admin.sendMessage(
+                        Component.text("Error restoring death inventory: ${e.message}", NamedTextColor.RED)
+                    )
+                    DeathRecoveryGUI(plugin, targetUUID, targetName).open(admin)
+                }
+            }
+        }
     }
 
     override fun fillEmptySlots(inventory: Inventory) {

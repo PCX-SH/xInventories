@@ -23,12 +23,13 @@ import java.time.temporal.ChronoUnit
  * - /xinv audit <player> [--limit 50]
  * - /xinv audit search <action> [--from date] [--to date]
  * - /xinv audit export <file> [--from date] [--to date]
+ * - /xinv audit stats - Show audit statistics
  */
 class AuditCommand : Subcommand {
 
     override val name = "audit"
     override val permission = "xinventories.admin.audit"
-    override val usage = "/xinv audit <player|search|export> [args...]"
+    override val usage = "/xinv audit <player|search|export|stats> [args...]"
     override val description = "View and search audit logs"
 
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")

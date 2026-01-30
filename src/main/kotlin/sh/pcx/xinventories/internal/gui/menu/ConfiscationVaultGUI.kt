@@ -58,15 +58,9 @@ class ConfiscationVaultGUI(
         setItem(45, GUIItemBuilder()
             .material(Material.ARROW)
             .name("Back", NamedTextColor.GRAY)
-            .lore(if (isAdmin) "Return to player detail" else "Close")
+            .lore("Close this menu")
             .onClick { event ->
-                val player = event.whoClicked as Player
-                if (isAdmin) {
-                    // Return to player detail GUI
-                    player.closeInventory()
-                } else {
-                    player.closeInventory()
-                }
+                (event.whoClicked as Player).closeInventory()
             }
             .build()
         )

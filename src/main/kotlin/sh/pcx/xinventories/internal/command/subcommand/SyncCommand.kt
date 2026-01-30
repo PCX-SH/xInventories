@@ -18,13 +18,14 @@ import java.util.UUID
  *   /xinv sync lock <player> - Check lock status for a player
  *   /xinv sync unlock <player> - Force unlock a player (admin)
  *   /xinv sync invalidate <player> - Invalidate cache for a player
+ *   /xinv sync stats - Show sync statistics
  */
 class SyncCommand : Subcommand {
 
     override val name = "sync"
     override val aliases = listOf("network")
     override val permission = "xinventories.command.sync"
-    override val usage = "/xinv sync <status|servers|locks|lock|unlock|invalidate>"
+    override val usage = "/xinv sync <status|servers|locks|lock|unlock|invalidate|stats>"
     override val description = "Network synchronization commands"
 
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
