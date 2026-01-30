@@ -8,7 +8,11 @@ import sh.pcx.xinventories.api.event.InventorySwitchEvent
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.InventoryGroup
 import sh.pcx.xinventories.api.model.PlayerInventorySnapshot
+import sh.pcx.xinventories.internal.model.Group
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.RestrictionAction
+import sh.pcx.xinventories.internal.model.RestrictionConfig
+import sh.pcx.xinventories.internal.model.VersionTrigger
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -50,11 +54,28 @@ class InventoryService(
             return
         }
 
+        // Acquire distributed lock if sync is enabled
+        val syncService = plugin.serviceManager.syncService
+        if (syncService != null && syncService.isEnabled) {
+            val lockTimeout = plugin.configManager.mainConfig.sync.transferLock.timeoutSeconds * 1000L
+            val acquired = syncService.acquireLock(player.uniqueId, lockTimeout)
+            if (!acquired) {
+                Logging.warning("Failed to acquire lock for ${player.name} on join, proceeding anyway")
+                // Continue anyway - better to have potential conflict than to block the player
+            }
+        }
+
         val group = groupService.getGroupForWorld(player.world)
         playerGroups[player.uniqueId] = group.name
 
         // Load inventory
         loadInventory(player, group.toApiModel(), InventoryLoadEvent.LoadReason.JOIN)
+
+        // Handle template application on join
+        handleTemplateOnGroupEntry(player, group)
+
+        // Apply shared slot enforced items
+        plugin.serviceManager.sharedSlotService.applyEnforcedItems(player)
     }
 
     /**
@@ -65,13 +86,45 @@ class InventoryService(
             Logging.debug { "Player ${player.name} has bypass, skipping inventory save" }
             playerGroups.remove(player.uniqueId)
             activeSnapshots.remove(player.uniqueId)
+            // Release lock if sync is enabled
+            val syncService = plugin.serviceManager.syncService
+            if (syncService != null && syncService.isEnabled) {
+                syncService.releaseLock(player.uniqueId)
+            }
+            // Clean up shared slot cache
+            plugin.serviceManager.sharedSlotService.cleanup(player.uniqueId)
             return
         }
 
         val groupName = playerGroups[player.uniqueId] ?: groupService.getGroupForWorld(player.world).name
 
+        // Create inventory version on disconnect if enabled
+        if (config.versioning.enabled && config.versioning.triggerOn.disconnect) {
+            try {
+                plugin.serviceManager.versioningService.createVersion(
+                    player,
+                    VersionTrigger.DISCONNECT,
+                    mapOf("reason" to "player_disconnect")
+                )
+            } catch (e: Exception) {
+                Logging.error("Failed to create version on disconnect for ${player.name}", e)
+            }
+        }
+
+        // Clear version tracking for this player
+        plugin.serviceManager.versioningService.clearPlayerTracking(player.uniqueId)
+
         // Save current inventory
         saveInventory(player, groupName)
+
+        // Release distributed lock if sync is enabled
+        val syncService = plugin.serviceManager.syncService
+        if (syncService != null && syncService.isEnabled) {
+            syncService.releaseLock(player.uniqueId)
+        }
+
+        // Clean up shared slot cache
+        plugin.serviceManager.sharedSlotService.cleanup(player.uniqueId)
 
         // Clean up
         playerGroups.remove(player.uniqueId)
@@ -224,6 +277,32 @@ class InventoryService(
         val currentSnapshot = activeSnapshots[player.uniqueId]
             ?: PlayerInventorySnapshot.fromPlayer(player, fromGroup.name)
 
+        // Get internal group objects for restrictions
+        val fromGroupInternal = groupService.getGroup(fromGroup.name)
+        val toGroupInternal = groupService.getGroup(toGroup.name)
+
+        // Check restrictions when leaving group (strip-on-exit)
+        fromGroupInternal?.restrictions?.let { restrictions ->
+            if (restrictions.isEnabled() || restrictions.stripOnExit.isNotEmpty()) {
+                val allowed = checkAndHandleRestrictions(player, fromGroupInternal, restrictions, RestrictionAction.EXITING)
+                if (!allowed) {
+                    Logging.debug { "Inventory switch blocked by restrictions for ${player.name} (exiting ${fromGroup.name})" }
+                    return false
+                }
+            }
+        }
+
+        // Check restrictions when entering group
+        toGroupInternal?.restrictions?.let { restrictions ->
+            if (restrictions.isEnabled()) {
+                val allowed = checkAndHandleRestrictions(player, toGroupInternal, restrictions, RestrictionAction.ENTERING)
+                if (!allowed) {
+                    Logging.debug { "Inventory switch blocked by restrictions for ${player.name} (entering ${toGroup.name})" }
+                    return false
+                }
+            }
+        }
+
         // Fire switch event on main thread (Paper requires sync events on main thread)
         val switchEventResult = withContext(plugin.mainThreadDispatcher) {
             val event = InventorySwitchEvent(
@@ -244,9 +323,31 @@ class InventoryService(
             return false
         }
 
+        // Create inventory version on world change if enabled
+        if (config.versioning.enabled && config.versioning.triggerOn.worldChange) {
+            try {
+                plugin.serviceManager.versioningService.createVersion(
+                    player,
+                    VersionTrigger.WORLD_CHANGE,
+                    mapOf(
+                        "from_group" to fromGroup.name,
+                        "to_group" to toGroup.name,
+                        "reason" to "world_change"
+                    )
+                )
+            } catch (e: Exception) {
+                Logging.error("Failed to create version on world change for ${player.name}", e)
+            }
+        }
+
+        // Preserve shared slots before saving
+        plugin.serviceManager.sharedSlotService.preserveSharedSlots(player)
+
         // Save current inventory
         if (config.features.saveOnWorldChange) {
             val data = PlayerData.fromPlayer(player, fromGroup.name)
+            // Exclude shared slots from saved data
+            plugin.serviceManager.sharedSlotService.excludeSharedSlotsFromData(data)
             storageService.savePlayerData(data)
         }
 
@@ -280,10 +381,20 @@ class InventoryService(
             )
         }
 
+        // Restore shared slots after loading new inventory
+        withContext(plugin.mainThreadDispatcher) {
+            plugin.serviceManager.sharedSlotService.restoreSharedSlots(player)
+        }
+
         playerGroups[player.uniqueId] = toGroup.name
 
         // Notify player
         notifySwitch(player, fromGroup.name, toGroup.name)
+
+        // Handle template application on group entry
+        if (toGroupInternal != null) {
+            handleTemplateOnGroupEntry(player, toGroupInternal)
+        }
 
         Logging.debug { "Switched inventory for ${player.name}: ${fromGroup.name} -> ${toGroup.name}" }
         return true
@@ -411,5 +522,52 @@ class InventoryService(
                 Logging.debug { "Invalid switch sound: $soundName" }
             }
         }
+    }
+
+    // =========================================================================
+    // Content Control Integration
+    // =========================================================================
+
+    /**
+     * Handles template application when a player enters a group.
+     */
+    private suspend fun handleTemplateOnGroupEntry(player: Player, group: Group) {
+        val templateSettings = group.templateSettings ?: return
+        if (!templateSettings.enabled) return
+
+        plugin.serviceManager.templateService.handleGroupEntry(
+            player,
+            group.toApiModel(),
+            templateSettings
+        )
+    }
+
+    /**
+     * Checks item restrictions and handles violations.
+     * Returns true if the player is allowed to proceed, false if blocked.
+     */
+    private fun checkAndHandleRestrictions(
+        player: Player,
+        group: Group,
+        config: RestrictionConfig,
+        action: RestrictionAction
+    ): Boolean {
+        val restrictionService = plugin.serviceManager.restrictionService
+
+        // Check player's inventory for violations
+        val violations = restrictionService.checkPlayerInventory(player, config, action)
+
+        if (violations.isEmpty()) {
+            return true
+        }
+
+        // Handle the violations
+        return restrictionService.handleViolations(
+            player,
+            group.toApiModel(),
+            config,
+            violations,
+            action
+        )
     }
 }

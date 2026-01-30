@@ -1,6 +1,7 @@
 package sh.pcx.xinventories.internal.service
 
 import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.internal.config.*
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.CoroutineScope
 
@@ -28,6 +29,44 @@ class ServiceManager(
         private set
 
     lateinit var migrationService: MigrationService
+        private set
+
+    lateinit var conditionEvaluator: ConditionEvaluator
+        private set
+
+    lateinit var lockingService: LockingService
+        private set
+
+    // Data Foundation services
+    lateinit var versioningService: VersioningService
+        private set
+
+    lateinit var deathRecoveryService: DeathRecoveryService
+        private set
+
+    // Content Control services
+    lateinit var templateService: TemplateService
+        private set
+
+    lateinit var restrictionService: RestrictionService
+        private set
+
+    lateinit var sharedSlotService: SharedSlotService
+        private set
+
+    // External Integration services
+    lateinit var economyService: EconomyService
+        private set
+
+    lateinit var importService: sh.pcx.xinventories.internal.import.ImportService
+        private set
+
+    // Sync service (nullable - only initialized when sync is enabled)
+    var syncService: SyncService? = null
+        private set
+
+    // Sync config (for command access)
+    var syncConfig: SyncConfig? = null
         private set
 
     private var initialized = false
@@ -74,8 +113,136 @@ class ServiceManager(
         migrationService = MigrationService(plugin, storageService)
         Logging.debug { "MigrationService initialized" }
 
+        // Condition evaluator (no dependencies)
+        conditionEvaluator = ConditionEvaluator(plugin)
+        Logging.debug { "ConditionEvaluator initialized" }
+
+        // Locking service (depends on scope)
+        lockingService = LockingService(plugin, scope)
+        lockingService.initialize()
+        Logging.debug { "LockingService initialized" }
+
+        // Data Foundation services
+
+        // Versioning service (depends on storage)
+        versioningService = VersioningService(plugin, scope, storageService)
+        versioningService.initialize()
+        Logging.debug { "VersioningService initialized" }
+
+        // Death recovery service (depends on storage)
+        deathRecoveryService = DeathRecoveryService(plugin, scope, storageService)
+        deathRecoveryService.initialize()
+        Logging.debug { "DeathRecoveryService initialized" }
+
+        // Content Control services
+
+        // Template service (depends on scope)
+        templateService = TemplateService(plugin, scope)
+        templateService.initialize()
+        Logging.debug { "TemplateService initialized" }
+
+        // Restriction service (depends on message service)
+        restrictionService = RestrictionService(plugin, scope, messageService)
+        restrictionService.initialize()
+        Logging.debug { "RestrictionService initialized" }
+
+        // Shared slot service (depends on scope)
+        sharedSlotService = SharedSlotService(plugin, scope)
+        val sharedSlotsConfig = plugin.configManager.mainConfig.sharedSlots.toSharedSlotsConfig()
+        sharedSlotService.initialize(sharedSlotsConfig)
+        Logging.debug { "SharedSlotService initialized" }
+
+        // External Integration services
+
+        // Economy service (depends on storage, group service, Vault soft dependency)
+        economyService = EconomyService(plugin, storageService, groupService)
+        economyService.initialize()
+        Logging.debug { "EconomyService initialized" }
+
+        // Import service (depends on storage, group service, economy service)
+        importService = sh.pcx.xinventories.internal.import.ImportService(plugin, scope, storageService, groupService, economyService)
+        importService.initialize()
+        Logging.debug { "ImportService initialized" }
+
+        // Sync service (optional - depends on config)
+        initializeSyncService()
+
         initialized = true
         Logging.info("All services initialized")
+    }
+
+    /**
+     * Initializes the sync service if enabled in configuration.
+     */
+    private suspend fun initializeSyncService() {
+        val mainConfig = plugin.configManager.mainConfig.sync
+
+        if (!mainConfig.enabled) {
+            Logging.info("Network sync is disabled")
+            return
+        }
+
+        // Convert config to internal sync config
+        // Use fully qualified names due to SyncMode enum existing in both config and service packages
+        val internalSyncConfig = sh.pcx.xinventories.internal.service.SyncConfig(
+            enabled = mainConfig.enabled,
+            mode = when (mainConfig.mode) {
+                sh.pcx.xinventories.internal.config.SyncMode.REDIS -> sh.pcx.xinventories.internal.service.SyncMode.REDIS
+                sh.pcx.xinventories.internal.config.SyncMode.PLUGIN_MESSAGING -> sh.pcx.xinventories.internal.service.SyncMode.PLUGIN_MESSAGING
+                sh.pcx.xinventories.internal.config.SyncMode.MYSQL_NOTIFY -> sh.pcx.xinventories.internal.service.SyncMode.MYSQL_NOTIFY
+            },
+            serverId = mainConfig.serverId,
+            redis = RedisConfig(
+                host = mainConfig.redis.host,
+                port = mainConfig.redis.port,
+                password = mainConfig.redis.password,
+                channel = mainConfig.redis.channel,
+                timeout = mainConfig.redis.timeout
+            ),
+            conflicts = ConflictConfig(
+                strategy = mainConfig.conflicts.strategy,
+                mergeRules = mainConfig.conflicts.mergeRules.toMergeRules()
+            ),
+            transferLock = TransferLockConfig(
+                enabled = mainConfig.transferLock.enabled,
+                timeoutSeconds = mainConfig.transferLock.timeoutSeconds
+            ),
+            heartbeat = HeartbeatConfig(
+                intervalSeconds = mainConfig.heartbeat.intervalSeconds,
+                timeoutSeconds = mainConfig.heartbeat.timeoutSeconds
+            )
+        )
+
+        syncConfig = internalSyncConfig
+
+        when (mainConfig.mode) {
+            sh.pcx.xinventories.internal.config.SyncMode.REDIS -> {
+                val redisSyncService = RedisSyncService(plugin, scope, internalSyncConfig)
+                if (redisSyncService.initialize()) {
+                    syncService = redisSyncService
+
+                    // Register cache invalidation handler
+                    redisSyncService.onCacheInvalidate { uuid, group ->
+                        if (group != null) {
+                            storageService.invalidateCache(uuid, group, null)
+                        } else {
+                            storageService.invalidateCache(uuid)
+                        }
+                        Logging.debug { "Cache invalidated for $uuid (group: $group) via sync" }
+                    }
+
+                    Logging.info("Redis sync service initialized")
+                } else {
+                    Logging.error("Failed to initialize Redis sync service")
+                }
+            }
+            sh.pcx.xinventories.internal.config.SyncMode.PLUGIN_MESSAGING -> {
+                Logging.warning("Plugin messaging sync mode is not yet implemented")
+            }
+            sh.pcx.xinventories.internal.config.SyncMode.MYSQL_NOTIFY -> {
+                Logging.warning("MySQL notify sync mode is not yet implemented")
+            }
+        }
     }
 
     /**
@@ -87,6 +254,47 @@ class ServiceManager(
         Logging.debug { "Shutting down services..." }
 
         // Shutdown in reverse order
+
+        // Sync service (if enabled)
+        try {
+            syncService?.shutdown()
+            syncService = null
+            Logging.debug { "SyncService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down SyncService", e)
+        }
+
+        // Template service
+        try {
+            templateService.shutdown()
+            Logging.debug { "TemplateService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down TemplateService", e)
+        }
+
+        // Locking service
+        try {
+            lockingService.shutdown()
+            Logging.debug { "LockingService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down LockingService", e)
+        }
+
+        // Death recovery service
+        try {
+            deathRecoveryService.shutdown()
+            Logging.debug { "DeathRecoveryService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down DeathRecoveryService", e)
+        }
+
+        // Versioning service
+        try {
+            versioningService.shutdown()
+            Logging.debug { "VersioningService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down VersioningService", e)
+        }
 
         // Backup service
         try {
@@ -117,6 +325,15 @@ class ServiceManager(
         // Reload group service
         groupService.reload()
 
+        // Reload condition evaluator
+        conditionEvaluator.reload()
+
+        // Reload locking service
+        lockingService.reload()
+
+        // Reload template service
+        // templateService.reload() is called by TemplateCommand when needed
+
         // Note: Storage service doesn't support hot-reload
         // (would need to restart plugin to change storage type)
 
@@ -132,10 +349,17 @@ class ServiceManager(
      * Gets service health status.
      */
     suspend fun getHealthStatus(): Map<String, Boolean> {
-        return mapOf(
+        val healthMap = mutableMapOf(
             "storage" to storageService.isHealthy(),
             "cache" to storageService.cache.isEnabled(),
             "groups" to (groupService.getAllGroups().isNotEmpty())
         )
+
+        // Add sync health if enabled
+        syncService?.let {
+            healthMap["sync"] = it.isEnabled
+        }
+
+        return healthMap
     }
 }

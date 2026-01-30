@@ -90,29 +90,59 @@ class StorageService(
      * Saves player data.
      */
     suspend fun savePlayerData(data: PlayerData, useCache: Boolean = true): Boolean {
+        // Increment version for sync conflict detection
+        data.version++
+
         if (useCache && cache.isEnabled()) {
             cache.put(data, markDirty = true)
 
             // If async saving is disabled, save immediately
             if (!plugin.configManager.mainConfig.features.asyncSaving) {
                 return storage.savePlayerData(data).also {
-                    if (it) cache.markClean(data.uuid, data.group, data.gameMode)
+                    if (it) {
+                        cache.markClean(data.uuid, data.group, data.gameMode)
+                        // Broadcast update to other servers if sync is enabled
+                        broadcastDataUpdate(data)
+                    }
                 }
             }
 
             return true
         }
 
-        return storage.savePlayerData(data)
+        val success = storage.savePlayerData(data)
+        if (success) {
+            // Broadcast update to other servers if sync is enabled
+            broadcastDataUpdate(data)
+        }
+        return success
+    }
+
+    /**
+     * Broadcasts a data update notification to other servers via sync service.
+     */
+    private fun broadcastDataUpdate(data: PlayerData) {
+        val syncService = plugin.serviceManager.syncService
+        if (syncService != null && syncService.isEnabled) {
+            syncService.broadcastUpdate(data.uuid, data.group, data.version)
+            Logging.debug { "Broadcast sync update for ${data.uuid} in group ${data.group}, version ${data.version}" }
+        }
     }
 
     /**
      * Saves player data immediately (bypasses write-behind).
      */
     suspend fun savePlayerDataImmediate(data: PlayerData): Boolean {
+        // Increment version for sync conflict detection
+        data.version++
+
         val success = storage.savePlayerData(data)
-        if (success && cache.isEnabled()) {
-            cache.put(data, markDirty = false)
+        if (success) {
+            if (cache.isEnabled()) {
+                cache.put(data, markDirty = false)
+            }
+            // Broadcast update to other servers if sync is enabled
+            broadcastDataUpdate(data)
         }
         return success
     }
@@ -196,6 +226,14 @@ class StorageService(
     }
 
     /**
+     * Alias for hasPlayerData without requiring GameMode for import compatibility.
+     * Checks if any data exists for the player in the group.
+     */
+    suspend fun hasPlayerData(uuid: UUID, group: String): Boolean {
+        return hasData(uuid, group)
+    }
+
+    /**
      * Convenience alias for loadPlayerData.
      */
     suspend fun load(uuid: UUID, group: String, gameMode: GameMode?): PlayerData? {
@@ -276,11 +314,18 @@ class StorageService(
 
         Logging.debug { "Flushing ${dirty.size} dirty cache entries" }
 
+        // Increment versions for all dirty entries
+        dirty.forEach { data ->
+            data.version++
+        }
+
         val count = storage.savePlayerDataBatch(dirty)
 
-        // Mark as clean
+        // Mark as clean and broadcast updates
         dirty.forEach { data ->
             cache.markClean(data.uuid, data.group, data.gameMode)
+            // Broadcast update to other servers if sync is enabled
+            broadcastDataUpdate(data)
         }
 
         return count

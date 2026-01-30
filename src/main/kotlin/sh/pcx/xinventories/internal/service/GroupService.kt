@@ -4,11 +4,23 @@ import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.model.GroupModifier
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.InventoryGroup
+import sh.pcx.xinventories.internal.config.ConditionsConfig
 import sh.pcx.xinventories.internal.config.GroupConfig
+import sh.pcx.xinventories.internal.config.RestrictionConfigSection
+import sh.pcx.xinventories.internal.config.TemplateConfigSection
 import sh.pcx.xinventories.internal.model.Group
+import sh.pcx.xinventories.internal.model.GroupConditions
+import sh.pcx.xinventories.internal.model.PlaceholderCondition
+import sh.pcx.xinventories.internal.model.RestrictionConfig
+import sh.pcx.xinventories.internal.model.RestrictionMode
+import sh.pcx.xinventories.internal.model.RestrictionViolationAction
+import sh.pcx.xinventories.internal.model.TemplateApplyTrigger
+import sh.pcx.xinventories.internal.model.TemplateSettings
+import sh.pcx.xinventories.internal.model.TimeRange
 import sh.pcx.xinventories.internal.model.WorldPattern
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.World
+import org.bukkit.entity.Player
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -41,6 +53,9 @@ class GroupService(private val plugin: XInventories) {
 
         config.groups.forEach { (name, groupConfig) ->
             val patterns = groupConfig.patterns.mapNotNull { WorldPattern.fromString(it) }
+            val conditions = parseConditions(groupConfig.conditions)
+            val templateSettings = parseTemplateSettings(groupConfig.template)
+            val restrictionConfig = parseRestrictionConfig(groupConfig.restrictions)
 
             val group = Group(
                 name = name,
@@ -49,10 +64,23 @@ class GroupService(private val plugin: XInventories) {
                 priority = groupConfig.priority,
                 parent = groupConfig.parent,
                 settings = groupConfig.settings,
-                isDefault = name == config.defaultGroup
+                isDefault = name == config.defaultGroup,
+                conditions = conditions,
+                templateSettings = templateSettings,
+                restrictions = restrictionConfig
             )
 
             groups[name] = group
+
+            if (conditions?.hasConditions() == true) {
+                Logging.debug { "Group '$name' has conditions: ${conditions.toDisplayString()}" }
+            }
+            if (templateSettings?.enabled == true) {
+                Logging.debug { "Group '$name' has template: ${templateSettings.templateName ?: name}, trigger: ${templateSettings.applyOn}" }
+            }
+            if (restrictionConfig?.isEnabled() == true) {
+                Logging.debug { "Group '$name' has restrictions: mode=${restrictionConfig.mode}" }
+            }
         }
 
         defaultGroupName = config.defaultGroup
@@ -65,6 +93,84 @@ class GroupService(private val plugin: XInventories) {
                 isDefault = true
             )
         }
+    }
+
+    /**
+     * Parses template configuration into TemplateSettings model.
+     */
+    private fun parseTemplateSettings(config: TemplateConfigSection?): TemplateSettings? {
+        if (config == null) return null
+
+        val applyTrigger = try {
+            TemplateApplyTrigger.valueOf(config.applyOn.uppercase())
+        } catch (e: Exception) {
+            TemplateApplyTrigger.NONE
+        }
+
+        return TemplateSettings(
+            enabled = config.enabled,
+            templateName = config.templateName,
+            applyOn = applyTrigger,
+            allowReset = config.allowReset,
+            clearInventoryFirst = config.clearInventoryFirst
+        )
+    }
+
+    /**
+     * Parses restriction configuration into RestrictionConfig model.
+     */
+    private fun parseRestrictionConfig(config: RestrictionConfigSection?): RestrictionConfig? {
+        if (config == null) return null
+
+        val mode = try {
+            RestrictionMode.valueOf(config.mode.uppercase())
+        } catch (e: Exception) {
+            RestrictionMode.NONE
+        }
+
+        val onViolation = try {
+            RestrictionViolationAction.valueOf(config.onViolation.uppercase())
+        } catch (e: Exception) {
+            RestrictionViolationAction.REMOVE
+        }
+
+        return RestrictionConfig(
+            mode = mode,
+            onViolation = onViolation,
+            notifyPlayer = config.notifyPlayer,
+            notifyAdmins = config.notifyAdmins,
+            blacklist = config.blacklist,
+            whitelist = config.whitelist,
+            stripOnExit = config.stripOnExit
+        )
+    }
+
+    /**
+     * Parses conditions configuration into GroupConditions model.
+     */
+    private fun parseConditions(config: ConditionsConfig?): GroupConditions? {
+        if (config == null) return null
+
+        val scheduleRanges = config.schedule?.mapNotNull { scheduleConfig ->
+            TimeRange.fromStrings(scheduleConfig.start, scheduleConfig.end, scheduleConfig.timezone)
+        }
+
+        val placeholderCondition = config.placeholder?.let {
+            PlaceholderCondition.fromConfig(it.placeholder, it.operator, it.value)
+        }
+
+        val placeholderConditions = config.placeholders?.mapNotNull {
+            PlaceholderCondition.fromConfig(it.placeholder, it.operator, it.value)
+        }
+
+        return GroupConditions(
+            permission = config.permission,
+            schedule = scheduleRanges,
+            cron = config.cron,
+            placeholder = placeholderCondition,
+            placeholders = placeholderConditions,
+            requireAll = config.requireAll
+        )
     }
 
     /**
@@ -135,6 +241,91 @@ class GroupService(private val plugin: XInventories) {
      */
     fun getGroupForWorldApi(world: World): InventoryGroup = getGroupForWorld(world).toApiModel()
     fun getGroupForWorldApi(worldName: String): InventoryGroup = getGroupForWorld(worldName).toApiModel()
+
+    /**
+     * Gets the group for a player, considering both world and conditions.
+     * Resolution order:
+     * 1. Groups with conditions that match the player (highest priority first)
+     * 2. Explicit world assignment (highest priority first)
+     * 3. Pattern match (highest priority first)
+     * 4. Default group
+     */
+    fun getGroupForPlayer(player: Player): Group {
+        val worldName = player.world.name
+        val conditionEvaluator = plugin.serviceManager.conditionEvaluator
+
+        // Get all groups that could match this world
+        val worldMatchingGroups = groups.values.filter { group ->
+            group.worlds.contains(worldName) ||
+            group.matchesPattern(worldName) ||
+            group.worlds.isEmpty() && group.patterns.isEmpty() // Groups with only conditions
+        }
+
+        // First, check groups with conditions (they have higher priority)
+        val conditionalGroups = worldMatchingGroups
+            .filter { it.conditions?.hasConditions() == true }
+            .sortedByDescending { it.priority }
+
+        for (group in conditionalGroups) {
+            val result = conditionEvaluator.evaluateConditions(player, group)
+            if (result.matches) {
+                Logging.debug { "Player ${player.name} matched conditional group '${group.name}'" }
+                return group
+            }
+        }
+
+        // Fall back to world-based matching (existing logic)
+        return getGroupForWorld(worldName)
+    }
+
+    /**
+     * Gets the group for a player as API model.
+     */
+    fun getGroupForPlayerApi(player: Player): InventoryGroup = getGroupForPlayer(player).toApiModel()
+
+    /**
+     * Gets the reason why a player is in their current group.
+     */
+    fun getGroupMatchReason(player: Player): String {
+        val worldName = player.world.name
+        val conditionEvaluator = plugin.serviceManager.conditionEvaluator
+
+        // Check conditional groups first
+        val conditionalGroups = groups.values
+            .filter { it.conditions?.hasConditions() == true }
+            .filter {
+                it.worlds.contains(worldName) ||
+                it.matchesPattern(worldName) ||
+                it.worlds.isEmpty() && it.patterns.isEmpty()
+            }
+            .sortedByDescending { it.priority }
+
+        for (group in conditionalGroups) {
+            val result = conditionEvaluator.evaluateConditions(player, group)
+            if (result.matches) {
+                return "Matched conditional group '${group.name}': ${result.matchedConditions.joinToString(", ")}"
+            }
+        }
+
+        // Check world-based matching
+        val explicitMatch = groups.values
+            .filter { it.worlds.contains(worldName) }
+            .maxByOrNull { it.priority }
+
+        if (explicitMatch != null) {
+            return "Explicit world assignment to '${explicitMatch.name}'"
+        }
+
+        val patternMatch = groups.values
+            .filter { it.matchesPattern(worldName) }
+            .maxByOrNull { it.priority }
+
+        if (patternMatch != null) {
+            return "Pattern match to '${patternMatch.name}'"
+        }
+
+        return "Default group '${defaultGroupName}'"
+    }
 
     /**
      * Creates a new group.
@@ -308,7 +499,7 @@ class GroupService(private val plugin: XInventories) {
     /**
      * Saves current groups to configuration.
      */
-    private fun saveToConfig() {
+    fun saveToConfig() {
         plugin.configManager.saveGroupsConfig()
     }
 
