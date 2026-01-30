@@ -16,7 +16,9 @@ class Group(
     var isDefault: Boolean = false,
     var conditions: GroupConditions? = null,
     var templateSettings: TemplateSettings? = null,
-    var restrictions: RestrictionConfig? = null
+    var restrictions: RestrictionConfig? = null,
+    /** Set of settings field names that were explicitly set in config (for merge inheritance) */
+    var explicitSettings: Set<String> = emptySet()
 ) {
     private val _worlds = worlds.toMutableSet()
     private val _patterns = patterns.toMutableList()

@@ -56,6 +56,41 @@ features:
   # Notify admins of critical errors
   admin-notifications: true
 
+# ============================================================
+# Player State Defaults (PWI-style)
+# ============================================================
+# Global defaults for what player data to save/restore.
+# These can be overridden per-group in groups.yml.
+player:
+  # Core player state
+  save-health: true
+  save-hunger: true
+  save-saturation: true
+  save-exhaustion: true
+  save-experience: true
+  save-potion-effects: true
+  save-ender-chest: true
+  save-inventory: true
+  save-gamemode: false
+
+  # Flight state
+  save-flying: true
+  save-allow-flight: true
+
+  # Environmental state
+  save-fall-distance: true
+  save-fire-ticks: true
+  save-maximum-air: true
+  save-remaining-air: true
+
+  # Display (opt-in - may conflict with other plugins)
+  save-display-name: false
+
+  # Advanced (opt-in - can be performance intensive)
+  save-statistics: false
+  save-advancements: false
+  save-recipes: false
+
 # Backup configuration
 backup:
   # Enable automatic backups

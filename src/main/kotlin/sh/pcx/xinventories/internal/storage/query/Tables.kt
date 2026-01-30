@@ -36,6 +36,13 @@ object Tables {
             statistics TEXT,
             advancements TEXT,
             recipes TEXT,
+            is_flying INTEGER NOT NULL DEFAULT 0,
+            allow_flight INTEGER NOT NULL DEFAULT 0,
+            display_name TEXT,
+            fall_distance REAL NOT NULL DEFAULT 0.0,
+            fire_ticks INTEGER NOT NULL DEFAULT 0,
+            maximum_air INTEGER NOT NULL DEFAULT 300,
+            remaining_air INTEGER NOT NULL DEFAULT 300,
             UNIQUE(uuid, group_name, gamemode)
         )
     """.trimIndent()
@@ -69,6 +76,13 @@ object Tables {
             statistics MEDIUMTEXT,
             advancements MEDIUMTEXT,
             recipes MEDIUMTEXT,
+            is_flying TINYINT(1) NOT NULL DEFAULT 0,
+            allow_flight TINYINT(1) NOT NULL DEFAULT 0,
+            display_name VARCHAR(256),
+            fall_distance FLOAT NOT NULL DEFAULT 0.0,
+            fire_ticks INT NOT NULL DEFAULT 0,
+            maximum_air INT NOT NULL DEFAULT 300,
+            remaining_air INT NOT NULL DEFAULT 300,
             UNIQUE KEY unique_player_group (uuid, group_name, gamemode),
             INDEX idx_uuid (uuid),
             INDEX idx_group (group_name)
@@ -234,5 +248,37 @@ object Tables {
      */
     val CREATE_TEMP_GROUPS_INDEXES_SQLITE = listOf(
         "CREATE INDEX IF NOT EXISTS idx_temp_expires ON $TEMP_GROUPS (expires_at)"
+    )
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Schema Migration Queries
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Migration: Add PWI-style player state columns to player_data table (SQLite).
+     * These columns are added with default values for backwards compatibility.
+     */
+    val MIGRATE_ADD_PLAYER_STATE_COLUMNS_SQLITE = listOf(
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN is_flying INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN allow_flight INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN display_name TEXT",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN fall_distance REAL NOT NULL DEFAULT 0.0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN fire_ticks INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN maximum_air INTEGER NOT NULL DEFAULT 300",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN remaining_air INTEGER NOT NULL DEFAULT 300"
+    )
+
+    /**
+     * Migration: Add PWI-style player state columns to player_data table (MySQL).
+     * These columns are added with default values for backwards compatibility.
+     */
+    val MIGRATE_ADD_PLAYER_STATE_COLUMNS_MYSQL = listOf(
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN is_flying TINYINT(1) NOT NULL DEFAULT 0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN allow_flight TINYINT(1) NOT NULL DEFAULT 0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN display_name VARCHAR(256)",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN fall_distance FLOAT NOT NULL DEFAULT 0.0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN fire_ticks INT NOT NULL DEFAULT 0",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN maximum_air INT NOT NULL DEFAULT 300",
+        "ALTER TABLE $PLAYER_DATA ADD COLUMN remaining_air INT NOT NULL DEFAULT 300"
     )
 }

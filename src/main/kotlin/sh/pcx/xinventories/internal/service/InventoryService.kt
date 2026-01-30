@@ -475,9 +475,12 @@ class InventoryService(
     private fun clearPlayerInventory(player: Player, settings: GroupSettings) {
         // Run on player's region thread (Folia) or main thread (Paper/Spigot)
         SchedulerCompat.runTask(plugin, player) { p ->
-            p.inventory.clear()
-            p.inventory.armorContents = arrayOfNulls(4)
-            p.inventory.setItemInOffHand(null)
+            // Only clear inventory if save-inventory is enabled
+            if (settings.saveInventory) {
+                p.inventory.clear()
+                p.inventory.armorContents = arrayOfNulls(4)
+                p.inventory.setItemInOffHand(null)
+            }
 
             if (settings.saveEnderChest) {
                 p.enderChest.clear()
@@ -505,6 +508,31 @@ class InventoryService(
                 p.activePotionEffects.forEach { effect ->
                     p.removePotionEffect(effect.type)
                 }
+            }
+
+            // PWI-style player state clearing
+            if (settings.saveFlying) {
+                p.isFlying = false
+            }
+
+            if (settings.saveAllowFlight) {
+                p.allowFlight = false
+            }
+
+            if (settings.saveFallDistance) {
+                p.fallDistance = 0.0f
+            }
+
+            if (settings.saveFireTicks) {
+                p.fireTicks = 0
+            }
+
+            if (settings.saveMaximumAir) {
+                p.maximumAir = 300
+            }
+
+            if (settings.saveRemainingAir) {
+                p.remainingAir = 300
             }
 
             // Clear statistics if enabled (reset to 0)

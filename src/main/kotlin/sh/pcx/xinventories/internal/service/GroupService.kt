@@ -67,7 +67,8 @@ class GroupService(private val plugin: XInventories) {
                 isDefault = name == config.defaultGroup,
                 conditions = conditions,
                 templateSettings = templateSettings,
-                restrictions = restrictionConfig
+                restrictions = restrictionConfig,
+                explicitSettings = groupConfig.explicitSettings
             )
 
             groups[name] = group
@@ -506,8 +507,10 @@ class GroupService(private val plugin: XInventories) {
     /**
      * Resolves the effective settings for a group, including inherited settings.
      *
-     * This method walks up the inheritance chain and merges parent settings
-     * with child settings, where child settings override parent settings.
+     * Resolution order (PWI-style):
+     * 1. Start with global player defaults from config.yml
+     * 2. Apply parent group settings (if any)
+     * 3. Merge with group's explicit settings (only explicitly set values override)
      *
      * @param groupName The name of the group
      * @return The resolved settings, or default settings if group not found
@@ -518,13 +521,6 @@ class GroupService(private val plugin: XInventories) {
 
         val group = getGroup(groupName) ?: return GroupSettings()
 
-        // If no parent, just return the group's own settings
-        val parentName = group.parent
-        if (parentName == null) {
-            resolvedSettingsCache[groupName] = group.settings
-            return group.settings
-        }
-
         // Check for circular inheritance
         val visited = mutableSetOf<String>()
         if (hasCircularInheritance(groupName, visited)) {
@@ -533,14 +529,20 @@ class GroupService(private val plugin: XInventories) {
             return group.settings
         }
 
-        // Resolve parent settings recursively
-        val parentSettings = resolveSettings(parentName)
+        // Start with global player defaults, then apply parent settings if any
+        val globalDefaults = plugin.configManager.mainConfig.player.toGroupSettings()
+        val parentName = group.parent
+        val baseSettings = if (parentName != null) {
+            resolveSettings(parentName)
+        } else {
+            globalDefaults
+        }
 
-        // Merge parent with child (child overrides)
-        val merged = parentSettings.mergeWith(group.settings)
+        // Merge group's explicit settings on top (only explicitly set fields override)
+        val merged = baseSettings.merge(group.settings, group.explicitSettings.ifEmpty { null })
         resolvedSettingsCache[groupName] = merged
 
-        Logging.debug { "Resolved settings for '$groupName' (parent: '$parentName')" }
+        Logging.debug { "Resolved settings for '$groupName' (parent: '$parentName', explicit: ${group.explicitSettings.size} fields)" }
         return merged
     }
 

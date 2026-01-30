@@ -33,7 +33,47 @@ data class GroupSettings(
          * Whether to save and restore discovered recipes per group.
          * Default is false (opt-in) because this changes recipe book on world switch.
          */
-        val saveRecipes: Boolean = false
+        val saveRecipes: Boolean = false,
+        /**
+         * Whether to save and restore inventory contents.
+         * Default is true. Set to false to disable inventory persistence for a group.
+         */
+        val saveInventory: Boolean = true,
+        /**
+         * Whether to save and restore player flying state.
+         * Default is true.
+         */
+        val saveFlying: Boolean = true,
+        /**
+         * Whether to save and restore player's allow-flight setting.
+         * Default is true.
+         */
+        val saveAllowFlight: Boolean = true,
+        /**
+         * Whether to save and restore player's display name.
+         * Default is false (opt-in) to avoid overwriting plugins that manage display names.
+         */
+        val saveDisplayName: Boolean = false,
+        /**
+         * Whether to save and restore player's fall distance.
+         * Default is true.
+         */
+        val saveFallDistance: Boolean = true,
+        /**
+         * Whether to save and restore player's fire ticks.
+         * Default is true.
+         */
+        val saveFireTicks: Boolean = true,
+        /**
+         * Whether to save and restore player's maximum air level.
+         * Default is true.
+         */
+        val saveMaximumAir: Boolean = true,
+        /**
+         * Whether to save and restore player's remaining air.
+         * Default is true.
+         */
+        val saveRemainingAir: Boolean = true
 ) {
     /**
      * Merges this settings with child settings.
@@ -67,7 +107,15 @@ data class GroupSettings(
             separateEconomy = if ("separateEconomy" in childExplicit) child.separateEconomy else this.separateEconomy,
             saveStatistics = if ("saveStatistics" in childExplicit) child.saveStatistics else this.saveStatistics,
             saveAdvancements = if ("saveAdvancements" in childExplicit) child.saveAdvancements else this.saveAdvancements,
-            saveRecipes = if ("saveRecipes" in childExplicit) child.saveRecipes else this.saveRecipes
+            saveRecipes = if ("saveRecipes" in childExplicit) child.saveRecipes else this.saveRecipes,
+            saveInventory = if ("saveInventory" in childExplicit) child.saveInventory else this.saveInventory,
+            saveFlying = if ("saveFlying" in childExplicit) child.saveFlying else this.saveFlying,
+            saveAllowFlight = if ("saveAllowFlight" in childExplicit) child.saveAllowFlight else this.saveAllowFlight,
+            saveDisplayName = if ("saveDisplayName" in childExplicit) child.saveDisplayName else this.saveDisplayName,
+            saveFallDistance = if ("saveFallDistance" in childExplicit) child.saveFallDistance else this.saveFallDistance,
+            saveFireTicks = if ("saveFireTicks" in childExplicit) child.saveFireTicks else this.saveFireTicks,
+            saveMaximumAir = if ("saveMaximumAir" in childExplicit) child.saveMaximumAir else this.saveMaximumAir,
+            saveRemainingAir = if ("saveRemainingAir" in childExplicit) child.saveRemainingAir else this.saveRemainingAir
         )
     }
 
@@ -106,7 +154,15 @@ data class GroupSettings(
             separateEconomy = false,
             saveStatistics = false,
             saveAdvancements = false,
-            saveRecipes = false
+            saveRecipes = false,
+            saveInventory = false,
+            saveFlying = false,
+            saveAllowFlight = false,
+            saveDisplayName = false,
+            saveFallDistance = false,
+            saveFireTicks = false,
+            saveMaximumAir = false,
+            saveRemainingAir = false
         )
     }
 }

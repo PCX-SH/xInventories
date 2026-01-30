@@ -12,8 +12,7 @@ import java.util.concurrent.CompletableFuture
  * Templates are preset inventories that can be applied to players when
  * entering groups or on demand via commands.
  *
- * // TODO: Add to XInventoriesAPI:
- * // val templates: TemplateAPI
+ * Access via [XInventoriesAPI.templates].
  */
 interface TemplateAPI {
 

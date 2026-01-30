@@ -82,6 +82,15 @@ object PlayerDataSerializer {
                 section.set("recipes", RecipeSerializer.serializeToList(recs))
             }
         }
+
+        // PWI-style player state
+        section.set("is-flying", data.isFlying)
+        section.set("allow-flight", data.allowFlight)
+        data.displayName?.let { section.set("display-name", it) }
+        section.set("fall-distance", data.fallDistance.toDouble())
+        section.set("fire-ticks", data.fireTicks)
+        section.set("maximum-air", data.maximumAir)
+        section.set("remaining-air", data.remainingAir)
     }
 
     /**
@@ -157,6 +166,15 @@ object PlayerDataSerializer {
             section.getStringList("recipes").takeIf { it.isNotEmpty() }?.let { recList ->
                 data.recipes = RecipeSerializer.deserializeFromList(recList)
             }
+
+            // PWI-style player state
+            data.isFlying = section.getBoolean("is-flying", false)
+            data.allowFlight = section.getBoolean("allow-flight", false)
+            data.displayName = section.getString("display-name")
+            data.fallDistance = section.getDouble("fall-distance", 0.0).toFloat()
+            data.fireTicks = section.getInt("fire-ticks", 0)
+            data.maximumAir = section.getInt("maximum-air", 300)
+            data.remainingAir = section.getInt("remaining-air", 300)
 
             data
         } catch (e: Exception) {
@@ -245,6 +263,15 @@ object PlayerDataSerializer {
                 data.recipes = RecipeSerializer.deserializeFromList(recList)
             }
 
+            // PWI-style player state
+            data.isFlying = section.getBoolean("is-flying", false)
+            data.allowFlight = section.getBoolean("allow-flight", false)
+            data.displayName = section.getString("display-name")
+            data.fallDistance = section.getDouble("fall-distance", 0.0).toFloat()
+            data.fireTicks = section.getInt("fire-ticks", 0)
+            data.maximumAir = section.getInt("maximum-air", 300)
+            data.remainingAir = section.getInt("remaining-air", 300)
+
             data
         } catch (e: Exception) {
             Logging.error("Failed to deserialize player data from YAML section", e)
@@ -279,7 +306,15 @@ object PlayerDataSerializer {
             "version" to data.version,
             "statistics" to (data.statistics?.let { StatisticsSerializer.serializeToString(it) } ?: ""),
             "advancements" to (data.advancements?.let { AdvancementSerializer.serializeToString(it) } ?: ""),
-            "recipes" to (data.recipes?.let { RecipeSerializer.serializeToString(it) } ?: "")
+            "recipes" to (data.recipes?.let { RecipeSerializer.serializeToString(it) } ?: ""),
+            // PWI-style player state
+            "is_flying" to data.isFlying,
+            "allow_flight" to data.allowFlight,
+            "display_name" to (data.displayName ?: ""),
+            "fall_distance" to data.fallDistance,
+            "fire_ticks" to data.fireTicks,
+            "maximum_air" to data.maximumAir,
+            "remaining_air" to data.remainingAir
         )
     }
 
@@ -366,6 +401,16 @@ object PlayerDataSerializer {
             if (!recsStr.isNullOrBlank()) {
                 data.recipes = RecipeSerializer.deserializeFromString(recsStr)
             }
+
+            // PWI-style player state (optional - backwards compatible with older DBs)
+            data.isFlying = (row["is_flying"] as? Boolean) ?: (row["is_flying"] as? Number)?.toInt() == 1
+            data.allowFlight = (row["allow_flight"] as? Boolean) ?: (row["allow_flight"] as? Number)?.toInt() == 1
+            val displayNameStr = row["display_name"] as? String
+            data.displayName = if (displayNameStr.isNullOrBlank()) null else displayNameStr
+            data.fallDistance = (row["fall_distance"] as? Number)?.toFloat() ?: 0.0f
+            data.fireTicks = (row["fire_ticks"] as? Number)?.toInt() ?: 0
+            data.maximumAir = (row["maximum_air"] as? Number)?.toInt() ?: 300
+            data.remainingAir = (row["remaining_air"] as? Number)?.toInt() ?: 300
 
             data
         } catch (e: Exception) {

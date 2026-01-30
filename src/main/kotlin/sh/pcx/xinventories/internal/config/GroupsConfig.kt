@@ -27,7 +27,9 @@ data class GroupConfig(
     val settings: GroupSettings = GroupSettings(),
     val conditions: ConditionsConfig? = null,
     val template: TemplateConfigSection? = null,
-    val restrictions: RestrictionConfigSection? = null
+    val restrictions: RestrictionConfigSection? = null,
+    /** Set of field names that were explicitly set in the config (for merge inheritance) */
+    val explicitSettings: Set<String> = emptySet()
 )
 
 /**

@@ -378,6 +378,14 @@ class ServiceManager(
             Logging.error("Error shutting down AntiDupeService", e)
         }
 
+        // Restriction service
+        try {
+            restrictionService.shutdown()
+            Logging.debug { "RestrictionService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down RestrictionService", e)
+        }
+
         // Audit service
         try {
             auditService?.shutdown()

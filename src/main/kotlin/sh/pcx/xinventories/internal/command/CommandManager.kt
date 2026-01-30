@@ -36,6 +36,7 @@ class CommandManager(private val plugin: XInventories) {
         // Content Control commands
         registerSubcommand(TemplateCommand())
         registerSubcommand(RestrictCommand())
+        registerSubcommand(VaultCommand())
         registerSubcommand(ResetCommand())
 
         // Advanced Groups commands

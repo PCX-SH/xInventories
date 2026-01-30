@@ -13,8 +13,7 @@ import org.bukkit.inventory.ItemStack
  * Supports blacklist mode (specified items blocked) and whitelist mode (only
  * specified items allowed).
  *
- * // TODO: Add to XInventoriesAPI:
- * // val restrictions: RestrictionAPI
+ * Access via [XInventoriesAPI.restrictions].
  */
 interface RestrictionAPI {
 

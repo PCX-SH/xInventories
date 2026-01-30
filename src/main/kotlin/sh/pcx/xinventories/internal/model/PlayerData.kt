@@ -40,6 +40,15 @@ class PlayerData(
     var totalExperience: Int = 0
     val potionEffects: MutableList<PotionEffect> = mutableListOf()
 
+    // PWI-style player state
+    var isFlying: Boolean = false
+    var allowFlight: Boolean = false
+    var displayName: String? = null
+    var fallDistance: Float = 0.0f
+    var fireTicks: Int = 0
+    var maximumAir: Int = 300
+    var remainingAir: Int = 300
+
     // Metadata
     var timestamp: Instant = Instant.now()
     var dirty: Boolean = false
@@ -99,6 +108,13 @@ class PlayerData(
         statistics = null
         advancements = null
         recipes = null
+        isFlying = false
+        allowFlight = false
+        displayName = null
+        fallDistance = 0.0f
+        fireTicks = 0
+        maximumAir = 300
+        remainingAir = 300
         dirty = true
     }
 
@@ -159,6 +175,15 @@ class PlayerData(
         potionEffects.clear()
         potionEffects.addAll(player.activePotionEffects)
 
+        // PWI-style player state
+        isFlying = player.isFlying
+        allowFlight = player.allowFlight
+        displayName = player.displayName
+        fallDistance = player.fallDistance
+        fireTicks = player.fireTicks
+        maximumAir = player.maximumAir
+        remainingAir = player.remainingAir
+
         // Note: Statistics, advancements, and recipes are loaded separately
         // via loadFromPlayerExtended() when their respective settings are enabled.
         // This is to avoid performance impact when these features are disabled.
@@ -190,23 +215,26 @@ class PlayerData(
      */
     @Suppress("UnstableApiUsage")
     fun applyToPlayer(player: Player, settings: sh.pcx.xinventories.api.model.GroupSettings) {
-        // Clear current inventory
-        player.inventory.clear()
+        // Apply inventory only if save-inventory is enabled
+        if (settings.saveInventory) {
+            // Clear current inventory
+            player.inventory.clear()
 
-        // Apply main inventory
-        mainInventory.forEach { (slot, item) ->
-            player.inventory.setItem(slot, item.clone())
+            // Apply main inventory
+            mainInventory.forEach { (slot, item) ->
+                player.inventory.setItem(slot, item.clone())
+            }
+
+            // Apply armor
+            val armorContents = arrayOfNulls<ItemStack>(4)
+            armorInventory.forEach { (slot, item) ->
+                armorContents[slot] = item.clone()
+            }
+            player.inventory.armorContents = armorContents
+
+            // Apply offhand
+            player.inventory.setItemInOffHand(offhand?.clone())
         }
-
-        // Apply armor
-        val armorContents = arrayOfNulls<ItemStack>(4)
-        armorInventory.forEach { (slot, item) ->
-            armorContents[slot] = item.clone()
-        }
-        player.inventory.armorContents = armorContents
-
-        // Apply offhand
-        player.inventory.setItemInOffHand(offhand?.clone())
 
         // Apply ender chest if enabled
         if (settings.saveEnderChest) {
@@ -271,6 +299,38 @@ class PlayerData(
         // Apply recipes if enabled and saved
         if (settings.saveRecipes && recipes != null) {
             RecipeSerializer.applyToPlayer(player, recipes!!)
+        }
+
+        // Apply PWI-style player state
+        if (settings.saveAllowFlight) {
+            player.allowFlight = allowFlight
+        }
+
+        if (settings.saveFlying) {
+            // Only set flying if player is allowed to fly
+            if (player.allowFlight || settings.saveAllowFlight && allowFlight) {
+                player.isFlying = isFlying
+            }
+        }
+
+        if (settings.saveDisplayName && displayName != null) {
+            player.setDisplayName(displayName)
+        }
+
+        if (settings.saveFallDistance) {
+            player.fallDistance = fallDistance
+        }
+
+        if (settings.saveFireTicks) {
+            player.fireTicks = fireTicks
+        }
+
+        if (settings.saveMaximumAir) {
+            player.maximumAir = maximumAir
+        }
+
+        if (settings.saveRemainingAir) {
+            player.remainingAir = remainingAir.coerceAtMost(player.maximumAir)
         }
     }
 

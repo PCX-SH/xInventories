@@ -236,6 +236,7 @@ class ConfigManager(private val plugin: XInventories) {
                 clearOnDeath = config.getBoolean("features.clear-on-death", false),
                 adminNotifications = config.getBoolean("features.admin-notifications", true)
             ),
+            player = loadPlayerConfig(config),
             backup = BackupConfig(
                 autoBackup = config.getBoolean("backup.auto-backup", true),
                 intervalHours = config.getInt("backup.interval-hours", 24),
@@ -325,15 +326,17 @@ class ConfigManager(private val plugin: XInventories) {
     }
 
     private fun loadGroupConfig(section: ConfigurationSection): GroupConfig {
+        val (settings, explicit) = loadGroupSettingsWithExplicit(section.getConfigurationSection("settings"))
         return GroupConfig(
             worlds = section.getStringList("worlds"),
             patterns = section.getStringList("patterns"),
             priority = section.getInt("priority", 0),
             parent = section.getString("parent"),
-            settings = loadGroupSettings(section.getConfigurationSection("settings")),
+            settings = settings,
             conditions = loadConditionsConfig(section.getConfigurationSection("conditions")),
             template = loadTemplateConfig(section.getConfigurationSection("template")),
-            restrictions = loadRestrictionsConfig(section.getConfigurationSection("restrictions"))
+            restrictions = loadRestrictionsConfig(section.getConfigurationSection("restrictions")),
+            explicitSettings = explicit
         )
     }
 
@@ -415,8 +418,62 @@ class ConfigManager(private val plugin: XInventories) {
             clearOnJoin = section.getBoolean("clear-on-join", false),
             saveStatistics = section.getBoolean("save-statistics", false),
             saveAdvancements = section.getBoolean("save-advancements", false),
-            saveRecipes = section.getBoolean("save-recipes", false)
+            saveRecipes = section.getBoolean("save-recipes", false),
+            saveInventory = section.getBoolean("save-inventory", true),
+            saveFlying = section.getBoolean("save-flying", true),
+            saveAllowFlight = section.getBoolean("save-allow-flight", true),
+            saveDisplayName = section.getBoolean("save-display-name", false),
+            saveFallDistance = section.getBoolean("save-fall-distance", true),
+            saveFireTicks = section.getBoolean("save-fire-ticks", true),
+            saveMaximumAir = section.getBoolean("save-maximum-air", true),
+            saveRemainingAir = section.getBoolean("save-remaining-air", true)
         )
+    }
+
+    /**
+     * Loads group settings and returns both the settings and which fields were explicitly set.
+     * This enables proper inheritance merging where only explicitly set values override parent.
+     */
+    fun loadGroupSettingsWithExplicit(section: ConfigurationSection?): Pair<GroupSettings, Set<String>> {
+        if (section == null) return GroupSettings() to emptySet()
+
+        val explicit = mutableSetOf<String>()
+        val keys = section.getKeys(false)
+
+        // Map of config key to property name
+        val keyMapping = mapOf(
+            "save-health" to "saveHealth",
+            "save-hunger" to "saveHunger",
+            "save-saturation" to "saveSaturation",
+            "save-exhaustion" to "saveExhaustion",
+            "save-experience" to "saveExperience",
+            "save-potion-effects" to "savePotionEffects",
+            "save-ender-chest" to "saveEnderChest",
+            "save-gamemode" to "saveGameMode",
+            "separate-gamemode-inventories" to "separateGameModeInventories",
+            "clear-on-death" to "clearOnDeath",
+            "clear-on-join" to "clearOnJoin",
+            "separate-economy" to "separateEconomy",
+            "save-statistics" to "saveStatistics",
+            "save-advancements" to "saveAdvancements",
+            "save-recipes" to "saveRecipes",
+            "save-inventory" to "saveInventory",
+            "save-flying" to "saveFlying",
+            "save-allow-flight" to "saveAllowFlight",
+            "save-display-name" to "saveDisplayName",
+            "save-fall-distance" to "saveFallDistance",
+            "save-fire-ticks" to "saveFireTicks",
+            "save-maximum-air" to "saveMaximumAir",
+            "save-remaining-air" to "saveRemainingAir"
+        )
+
+        keyMapping.forEach { (configKey, propName) ->
+            if (keys.contains(configKey)) {
+                explicit.add(propName)
+            }
+        }
+
+        return loadGroupSettings(section) to explicit
     }
 
     private fun saveGroupSettings(section: ConfigurationSection, settings: GroupSettings) {
@@ -434,6 +491,41 @@ class ConfigManager(private val plugin: XInventories) {
         section.set("save-statistics", settings.saveStatistics)
         section.set("save-advancements", settings.saveAdvancements)
         section.set("save-recipes", settings.saveRecipes)
+        section.set("save-inventory", settings.saveInventory)
+        section.set("save-flying", settings.saveFlying)
+        section.set("save-allow-flight", settings.saveAllowFlight)
+        section.set("save-display-name", settings.saveDisplayName)
+        section.set("save-fall-distance", settings.saveFallDistance)
+        section.set("save-fire-ticks", settings.saveFireTicks)
+        section.set("save-maximum-air", settings.saveMaximumAir)
+        section.set("save-remaining-air", settings.saveRemainingAir)
+    }
+
+    /**
+     * Loads player configuration (global defaults) from the main config.
+     */
+    private fun loadPlayerConfig(config: org.bukkit.configuration.file.FileConfiguration): PlayerConfig {
+        return PlayerConfig(
+            saveHealth = config.getBoolean("player.save-health", true),
+            saveHunger = config.getBoolean("player.save-hunger", true),
+            saveSaturation = config.getBoolean("player.save-saturation", true),
+            saveExhaustion = config.getBoolean("player.save-exhaustion", true),
+            saveExperience = config.getBoolean("player.save-experience", true),
+            savePotionEffects = config.getBoolean("player.save-potion-effects", true),
+            saveEnderChest = config.getBoolean("player.save-ender-chest", true),
+            saveInventory = config.getBoolean("player.save-inventory", true),
+            saveGameMode = config.getBoolean("player.save-gamemode", false),
+            saveFlying = config.getBoolean("player.save-flying", true),
+            saveAllowFlight = config.getBoolean("player.save-allow-flight", true),
+            saveFallDistance = config.getBoolean("player.save-fall-distance", true),
+            saveFireTicks = config.getBoolean("player.save-fire-ticks", true),
+            saveMaximumAir = config.getBoolean("player.save-maximum-air", true),
+            saveRemainingAir = config.getBoolean("player.save-remaining-air", true),
+            saveDisplayName = config.getBoolean("player.save-display-name", false),
+            saveStatistics = config.getBoolean("player.save-statistics", false),
+            saveAdvancements = config.getBoolean("player.save-advancements", false),
+            saveRecipes = config.getBoolean("player.save-recipes", false)
+        )
     }
 
     private fun loadMessagesConfig() {

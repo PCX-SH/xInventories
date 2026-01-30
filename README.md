@@ -52,10 +52,12 @@ A powerful per-world inventory management plugin for Paper 1.20.5+ servers. Sepa
 - **Inventory Versioning** - Automatic version history with rollback capability
 - **Death Recovery** - Recover inventories lost on death
 - **Player State Separation** - Per-group statistics, advancements, and recipes
+- **PWI-Style Settings** - Flying, fall distance, fire ticks, air, display name per-group
 
 #### Content Control
 - **Templates** - Pre-defined inventory templates for groups (starter kits, loadouts)
-- **Item Restrictions** - Whitelist/blacklist items per group
+- **Item Restrictions** - Whitelist/blacklist items per group with confiscation vault
+- **Confiscation Vault** - Store and reclaim restricted items via `/xinv vault`
 - **NBT Filters** - Advanced filtering by enchantments, custom model data, name/lore patterns
 - **Shared Slots** - Share specific slots across all groups
 
@@ -134,6 +136,7 @@ All commands use `/xinventories` (aliases: `/xinv`, `/xi`)
 | `/xinv death <list\|restore\|preview> [player]` | Death recovery | `xinventories.command.death` |
 | `/xinv template <list\|apply\|create> [name]` | Inventory templates | `xinventories.command.template` |
 | `/xinv restrict <list\|add\|remove> [group]` | Item restrictions | `xinventories.command.restrict` |
+| `/xinv vault [player\|claim]` | View/claim confiscated items | `xinventories.command.vault` |
 | `/xinv conditions <group>` | View group conditions | `xinventories.command.conditions` |
 | `/xinv whoami` | Show current group and match reason | `xinventories.command` |
 | `/xinv lock <player> [reason] [duration]` | Lock player inventory | `xinventories.command.lock` |

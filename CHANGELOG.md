@@ -23,17 +23,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Statistics Separation** - Per-group player statistics (kills, deaths, blocks mined, etc.)
 - **Advancements Separation** - Per-group advancement/achievement progress
 - **Recipes Separation** - Per-group unlocked recipe tracking
+- **PWI-Style Player Settings** - Extended player state options
+  - Flying state (`save-flying`, `save-allow-flight`)
+  - Fall distance, fire ticks, air levels
+  - Display name preservation
+  - Inventory toggle (`save-inventory`) to disable inventory sync per-group
+  - Global defaults in `config.yml` with per-group overrides
 - All existing state (ender chest, XP, potion effects, health/hunger) now fully per-group
 
 #### Content Control
 - **Templates** - Pre-defined inventory templates for groups
   - Apply templates on first join or group entry
   - Commands: `/xinv template list`, `/xinv template apply`, `/xinv template create`
+  - Template editor GUI for viewing/editing template contents
   - Support for starter kits, event loadouts, etc.
 - **Item Restrictions** - Control which items players can use per group
   - Whitelist or blacklist modes with material patterns
-  - Actions: prevent, drop, or clear restricted items
+  - Actions: prevent, drop, remove, or move to vault
   - Per-group restriction configurations
+- **Confiscation Vault** - Storage for restricted items
+  - Items removed with MOVE_TO_VAULT action are stored safely
+  - Players can view and reclaim confiscated items via GUI
+  - Commands: `/xinv vault`, `/xinv vault claim`, `/xinv vault <player>`
+  - Admin access to view/manage other players' vaults
 - **NBT Filters** - Advanced item filtering by NBT data
   - Filter by enchantments (with level ranges)
   - Filter by custom model data

@@ -25,7 +25,8 @@ groups:
     # Parent group (inherits settings, null for none)
     parent: null
 
-    # Group-specific settings
+    # Group-specific settings (overrides global player: defaults in config.yml)
+    # Only settings explicitly defined here will override the global defaults.
     settings:
       save-health: true
       save-hunger: true
@@ -37,6 +38,15 @@ groups:
       save-gamemode: false
       separate-gamemode-inventories: true
       clear-on-death: false
+      # New PWI-style settings available:
+      # save-inventory: true        # Toggle inventory saving entirely
+      # save-flying: true           # Player flying state
+      # save-allow-flight: true     # Allow flight permission
+      # save-fall-distance: true    # Fall distance
+      # save-fire-ticks: true       # Fire ticks
+      # save-maximum-air: true      # Max air level
+      # save-remaining-air: true    # Current air level
+      # save-display-name: false    # Player display name (opt-in)
 
   # Creative group
   creative:

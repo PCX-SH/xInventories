@@ -20,8 +20,7 @@ import java.util.UUID
  * - Armor: 36 (boots), 37 (leggings), 38 (chestplate), 39 (helmet)
  * - Offhand: 40
  *
- * // TODO: Add to XInventoriesAPI:
- * // val sharedSlots: SharedSlotsAPI
+ * Access via [XInventoriesAPI.sharedSlots].
  */
 interface SharedSlotsAPI {
 

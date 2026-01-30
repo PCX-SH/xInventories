@@ -72,6 +72,9 @@ class MySqlStorage(
                 }
             }
 
+            // Run migrations for existing databases
+            runMigrations()
+
             Logging.debug { "MySQL connection pool initialized" }
         }
     }
@@ -85,6 +88,41 @@ class MySqlStorage(
 
     private fun getConnection(): Connection {
         return dataSource?.connection ?: throw IllegalStateException("Database not connected")
+    }
+
+    /**
+     * Runs schema migrations for existing databases.
+     * Adds new columns if they don't exist.
+     */
+    private fun runMigrations() {
+        // Check if new columns exist by trying to select them
+        val columnsExist = try {
+            getConnection().use { conn ->
+                conn.createStatement().use { stmt ->
+                    stmt.executeQuery("SELECT is_flying FROM ${Tables.PLAYER_DATA} LIMIT 1")
+                    true
+                }
+            }
+        } catch (e: Exception) {
+            false
+        }
+
+        if (!columnsExist) {
+            Logging.info("Running database migration: Adding PWI-style player state columns...")
+            getConnection().use { conn ->
+                Tables.MIGRATE_ADD_PLAYER_STATE_COLUMNS_MYSQL.forEach { query ->
+                    try {
+                        conn.createStatement().use { stmt ->
+                            stmt.execute(query)
+                        }
+                    } catch (e: Exception) {
+                        // Column might already exist, ignore
+                        Logging.debug { "Migration query skipped (column may exist): ${e.message}" }
+                    }
+                }
+            }
+            Logging.info("Database migration completed.")
+        }
     }
 
     override suspend fun doSavePlayerData(data: PlayerData) {
@@ -116,6 +154,14 @@ class MySqlStorage(
                     stmt.setString(21, sqlData["statistics"] as? String ?: "")
                     stmt.setString(22, sqlData["advancements"] as? String ?: "")
                     stmt.setString(23, sqlData["recipes"] as? String ?: "")
+                    // PWI-style player state
+                    stmt.setBoolean(24, sqlData["is_flying"] as Boolean)
+                    stmt.setBoolean(25, sqlData["allow_flight"] as Boolean)
+                    stmt.setString(26, sqlData["display_name"] as? String ?: "")
+                    stmt.setFloat(27, sqlData["fall_distance"] as Float)
+                    stmt.setInt(28, sqlData["fire_ticks"] as Int)
+                    stmt.setInt(29, sqlData["maximum_air"] as Int)
+                    stmt.setInt(30, sqlData["remaining_air"] as Int)
 
                     stmt.executeUpdate()
                 }
@@ -359,6 +405,14 @@ class MySqlStorage(
                             stmt.setString(21, sqlData["statistics"] as? String ?: "")
                             stmt.setString(22, sqlData["advancements"] as? String ?: "")
                             stmt.setString(23, sqlData["recipes"] as? String ?: "")
+                            // PWI-style player state
+                            stmt.setBoolean(24, sqlData["is_flying"] as Boolean)
+                            stmt.setBoolean(25, sqlData["allow_flight"] as Boolean)
+                            stmt.setString(26, sqlData["display_name"] as? String ?: "")
+                            stmt.setFloat(27, sqlData["fall_distance"] as Float)
+                            stmt.setInt(28, sqlData["fire_ticks"] as Int)
+                            stmt.setInt(29, sqlData["maximum_air"] as Int)
+                            stmt.setInt(30, sqlData["remaining_air"] as Int)
 
                             stmt.addBatch()
                             count++
@@ -404,7 +458,15 @@ class MySqlStorage(
                 "version" to rs.getLong("version"),
                 "statistics" to getStringOrNull(rs, "statistics"),
                 "advancements" to getStringOrNull(rs, "advancements"),
-                "recipes" to getStringOrNull(rs, "recipes")
+                "recipes" to getStringOrNull(rs, "recipes"),
+                // PWI-style player state (optional columns - backwards compatible)
+                "is_flying" to getBooleanOrNull(rs, "is_flying"),
+                "allow_flight" to getBooleanOrNull(rs, "allow_flight"),
+                "display_name" to getStringOrNull(rs, "display_name"),
+                "fall_distance" to getFloatOrNull(rs, "fall_distance"),
+                "fire_ticks" to getIntOrNull(rs, "fire_ticks"),
+                "maximum_air" to getIntOrNull(rs, "maximum_air"),
+                "remaining_air" to getIntOrNull(rs, "remaining_air")
             )
 
             PlayerDataSerializer.fromSqlMap(row)
@@ -420,6 +482,39 @@ class MySqlStorage(
     private fun getStringOrNull(rs: ResultSet, columnName: String): String? {
         return try {
             rs.getString(columnName)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Safely gets a boolean column that may not exist in older databases.
+     */
+    private fun getBooleanOrNull(rs: ResultSet, columnName: String): Boolean? {
+        return try {
+            rs.getBoolean(columnName)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Safely gets an int column that may not exist in older databases.
+     */
+    private fun getIntOrNull(rs: ResultSet, columnName: String): Int? {
+        return try {
+            rs.getInt(columnName)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Safely gets a float column that may not exist in older databases.
+     */
+    private fun getFloatOrNull(rs: ResultSet, columnName: String): Float? {
+        return try {
+            rs.getFloat(columnName)
         } catch (e: Exception) {
             null
         }

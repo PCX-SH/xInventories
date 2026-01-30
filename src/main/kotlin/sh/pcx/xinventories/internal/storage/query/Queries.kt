@@ -16,8 +16,9 @@ object Queries {
             health, max_health, food_level, saturation, exhaustion,
             experience, level, total_experience,
             main_inventory, armor_inventory, offhand, ender_chest, potion_effects,
-            balances, version, statistics, advancements, recipes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            balances, version, statistics, advancements, recipes,
+            is_flying, allow_flight, display_name, fall_distance, fire_ticks, maximum_air, remaining_air
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(uuid, group_name, gamemode) DO UPDATE SET
             player_name = excluded.player_name,
             timestamp = excluded.timestamp,
@@ -38,7 +39,14 @@ object Queries {
             version = excluded.version,
             statistics = excluded.statistics,
             advancements = excluded.advancements,
-            recipes = excluded.recipes
+            recipes = excluded.recipes,
+            is_flying = excluded.is_flying,
+            allow_flight = excluded.allow_flight,
+            display_name = excluded.display_name,
+            fall_distance = excluded.fall_distance,
+            fire_ticks = excluded.fire_ticks,
+            maximum_air = excluded.maximum_air,
+            remaining_air = excluded.remaining_air
     """.trimIndent()
 
     /**
@@ -50,8 +58,9 @@ object Queries {
             health, max_health, food_level, saturation, exhaustion,
             experience, level, total_experience,
             main_inventory, armor_inventory, offhand, ender_chest, potion_effects,
-            balances, version, statistics, advancements, recipes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            balances, version, statistics, advancements, recipes,
+            is_flying, allow_flight, display_name, fall_distance, fire_ticks, maximum_air, remaining_air
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
             player_name = VALUES(player_name),
             timestamp = VALUES(timestamp),
@@ -72,7 +81,14 @@ object Queries {
             version = VALUES(version),
             statistics = VALUES(statistics),
             advancements = VALUES(advancements),
-            recipes = VALUES(recipes)
+            recipes = VALUES(recipes),
+            is_flying = VALUES(is_flying),
+            allow_flight = VALUES(allow_flight),
+            display_name = VALUES(display_name),
+            fall_distance = VALUES(fall_distance),
+            fire_ticks = VALUES(fire_ticks),
+            maximum_air = VALUES(maximum_air),
+            remaining_air = VALUES(remaining_air)
     """.trimIndent()
 
     /**

@@ -1,6 +1,7 @@
 package sh.pcx.xinventories.internal.command.subcommand
 
 import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.internal.gui.menu.TemplateEditorGUI
 import sh.pcx.xinventories.internal.model.TemplateApplyTrigger
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
@@ -264,8 +265,7 @@ class TemplateCommand : Subcommand {
                     return true
                 }
 
-                // TODO: Open template editor GUI
-                messages.send(sender, "feature-not-implemented", "feature" to "Template Editor GUI")
+                TemplateEditorGUI(plugin, template).open(sender)
             }
 
             "reload" -> {

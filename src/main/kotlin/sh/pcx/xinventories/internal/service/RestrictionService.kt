@@ -3,17 +3,22 @@ package sh.pcx.xinventories.internal.service
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.event.ItemRestrictionEvent
 import sh.pcx.xinventories.api.model.InventoryGroup
+import sh.pcx.xinventories.internal.model.ConfiscatedItem
 import sh.pcx.xinventories.internal.model.ItemPattern
 import sh.pcx.xinventories.internal.model.RestrictionAction
 import sh.pcx.xinventories.internal.model.RestrictionConfig
 import sh.pcx.xinventories.internal.model.RestrictionMode
 import sh.pcx.xinventories.internal.model.RestrictionResult
 import sh.pcx.xinventories.internal.model.RestrictionViolationAction
+import sh.pcx.xinventories.internal.storage.ConfiscationStorage
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -29,11 +34,29 @@ class RestrictionService(
     // Cache parsed patterns for performance
     private val patternCache = ConcurrentHashMap<String, ItemPattern>()
 
+    // Storage for confiscated items
+    private lateinit var confiscationStorage: ConfiscationStorage
+
     /**
      * Initializes the restriction service.
      */
     fun initialize() {
+        confiscationStorage = ConfiscationStorage(plugin)
+        runBlocking {
+            confiscationStorage.initialize()
+        }
         Logging.debug { "RestrictionService initialized" }
+    }
+
+    /**
+     * Shuts down the restriction service.
+     */
+    fun shutdown() {
+        if (::confiscationStorage.isInitialized) {
+            runBlocking {
+                confiscationStorage.shutdown()
+            }
+        }
     }
 
     /**
@@ -211,9 +234,26 @@ class RestrictionService(
                                 player.world.dropItemNaturally(player.location, item)
                             }
                             RestrictionViolationAction.MOVE_TO_VAULT -> {
-                                // TODO: Implement vault storage
-                                Logging.debug { "Vault storage not yet implemented, dropping item" }
-                                player.world.dropItemNaturally(player.location, item)
+                                // Store item in confiscation vault
+                                val pattern = violations[slot]?.second ?: "unknown"
+                                val confiscatedItem = ConfiscatedItem.fromItemStack(
+                                    playerUuid = player.uniqueId,
+                                    item = item.clone(),
+                                    reason = "Restricted item: $pattern",
+                                    groupName = group.name,
+                                    worldName = player.world.name
+                                )
+                                scope.launch {
+                                    val id = confiscationStorage.storeItem(confiscatedItem)
+                                    if (id > 0) {
+                                        Logging.debug { "Confiscated item ${item.type.name} from ${player.name} (id: $id)" }
+                                    } else {
+                                        Logging.warning("Failed to store confiscated item, dropping instead")
+                                        plugin.server.scheduler.runTask(plugin, Runnable {
+                                            player.world.dropItemNaturally(player.location, item)
+                                        })
+                                    }
+                                }
                             }
                             else -> {
                                 // REMOVE - just delete the item
@@ -310,5 +350,117 @@ class RestrictionService(
     fun clearCache() {
         patternCache.clear()
         Logging.debug { "Pattern cache cleared" }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Confiscation Vault Methods
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Gets all confiscated items for a player.
+     */
+    suspend fun getConfiscatedItems(playerUuid: UUID, limit: Int = 100): List<ConfiscatedItem> {
+        return confiscationStorage.getItemsForPlayer(playerUuid, limit)
+    }
+
+    /**
+     * Gets a specific confiscated item by ID.
+     */
+    suspend fun getConfiscatedItem(id: Long): ConfiscatedItem? {
+        return confiscationStorage.getItemById(id)
+    }
+
+    /**
+     * Claims a confiscated item, returning it to the player.
+     * Returns the item if successful, null if failed.
+     */
+    suspend fun claimConfiscatedItem(player: Player, id: Long): ConfiscatedItem? {
+        val item = confiscationStorage.getItemById(id) ?: return null
+
+        // Verify ownership
+        if (item.playerUuid != player.uniqueId) {
+            Logging.warning("Player ${player.name} tried to claim item $id that belongs to ${item.playerUuid}")
+            return null
+        }
+
+        // Deserialize the item
+        val itemStack = item.toItemStack()
+        if (itemStack == null) {
+            Logging.warning("Failed to deserialize confiscated item $id")
+            return null
+        }
+
+        // Give item to player (or drop if inventory full)
+        val leftover = player.inventory.addItem(itemStack)
+        if (leftover.isNotEmpty()) {
+            leftover.values.forEach { leftoverItem ->
+                player.world.dropItemNaturally(player.location, leftoverItem)
+            }
+        }
+
+        // Delete from storage
+        confiscationStorage.deleteItem(id)
+
+        Logging.debug { "Player ${player.name} claimed confiscated item $id (${item.itemType})" }
+        return item
+    }
+
+    /**
+     * Claims all confiscated items for a player.
+     * Returns the number of items claimed.
+     */
+    suspend fun claimAllConfiscatedItems(player: Player): Int {
+        val items = confiscationStorage.getItemsForPlayer(player.uniqueId)
+        var claimed = 0
+
+        for (item in items) {
+            val itemStack = item.toItemStack() ?: continue
+
+            val leftover = player.inventory.addItem(itemStack)
+            if (leftover.isNotEmpty()) {
+                leftover.values.forEach { leftoverItem ->
+                    player.world.dropItemNaturally(player.location, leftoverItem)
+                }
+            }
+
+            confiscationStorage.deleteItem(item.id)
+            claimed++
+        }
+
+        if (claimed > 0) {
+            Logging.debug { "Player ${player.name} claimed $claimed confiscated items" }
+        }
+
+        return claimed
+    }
+
+    /**
+     * Gets the count of confiscated items for a player.
+     */
+    suspend fun getConfiscatedItemCount(playerUuid: UUID): Int {
+        return confiscationStorage.getCountForPlayer(playerUuid)
+    }
+
+    /**
+     * Deletes a confiscated item without returning it.
+     * For admin use only.
+     */
+    suspend fun deleteConfiscatedItem(id: Long): Boolean {
+        return confiscationStorage.deleteItem(id)
+    }
+
+    /**
+     * Deletes all confiscated items for a player.
+     * For admin use only.
+     */
+    suspend fun deleteAllConfiscatedItems(playerUuid: UUID): Int {
+        return confiscationStorage.deleteAllForPlayer(playerUuid)
+    }
+
+    /**
+     * Cleans up old confiscated items.
+     */
+    suspend fun cleanupConfiscations(retentionDays: Int): Int {
+        return confiscationStorage.cleanup(retentionDays)
     }
 }

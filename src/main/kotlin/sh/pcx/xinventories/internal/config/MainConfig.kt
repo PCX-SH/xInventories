@@ -16,6 +16,7 @@ data class MainConfig(
     val storage: StorageConfig = StorageConfig(),
     val cache: CacheConfig = CacheConfig(),
     val features: FeaturesConfig = FeaturesConfig(),
+    val player: PlayerConfig = PlayerConfig(),
     val backup: BackupConfig = BackupConfig(),
     val performance: PerformanceConfig = PerformanceConfig(),
     val versioning: VersioningConfig = VersioningConfig(),
@@ -30,6 +31,59 @@ data class MainConfig(
     val metrics: Boolean = true,
     val debug: Boolean = false
 )
+
+/**
+ * Global player settings defaults.
+ * These settings are used as defaults for all groups and can be overridden per-group.
+ */
+data class PlayerConfig(
+    val saveHealth: Boolean = true,
+    val saveHunger: Boolean = true,
+    val saveSaturation: Boolean = true,
+    val saveExhaustion: Boolean = true,
+    val saveExperience: Boolean = true,
+    val savePotionEffects: Boolean = true,
+    val saveEnderChest: Boolean = true,
+    val saveInventory: Boolean = true,
+    val saveGameMode: Boolean = false,
+    val saveFlying: Boolean = true,
+    val saveAllowFlight: Boolean = true,
+    val saveFallDistance: Boolean = true,
+    val saveFireTicks: Boolean = true,
+    val saveMaximumAir: Boolean = true,
+    val saveRemainingAir: Boolean = true,
+    val saveDisplayName: Boolean = false,
+    val saveStatistics: Boolean = false,
+    val saveAdvancements: Boolean = false,
+    val saveRecipes: Boolean = false
+) {
+    /**
+     * Converts to GroupSettings with all values set.
+     */
+    fun toGroupSettings(): sh.pcx.xinventories.api.model.GroupSettings {
+        return sh.pcx.xinventories.api.model.GroupSettings(
+            saveHealth = saveHealth,
+            saveHunger = saveHunger,
+            saveSaturation = saveSaturation,
+            saveExhaustion = saveExhaustion,
+            saveExperience = saveExperience,
+            savePotionEffects = savePotionEffects,
+            saveEnderChest = saveEnderChest,
+            saveInventory = saveInventory,
+            saveGameMode = saveGameMode,
+            saveFlying = saveFlying,
+            saveAllowFlight = saveAllowFlight,
+            saveFallDistance = saveFallDistance,
+            saveFireTicks = saveFireTicks,
+            saveMaximumAir = saveMaximumAir,
+            saveRemainingAir = saveRemainingAir,
+            saveDisplayName = saveDisplayName,
+            saveStatistics = saveStatistics,
+            saveAdvancements = saveAdvancements,
+            saveRecipes = saveRecipes
+        )
+    }
+}
 
 /**
  * Economy integration configuration for per-group economy balances.

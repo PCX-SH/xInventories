@@ -65,6 +65,9 @@ class SqliteStorage(
                 }
             }
 
+            // Run migrations for existing databases
+            runMigrations()
+
             Logging.debug { "SQLite database initialized at ${databaseFile.absolutePath}" }
         }
     }
@@ -73,6 +76,39 @@ class SqliteStorage(
         withContext(Dispatchers.IO) {
             connection?.close()
             connection = null
+        }
+    }
+
+    /**
+     * Runs schema migrations for existing databases.
+     * Adds new columns if they don't exist.
+     */
+    private fun runMigrations() {
+        val conn = connection ?: return
+
+        // Check if new columns exist by trying to select them
+        val columnsExist = try {
+            conn.createStatement().use { stmt ->
+                stmt.executeQuery("SELECT is_flying FROM ${Tables.PLAYER_DATA} LIMIT 1")
+                true
+            }
+        } catch (e: Exception) {
+            false
+        }
+
+        if (!columnsExist) {
+            Logging.info("Running database migration: Adding PWI-style player state columns...")
+            Tables.MIGRATE_ADD_PLAYER_STATE_COLUMNS_SQLITE.forEach { query ->
+                try {
+                    conn.createStatement().use { stmt ->
+                        stmt.execute(query)
+                    }
+                } catch (e: Exception) {
+                    // Column might already exist, ignore
+                    Logging.debug { "Migration query skipped (column may exist): ${e.message}" }
+                }
+            }
+            Logging.info("Database migration completed.")
         }
     }
 
@@ -105,6 +141,14 @@ class SqliteStorage(
                 stmt.setString(21, sqlData["statistics"] as? String ?: "")
                 stmt.setString(22, sqlData["advancements"] as? String ?: "")
                 stmt.setString(23, sqlData["recipes"] as? String ?: "")
+                // PWI-style player state
+                stmt.setInt(24, if (sqlData["is_flying"] as Boolean) 1 else 0)
+                stmt.setInt(25, if (sqlData["allow_flight"] as Boolean) 1 else 0)
+                stmt.setString(26, sqlData["display_name"] as? String ?: "")
+                stmt.setFloat(27, sqlData["fall_distance"] as Float)
+                stmt.setInt(28, sqlData["fire_ticks"] as Int)
+                stmt.setInt(29, sqlData["maximum_air"] as Int)
+                stmt.setInt(30, sqlData["remaining_air"] as Int)
 
                 stmt.executeUpdate()
             }
@@ -334,6 +378,14 @@ class SqliteStorage(
                         stmt.setString(21, sqlData["statistics"] as? String ?: "")
                         stmt.setString(22, sqlData["advancements"] as? String ?: "")
                         stmt.setString(23, sqlData["recipes"] as? String ?: "")
+                        // PWI-style player state
+                        stmt.setInt(24, if (sqlData["is_flying"] as Boolean) 1 else 0)
+                        stmt.setInt(25, if (sqlData["allow_flight"] as Boolean) 1 else 0)
+                        stmt.setString(26, sqlData["display_name"] as? String ?: "")
+                        stmt.setFloat(27, sqlData["fall_distance"] as Float)
+                        stmt.setInt(28, sqlData["fire_ticks"] as Int)
+                        stmt.setInt(29, sqlData["maximum_air"] as Int)
+                        stmt.setInt(30, sqlData["remaining_air"] as Int)
 
                         stmt.addBatch()
                         count++
@@ -378,7 +430,15 @@ class SqliteStorage(
                 "version" to rs.getLong("version"),
                 "statistics" to getStringOrNull(rs, "statistics"),
                 "advancements" to getStringOrNull(rs, "advancements"),
-                "recipes" to getStringOrNull(rs, "recipes")
+                "recipes" to getStringOrNull(rs, "recipes"),
+                // PWI-style player state (optional columns - backwards compatible)
+                "is_flying" to getIntOrNull(rs, "is_flying"),
+                "allow_flight" to getIntOrNull(rs, "allow_flight"),
+                "display_name" to getStringOrNull(rs, "display_name"),
+                "fall_distance" to getFloatOrNull(rs, "fall_distance"),
+                "fire_ticks" to getIntOrNull(rs, "fire_ticks"),
+                "maximum_air" to getIntOrNull(rs, "maximum_air"),
+                "remaining_air" to getIntOrNull(rs, "remaining_air")
             )
 
             PlayerDataSerializer.fromSqlMap(row)
@@ -394,6 +454,28 @@ class SqliteStorage(
     private fun getStringOrNull(rs: ResultSet, columnName: String): String? {
         return try {
             rs.getString(columnName)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Safely gets an int column that may not exist in older databases.
+     */
+    private fun getIntOrNull(rs: ResultSet, columnName: String): Int? {
+        return try {
+            rs.getInt(columnName)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Safely gets a float column that may not exist in older databases.
+     */
+    private fun getFloatOrNull(rs: ResultSet, columnName: String): Float? {
+        return try {
+            rs.getFloat(columnName)
         } catch (e: Exception) {
             null
         }
