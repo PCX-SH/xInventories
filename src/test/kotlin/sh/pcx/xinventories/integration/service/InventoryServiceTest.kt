@@ -154,6 +154,7 @@ class InventoryServiceTest {
         every { configManager.mainConfig } returns mainConfig
         every { configManager.groupsConfig } returns groupsConfig
         every { plugin.mainThreadDispatcher } returns testDispatcher
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
 
         // Use MockBukkit's built-in scheduler - no mocking needed

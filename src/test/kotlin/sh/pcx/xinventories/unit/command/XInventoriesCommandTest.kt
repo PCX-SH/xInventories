@@ -76,6 +76,7 @@ class XInventoriesCommandTest {
         command = mockk(relaxed = true)
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+        every { plugin.plugin } returns plugin
         every { plugin.serviceManager } returns serviceManager
         every { serviceManager.messageService } returns messageService
         every { plugin.scope } returns scope

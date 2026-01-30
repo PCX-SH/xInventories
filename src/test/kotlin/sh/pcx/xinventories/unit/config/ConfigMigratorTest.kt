@@ -46,6 +46,7 @@ class ConfigMigratorTest {
         dataFolder = tempDir.resolve("plugin").toFile()
         dataFolder.mkdirs()
 
+        every { plugin.plugin } returns plugin
         every { plugin.dataFolder } returns dataFolder
 
         migrator = ConfigMigrator(plugin)

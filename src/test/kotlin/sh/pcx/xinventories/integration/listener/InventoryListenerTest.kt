@@ -100,6 +100,7 @@ class InventoryListenerTest {
         every { serviceManager.groupService } returns groupService
         every { serviceManager.deathRecoveryService } returns deathRecoveryService
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
 
         // Default config

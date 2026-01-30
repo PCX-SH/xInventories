@@ -54,6 +54,7 @@ class XInventoriesAPITest {
         configManager = mockk(relaxed = true)
         logger = mockk(relaxed = true)
 
+        every { plugin.plugin } returns plugin
         every { plugin.serviceManager } returns serviceManager
         every { plugin.configManager } returns configManager
         every { plugin.logger } returns logger

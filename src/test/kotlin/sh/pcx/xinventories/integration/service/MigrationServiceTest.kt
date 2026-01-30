@@ -77,6 +77,7 @@ class MigrationServiceTest {
         // Set up plugin data folder
         val dataFolder = tempDir.resolve("plugin").toFile()
         dataFolder.mkdirs()
+        every { plugin.plugin } returns plugin
         every { plugin.dataFolder } returns dataFolder
 
         // Set up default config

@@ -81,6 +81,7 @@ class MessageServiceTest {
         server = mockk(relaxed = true)
 
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
         every { configManager.messagesConfig } returns messagesConfig
         every { configManager.mainConfig } returns mainConfig

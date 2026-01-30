@@ -84,6 +84,7 @@ class GameModeListenerTest {
         every { serviceManager.inventoryService } returns inventoryService
         every { serviceManager.groupService } returns groupService
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
 
         // Default config with separate gamemode inventories enabled

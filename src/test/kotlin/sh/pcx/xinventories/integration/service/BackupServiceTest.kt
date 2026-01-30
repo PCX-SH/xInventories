@@ -96,6 +96,7 @@ class BackupServiceTest {
         configManager = mockk(relaxed = true)
         storageService = mockk(relaxed = true)
 
+        every { plugin.plugin } returns plugin
         every { plugin.dataFolder } returns dataFolder
         every { plugin.configManager } returns configManager
         every { storageService.storageType } returns StorageType.YAML

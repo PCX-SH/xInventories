@@ -65,6 +65,7 @@ class SqliteStorageTest {
      */
     private fun createMockPlugin(dataFolder: File): XInventories {
         return mockk<XInventories>(relaxed = true) {
+            every { this@mockk.plugin } returns this@mockk
             every { this@mockk.dataFolder } returns dataFolder
         }
     }

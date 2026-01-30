@@ -86,6 +86,7 @@ class WorldChangeListenerTest {
         every { plugin.serviceManager } returns serviceManager
         every { serviceManager.inventoryService } returns inventoryService
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
 
         // Default config with no delay

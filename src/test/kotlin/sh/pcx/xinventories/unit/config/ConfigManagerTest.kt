@@ -55,6 +55,7 @@ class ConfigManagerTest {
         val dataFolder = tempDir.resolve("plugin").toFile()
         dataFolder.mkdirs()
 
+        every { plugin.plugin } returns plugin
         every { plugin.dataFolder } returns dataFolder
         every { plugin.config } returns mockConfig
         every { plugin.reloadConfig() } returns Unit

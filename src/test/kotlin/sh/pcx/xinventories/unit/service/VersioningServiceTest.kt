@@ -131,6 +131,7 @@ class VersioningServiceTest {
         scheduler = mockk(relaxed = true)
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+        every { plugin.plugin } returns plugin
         every { plugin.configManager } returns configManager
         every { plugin.serviceManager } returns serviceManager
         every { plugin.server } returns server

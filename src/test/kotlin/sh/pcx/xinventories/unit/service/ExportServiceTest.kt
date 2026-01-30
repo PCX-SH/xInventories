@@ -83,6 +83,7 @@ class ExportServiceTest {
         storageService = mockk(relaxed = true)
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+        every { plugin.plugin } returns plugin
         every { plugin.dataFolder } returns dataFolder
 
         exportService = ExportService(plugin, scope, storageService)

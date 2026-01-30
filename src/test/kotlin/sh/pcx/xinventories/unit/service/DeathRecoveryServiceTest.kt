@@ -112,6 +112,7 @@ class DeathRecoveryServiceTest {
 
         every { plugin.configManager } returns configManager
         every { plugin.serviceManager } returns serviceManager
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
         every { server.scheduler } returns scheduler
         every { configManager.mainConfig } returns mainConfig

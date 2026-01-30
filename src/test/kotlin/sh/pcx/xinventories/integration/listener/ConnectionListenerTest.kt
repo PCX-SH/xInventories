@@ -73,6 +73,7 @@ class ConnectionListenerTest {
         // Configure plugin mock
         every { plugin.serviceManager } returns serviceManager
         every { serviceManager.inventoryService } returns inventoryService
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
 
         // Make plugin.launch execute blocks immediately using Unconfined dispatcher

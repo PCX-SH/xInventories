@@ -89,6 +89,7 @@ class InventoryLockListenerTest {
         every { plugin.serviceManager } returns serviceManager
         every { serviceManager.lockingService } returns lockingService
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
 
         // Default config with locking enabled

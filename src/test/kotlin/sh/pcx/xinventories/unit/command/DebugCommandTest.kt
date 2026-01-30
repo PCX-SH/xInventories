@@ -95,6 +95,7 @@ class DebugCommandTest {
 
         every { plugin.serviceManager } returns serviceManager
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.description } returns descriptionFile
         every { configManager.mainConfig } returns mainConfig
         every { serviceManager.storageService } returns storageService

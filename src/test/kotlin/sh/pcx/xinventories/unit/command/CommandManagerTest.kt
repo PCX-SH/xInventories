@@ -84,6 +84,7 @@ class CommandManagerTest {
         pluginCommand = mockk(relaxed = true)
         logger = mockk(relaxed = true)
 
+        every { plugin.plugin } returns plugin
         every { plugin.server } returns server
         every { plugin.logger } returns logger
         every { plugin.serviceManager } returns serviceManager

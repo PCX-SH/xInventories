@@ -67,6 +67,7 @@ class YamlStorageTest {
      */
     private fun createMockPlugin(dataFolder: File): XInventories {
         val plugin = mockk<XInventories>(relaxed = true)
+        every { plugin.plugin } returns plugin
         every { plugin.dataFolder } returns dataFolder
         return plugin
     }

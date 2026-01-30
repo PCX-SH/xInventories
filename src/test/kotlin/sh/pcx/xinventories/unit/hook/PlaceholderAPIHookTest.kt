@@ -107,6 +107,7 @@ class PlaceholderAPIHookTest {
 
         every { plugin.serviceManager } returns serviceManager
         every { plugin.configManager } returns configManager
+        every { plugin.plugin } returns plugin
         every { plugin.description } returns description
 
         every { serviceManager.inventoryService } returns inventoryService

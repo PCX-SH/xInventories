@@ -60,7 +60,8 @@ class StartupBannerTest {
         every { description.version } returns "1.0.0"
         every { description.authors } returns listOf("TestAuthor")
 
-        // Wire up mocks
+        // Wire up mocks - plugin.plugin returns plugin itself for PluginContext compatibility
+        every { plugin.plugin } returns plugin
         every { plugin.logger } returns logger
         every { plugin.description } returns description
         every { plugin.configManager } returns configManager
@@ -245,10 +246,10 @@ class StartupBannerTest {
     inner class BannerContent {
 
         @Test
-        @DisplayName("Banner should have 5 logo lines")
-        fun bannerHasFiveLines() {
+        @DisplayName("Banner should have 6 logo lines")
+        fun bannerHasSixLines() {
             val bannerLines = StartupBanner.getBannerLines()
-            assertEquals(5, bannerLines.size, "Banner should have 5 logo lines")
+            assertEquals(6, bannerLines.size, "Banner should have 6 logo lines")
         }
 
         @Test
@@ -263,10 +264,10 @@ class StartupBannerTest {
         @DisplayName("Banner should contain 'Xinventories' pattern")
         fun bannerContainsXinventoriesPattern() {
             val bannerLines = StartupBanner.getBannerLines()
-            // The ASCII art should spell out something resembling Xinventories
+            // The ASCII art should spell out something resembling Xinventories using box-drawing characters
             val fullBanner = bannerLines.joinToString("")
-            assertTrue(fullBanner.contains("_") && fullBanner.contains("/") && fullBanner.contains("\\"),
-                "Banner should contain ASCII art characters")
+            assertTrue(fullBanner.contains("██") && fullBanner.contains("╔") && fullBanner.contains("╗"),
+                "Banner should contain ASCII art box-drawing characters")
         }
     }
 
