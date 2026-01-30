@@ -26,6 +26,7 @@ class ListenerManager(private val plugin: XInventories) {
         listeners.add(WorldChangeListener(plugin))
         listeners.add(GameModeListener(plugin))
         listeners.add(InventoryListener(plugin))
+        listeners.add(InventoryLockListener(plugin))
 
         // Register with Bukkit
         listeners.forEach { listener ->

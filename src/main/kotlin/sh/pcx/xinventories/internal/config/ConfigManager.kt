@@ -3,6 +3,8 @@ package sh.pcx.xinventories.internal.config
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.StorageType
+import sh.pcx.xinventories.internal.model.ConflictStrategy
+import sh.pcx.xinventories.internal.model.MergeRule
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
@@ -63,6 +65,21 @@ class ConfigManager(private val plugin: XInventories) {
                 section.set("priority", group.priority)
                 section.set("parent", group.parent)
                 saveGroupSettings(section.createSection("settings"), group.settings)
+
+                // Save conditions if present
+                group.conditions?.let { conditions ->
+                    saveConditionsConfig(section.createSection("conditions"), conditions)
+                }
+
+                // Save template settings if present
+                group.template?.let { template ->
+                    saveTemplateConfig(section.createSection("template"), template)
+                }
+
+                // Save restrictions if present
+                group.restrictions?.let { restrictions ->
+                    saveRestrictionsConfig(section.createSection("restrictions"), restrictions)
+                }
             }
 
             yaml.set("default-group", groupsConfig.defaultGroup)
@@ -78,6 +95,63 @@ class ConfigManager(private val plugin: XInventories) {
             Logging.debug { "Saved groups configuration" }
         } catch (e: Exception) {
             Logging.error("Failed to save groups configuration", e)
+        }
+    }
+
+    private fun saveConditionsConfig(section: ConfigurationSection, conditions: ConditionsConfig) {
+        conditions.permission?.let { section.set("permission", it) }
+        conditions.cron?.let { section.set("cron", it) }
+        section.set("require-all", conditions.requireAll)
+
+        conditions.schedule?.let { schedules ->
+            section.set("schedule", schedules.map { schedule ->
+                mapOf(
+                    "start" to schedule.start,
+                    "end" to schedule.end,
+                    "timezone" to schedule.timezone
+                ).filterValues { it != null }
+            })
+        }
+
+        conditions.placeholder?.let { placeholder ->
+            val placeholderSection = section.createSection("placeholder")
+            placeholderSection.set("placeholder", placeholder.placeholder)
+            placeholderSection.set("operator", placeholder.operator)
+            placeholderSection.set("value", placeholder.value)
+        }
+
+        conditions.placeholders?.let { placeholders ->
+            section.set("placeholders", placeholders.map { placeholder ->
+                mapOf(
+                    "placeholder" to placeholder.placeholder,
+                    "operator" to placeholder.operator,
+                    "value" to placeholder.value
+                )
+            })
+        }
+    }
+
+    private fun saveTemplateConfig(section: ConfigurationSection, template: TemplateConfigSection) {
+        section.set("enabled", template.enabled)
+        template.templateName?.let { section.set("template-name", it) }
+        section.set("apply-on", template.applyOn)
+        section.set("allow-reset", template.allowReset)
+        section.set("clear-inventory-first", template.clearInventoryFirst)
+    }
+
+    private fun saveRestrictionsConfig(section: ConfigurationSection, restrictions: RestrictionConfigSection) {
+        section.set("mode", restrictions.mode)
+        section.set("on-violation", restrictions.onViolation)
+        section.set("notify-player", restrictions.notifyPlayer)
+        section.set("notify-admins", restrictions.notifyAdmins)
+        if (restrictions.blacklist.isNotEmpty()) {
+            section.set("blacklist", restrictions.blacklist)
+        }
+        if (restrictions.whitelist.isNotEmpty()) {
+            section.set("whitelist", restrictions.whitelist)
+        }
+        if (restrictions.stripOnExit.isNotEmpty()) {
+            section.set("strip-on-exit", restrictions.stripOnExit)
         }
     }
 
@@ -138,6 +212,37 @@ class ConfigManager(private val plugin: XInventories) {
                 threadPoolSize = config.getInt("performance.thread-pool-size", 4),
                 saveDelayTicks = config.getInt("performance.save-delay-ticks", 1)
             ),
+            versioning = VersioningConfig(
+                enabled = config.getBoolean("versioning.enabled", true),
+                maxVersionsPerPlayer = config.getInt("versioning.max-versions-per-player", 10),
+                minIntervalSeconds = config.getInt("versioning.min-interval-seconds", 300),
+                retentionDays = config.getInt("versioning.retention-days", 7),
+                triggerOn = TriggerConfig(
+                    worldChange = config.getBoolean("versioning.trigger-on.world-change", true),
+                    disconnect = config.getBoolean("versioning.trigger-on.disconnect", true),
+                    manual = config.getBoolean("versioning.trigger-on.manual", true)
+                )
+            ),
+            deathRecovery = DeathRecoveryConfig(
+                enabled = config.getBoolean("death-recovery.enabled", true),
+                maxDeathsPerPlayer = config.getInt("death-recovery.max-deaths-per-player", 5),
+                retentionDays = config.getInt("death-recovery.retention-days", 3),
+                storeLocation = config.getBoolean("death-recovery.store-location", true),
+                storeDeathCause = config.getBoolean("death-recovery.store-death-cause", true),
+                storeKiller = config.getBoolean("death-recovery.store-killer", true)
+            ),
+            locking = LockingConfig(
+                enabled = config.getBoolean("locking.enabled", true),
+                defaultMessage = config.getString("locking.default-message", "<red>Your inventory is currently locked.")!!,
+                allowAdminBypass = config.getBoolean("locking.allow-admin-bypass", true)
+            ),
+            sharedSlots = loadSharedSlotsConfig(config),
+            economy = EconomyConfig(
+                enabled = config.getBoolean("economy.enabled", true),
+                provider = config.getString("economy.provider", "VAULT")!!,
+                separateByGroup = config.getBoolean("economy.separate-by-group", true)
+            ),
+            sync = loadSyncConfig(config),
             debug = config.getBoolean("debug", false)
         )
 
@@ -184,7 +289,71 @@ class ConfigManager(private val plugin: XInventories) {
             patterns = section.getStringList("patterns"),
             priority = section.getInt("priority", 0),
             parent = section.getString("parent"),
-            settings = loadGroupSettings(section.getConfigurationSection("settings"))
+            settings = loadGroupSettings(section.getConfigurationSection("settings")),
+            conditions = loadConditionsConfig(section.getConfigurationSection("conditions")),
+            template = loadTemplateConfig(section.getConfigurationSection("template")),
+            restrictions = loadRestrictionsConfig(section.getConfigurationSection("restrictions"))
+        )
+    }
+
+    private fun loadConditionsConfig(section: ConfigurationSection?): ConditionsConfig? {
+        if (section == null) return null
+
+        val scheduleConfigs = section.getMapList("schedule").mapNotNull { map ->
+            val start = map["start"] as? String ?: return@mapNotNull null
+            val end = map["end"] as? String ?: return@mapNotNull null
+            val timezone = map["timezone"] as? String
+            ScheduleConfig(start, end, timezone)
+        }.takeIf { it.isNotEmpty() }
+
+        val placeholderConfig = section.getConfigurationSection("placeholder")?.let {
+            PlaceholderConfig(
+                placeholder = it.getString("placeholder") ?: return@let null,
+                operator = it.getString("operator") ?: return@let null,
+                value = it.getString("value") ?: return@let null
+            )
+        }
+
+        val placeholderConfigs = section.getMapList("placeholders").mapNotNull { map ->
+            val placeholder = map["placeholder"] as? String ?: return@mapNotNull null
+            val operator = map["operator"] as? String ?: return@mapNotNull null
+            val value = map["value"] as? String ?: return@mapNotNull null
+            PlaceholderConfig(placeholder, operator, value)
+        }.takeIf { it.isNotEmpty() }
+
+        return ConditionsConfig(
+            permission = section.getString("permission"),
+            schedule = scheduleConfigs,
+            cron = section.getString("cron"),
+            placeholder = placeholderConfig,
+            placeholders = placeholderConfigs,
+            requireAll = section.getBoolean("require-all", true)
+        )
+    }
+
+    private fun loadTemplateConfig(section: ConfigurationSection?): TemplateConfigSection? {
+        if (section == null) return null
+
+        return TemplateConfigSection(
+            enabled = section.getBoolean("enabled", false),
+            templateName = section.getString("template-name"),
+            applyOn = section.getString("apply-on", "NONE")!!,
+            allowReset = section.getBoolean("allow-reset", false),
+            clearInventoryFirst = section.getBoolean("clear-inventory-first", true)
+        )
+    }
+
+    private fun loadRestrictionsConfig(section: ConfigurationSection?): RestrictionConfigSection? {
+        if (section == null) return null
+
+        return RestrictionConfigSection(
+            mode = section.getString("mode", "NONE")!!,
+            onViolation = section.getString("on-violation", "REMOVE")!!,
+            notifyPlayer = section.getBoolean("notify-player", true),
+            notifyAdmins = section.getBoolean("notify-admins", true),
+            blacklist = section.getStringList("blacklist"),
+            whitelist = section.getStringList("whitelist"),
+            stripOnExit = section.getStringList("strip-on-exit")
         )
     }
 
@@ -248,5 +417,103 @@ class ConfigManager(private val plugin: XInventories) {
         )
 
         Logging.debug { "Loaded ${messages.size} custom messages" }
+    }
+
+    /**
+     * Loads sync configuration from the main config.
+     */
+    private fun loadSyncConfig(config: org.bukkit.configuration.file.FileConfiguration): NetworkSyncConfig {
+        val syncMode = try {
+            SyncMode.valueOf(config.getString("sync.mode", "REDIS")!!.uppercase())
+        } catch (e: Exception) {
+            Logging.warning("Invalid sync mode, defaulting to REDIS")
+            SyncMode.REDIS
+        }
+
+        val conflictStrategy = try {
+            ConflictStrategy.valueOf(config.getString("sync.conflicts.strategy", "LAST_WRITE_WINS")!!.uppercase())
+        } catch (e: Exception) {
+            Logging.warning("Invalid conflict strategy, defaulting to LAST_WRITE_WINS")
+            ConflictStrategy.LAST_WRITE_WINS
+        }
+
+        return NetworkSyncConfig(
+            enabled = config.getBoolean("sync.enabled", false),
+            mode = syncMode,
+            serverId = config.getString("sync.server-id", "server-1")!!,
+            redis = RedisSyncConfig(
+                host = config.getString("sync.redis.host", "localhost")!!,
+                port = config.getInt("sync.redis.port", 6379),
+                password = config.getString("sync.redis.password", "")!!,
+                channel = config.getString("sync.redis.channel", "xinventories:sync")!!,
+                timeout = config.getInt("sync.redis.timeout", 5000)
+            ),
+            conflicts = ConflictSyncConfig(
+                strategy = conflictStrategy,
+                mergeRules = MergeRulesSyncConfig(
+                    inventory = parseMergeRule(config.getString("sync.conflicts.merge-rules.inventory", "NEWER")),
+                    experience = parseMergeRule(config.getString("sync.conflicts.merge-rules.experience", "HIGHER")),
+                    health = parseMergeRule(config.getString("sync.conflicts.merge-rules.health", "CURRENT_SERVER")),
+                    potionEffects = parseMergeRule(config.getString("sync.conflicts.merge-rules.potion-effects", "UNION"))
+                )
+            ),
+            transferLock = TransferLockSyncConfig(
+                enabled = config.getBoolean("sync.transfer-lock.enabled", true),
+                timeoutSeconds = config.getInt("sync.transfer-lock.timeout-seconds", 10)
+            ),
+            heartbeat = HeartbeatSyncConfig(
+                intervalSeconds = config.getInt("sync.heartbeat.interval-seconds", 30),
+                timeoutSeconds = config.getInt("sync.heartbeat.timeout-seconds", 90)
+            )
+        )
+    }
+
+    private fun parseMergeRule(value: String?): MergeRule {
+        return try {
+            MergeRule.valueOf(value?.uppercase() ?: "NEWER")
+        } catch (e: Exception) {
+            MergeRule.NEWER
+        }
+    }
+
+    /**
+     * Loads shared slots configuration from the main config.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun loadSharedSlotsConfig(config: org.bukkit.configuration.file.FileConfiguration): SharedSlotsConfigSection {
+        val enabled = config.getBoolean("shared-slots.enabled", true)
+        val slotConfigs = mutableListOf<SharedSlotConfigEntry>()
+
+        val slotsList = config.getList("shared-slots.slots") as? List<Map<String, Any?>>
+        slotsList?.forEach { slotMap ->
+            try {
+                val slot = (slotMap["slot"] as? Number)?.toInt()
+                val slots = (slotMap["slots"] as? List<*>)?.mapNotNull { (it as? Number)?.toInt() }
+                val mode = slotMap["mode"] as? String ?: "PRESERVE"
+
+                val itemConfig = (slotMap["item"] as? Map<String, Any?>)?.let { itemMap ->
+                    ItemConfigEntry(
+                        type = itemMap["type"] as? String ?: return@let null,
+                        amount = (itemMap["amount"] as? Number)?.toInt() ?: 1,
+                        displayName = itemMap["display-name"] as? String,
+                        lore = (itemMap["lore"] as? List<*>)?.mapNotNull { it as? String }
+                    )
+                }
+
+                slotConfigs.add(SharedSlotConfigEntry(
+                    slot = slot,
+                    slots = slots,
+                    mode = mode,
+                    item = itemConfig
+                ))
+            } catch (e: Exception) {
+                Logging.warning("Failed to parse shared slot config entry: ${e.message}")
+            }
+        }
+
+        return SharedSlotsConfigSection(
+            enabled = enabled,
+            slots = slotConfigs
+        )
     }
 }

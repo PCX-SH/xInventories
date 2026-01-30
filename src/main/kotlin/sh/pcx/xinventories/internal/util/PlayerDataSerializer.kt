@@ -42,6 +42,17 @@ object PlayerDataSerializer {
 
         // Potion effects
         section.set("potion-effects", PotionSerializer.serializeEffects(data.potionEffects))
+
+        // Economy balances
+        if (data.balances.isNotEmpty()) {
+            val balancesSection = section.createSection("balances")
+            data.balances.forEach { (group, balance) ->
+                balancesSection.set(group, balance)
+            }
+        }
+
+        // Version for sync
+        section.set("version", data.version)
     }
 
     /**
@@ -88,9 +99,86 @@ object PlayerDataSerializer {
             val effectsList = section.getList("potion-effects") as? List<Map<String, Any>>
             data.potionEffects.addAll(PotionSerializer.deserializeEffects(effectsList))
 
+            // Economy balances
+            section.getConfigurationSection("balances")?.let { balancesSection ->
+                balancesSection.getKeys(false).forEach { groupName ->
+                    data.balances[groupName] = balancesSection.getDouble(groupName)
+                }
+            }
+
+            // Version for sync
+            data.version = section.getLong("version", 0)
+
             data
         } catch (e: Exception) {
             Logging.error("Failed to deserialize player data from YAML", e)
+            null
+        }
+    }
+
+    /**
+     * Deserializes PlayerData from a YAML configuration section with default values.
+     * Used when the section might not contain uuid/group/gamemode fields.
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun fromYamlSection(
+        section: ConfigurationSection,
+        defaultUuid: UUID,
+        defaultGroup: String,
+        defaultGameMode: GameMode
+    ): PlayerData? {
+        return try {
+            val uuid = section.getString("uuid")?.let { UUID.fromString(it) } ?: defaultUuid
+            val playerName = section.getString("player-name") ?: "Unknown"
+            val group = section.getString("group") ?: defaultGroup
+            val gameMode = section.getString("gamemode")?.let {
+                try { GameMode.valueOf(it) } catch (e: Exception) { defaultGameMode }
+            } ?: defaultGameMode
+
+            val data = PlayerData(uuid, playerName, group, gameMode)
+
+            data.timestamp = section.getLong("timestamp", System.currentTimeMillis())
+                .let { Instant.ofEpochMilli(it) }
+
+            // State
+            data.health = section.getDouble("health", 20.0)
+            data.maxHealth = section.getDouble("max-health", 20.0)
+            data.foodLevel = section.getInt("food-level", 20)
+            data.saturation = section.getDouble("saturation", 5.0).toFloat()
+            data.exhaustion = section.getDouble("exhaustion", 0.0).toFloat()
+            data.experience = section.getDouble("experience", 0.0).toFloat()
+            data.level = section.getInt("level", 0)
+            data.totalExperience = section.getInt("total-experience", 0)
+
+            // Inventories
+            val mainMap = section.getConfigurationSection("inventory.main")?.getValues(false)
+            val armorMap = section.getConfigurationSection("inventory.armor")?.getValues(false)
+            val enderMap = section.getConfigurationSection("inventory.ender-chest")?.getValues(false)
+
+            data.mainInventory.putAll(InventorySerializer.yamlMapToInventory(mainMap))
+            data.armorInventory.putAll(InventorySerializer.yamlMapToInventory(armorMap))
+            data.offhand = InventorySerializer.mapToItemStack(
+                section.getConfigurationSection("inventory.offhand")?.getValues(false)
+            )
+            data.enderChest.putAll(InventorySerializer.yamlMapToInventory(enderMap))
+
+            // Potion effects
+            val effectsList = section.getList("potion-effects") as? List<Map<String, Any>>
+            data.potionEffects.addAll(PotionSerializer.deserializeEffects(effectsList))
+
+            // Economy balances
+            section.getConfigurationSection("balances")?.let { balancesSection ->
+                balancesSection.getKeys(false).forEach { groupName ->
+                    data.balances[groupName] = balancesSection.getDouble(groupName)
+                }
+            }
+
+            // Version for sync
+            data.version = section.getLong("version", 0)
+
+            data
+        } catch (e: Exception) {
+            Logging.error("Failed to deserialize player data from YAML section", e)
             null
         }
     }
@@ -117,8 +205,31 @@ object PlayerDataSerializer {
             "armor_inventory" to InventorySerializer.serializeInventoryMap(data.armorInventory),
             "offhand" to InventorySerializer.serializeItemStack(data.offhand),
             "ender_chest" to InventorySerializer.serializeInventoryMap(data.enderChest),
-            "potion_effects" to PotionSerializer.serializeEffectsToString(data.potionEffects)
+            "potion_effects" to PotionSerializer.serializeEffectsToString(data.potionEffects),
+            "balances" to serializeBalancesMap(data.balances),
+            "version" to data.version
         )
+    }
+
+    /**
+     * Serializes economy balances to JSON string.
+     */
+    private fun serializeBalancesMap(balances: Map<String, Double>): String {
+        if (balances.isEmpty()) return ""
+        return balances.entries.joinToString(";") { "${it.key}=${it.value}" }
+    }
+
+    /**
+     * Deserializes economy balances from JSON string.
+     */
+    private fun deserializeBalancesMap(str: String?): Map<String, Double> {
+        if (str.isNullOrEmpty()) return emptyMap()
+        return str.split(";")
+            .filter { it.contains("=") }
+            .associate {
+                val parts = it.split("=", limit = 2)
+                parts[0] to (parts.getOrNull(1)?.toDoubleOrNull() ?: 0.0)
+            }
     }
 
     /**
@@ -158,6 +269,13 @@ object PlayerDataSerializer {
             data.offhand = InventorySerializer.deserializeItemStack(offhandStr)
             data.enderChest.putAll(InventorySerializer.deserializeInventoryMap(enderInv))
             data.potionEffects.addAll(PotionSerializer.deserializeEffectsFromString(effectsStr))
+
+            // Economy balances
+            val balancesStr = row["balances"] as? String
+            data.balances.putAll(deserializeBalancesMap(balancesStr))
+
+            // Version for sync
+            data.version = (row["version"] as? Number)?.toLong() ?: 0
 
             data
         } catch (e: Exception) {

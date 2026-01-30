@@ -1,6 +1,13 @@
 package sh.pcx.xinventories.internal.config
 
 import sh.pcx.xinventories.api.model.StorageType
+import sh.pcx.xinventories.internal.model.ConflictStrategy
+import sh.pcx.xinventories.internal.model.ItemConfig
+import sh.pcx.xinventories.internal.model.MergeRule
+import sh.pcx.xinventories.internal.model.MergeRules
+import sh.pcx.xinventories.internal.model.SharedSlotEntry
+import sh.pcx.xinventories.internal.model.SharedSlotsConfig
+import sh.pcx.xinventories.internal.model.SlotMode
 
 /**
  * Main configuration model (config.yml).
@@ -11,7 +18,26 @@ data class MainConfig(
     val features: FeaturesConfig = FeaturesConfig(),
     val backup: BackupConfig = BackupConfig(),
     val performance: PerformanceConfig = PerformanceConfig(),
+    val versioning: VersioningConfig = VersioningConfig(),
+    val deathRecovery: DeathRecoveryConfig = DeathRecoveryConfig(),
+    val locking: LockingConfig = LockingConfig(),
+    val sharedSlots: SharedSlotsConfigSection = SharedSlotsConfigSection(),
+    val economy: EconomyConfig = EconomyConfig(),
+    val sync: NetworkSyncConfig = NetworkSyncConfig(),
+    val metrics: Boolean = true,
     val debug: Boolean = false
+)
+
+/**
+ * Economy integration configuration for per-group economy balances.
+ */
+data class EconomyConfig(
+    /** Whether economy integration is enabled */
+    val enabled: Boolean = true,
+    /** Economy provider to use (VAULT) */
+    val provider: String = "VAULT",
+    /** Whether to separate balances by group */
+    val separateByGroup: Boolean = true
 )
 
 data class StorageConfig(
@@ -69,4 +95,164 @@ data class PerformanceConfig(
     val batchSize: Int = 100,
     val threadPoolSize: Int = 4,
     val saveDelayTicks: Int = 1
+)
+
+/**
+ * Configuration for inventory locking feature.
+ */
+data class LockingConfig(
+    val enabled: Boolean = true,
+    val defaultMessage: String = "<red>Your inventory is currently locked.",
+    val allowAdminBypass: Boolean = true
+)
+
+// ============================================================
+// Shared Slots Configuration
+// ============================================================
+
+/**
+ * Configuration section for shared slots in config.yml.
+ */
+data class SharedSlotsConfigSection(
+    val enabled: Boolean = true,
+    val slots: List<SharedSlotConfigEntry> = emptyList()
+) {
+    /**
+     * Converts to the internal SharedSlotsConfig model.
+     */
+    fun toSharedSlotsConfig(): SharedSlotsConfig {
+        return SharedSlotsConfig(
+            enabled = enabled,
+            slots = slots.map { it.toSharedSlotEntry() }
+        )
+    }
+}
+
+/**
+ * Configuration entry for a single shared slot or slot group.
+ */
+data class SharedSlotConfigEntry(
+    val slot: Int? = null,
+    val slots: List<Int>? = null,
+    val mode: String = "PRESERVE",
+    val item: ItemConfigEntry? = null
+) {
+    /**
+     * Converts to the internal SharedSlotEntry model.
+     */
+    fun toSharedSlotEntry(): SharedSlotEntry {
+        val slotMode = try {
+            SlotMode.valueOf(mode.uppercase())
+        } catch (e: IllegalArgumentException) {
+            SlotMode.PRESERVE
+        }
+
+        return SharedSlotEntry(
+            slot = slot,
+            slots = slots,
+            mode = slotMode,
+            item = item?.toItemConfig()
+        )
+    }
+}
+
+/**
+ * Configuration for an enforced item in a slot.
+ */
+data class ItemConfigEntry(
+    val type: String,
+    val amount: Int = 1,
+    val displayName: String? = null,
+    val lore: List<String>? = null
+) {
+    /**
+     * Converts to the internal ItemConfig model.
+     */
+    fun toItemConfig(): ItemConfig? {
+        val material = org.bukkit.Material.matchMaterial(type) ?: return null
+        return ItemConfig(
+            type = material,
+            amount = amount,
+            displayName = displayName,
+            lore = lore
+        )
+    }
+}
+
+// ============================================================
+// Network Sync Configuration
+// ============================================================
+
+/**
+ * Configuration for cross-server synchronization.
+ */
+data class NetworkSyncConfig(
+    val enabled: Boolean = false,
+    val mode: SyncMode = SyncMode.REDIS,
+    val serverId: String = "server-1",
+    val redis: RedisSyncConfig = RedisSyncConfig(),
+    val conflicts: ConflictSyncConfig = ConflictSyncConfig(),
+    val transferLock: TransferLockSyncConfig = TransferLockSyncConfig(),
+    val heartbeat: HeartbeatSyncConfig = HeartbeatSyncConfig()
+)
+
+/**
+ * Sync mode options.
+ */
+enum class SyncMode {
+    REDIS,
+    PLUGIN_MESSAGING,
+    MYSQL_NOTIFY
+}
+
+/**
+ * Redis connection configuration for sync.
+ */
+data class RedisSyncConfig(
+    val host: String = "localhost",
+    val port: Int = 6379,
+    val password: String = "",
+    val channel: String = "xinventories:sync",
+    val timeout: Int = 5000
+)
+
+/**
+ * Conflict resolution configuration.
+ */
+data class ConflictSyncConfig(
+    val strategy: ConflictStrategy = ConflictStrategy.LAST_WRITE_WINS,
+    val mergeRules: MergeRulesSyncConfig = MergeRulesSyncConfig()
+)
+
+/**
+ * Merge rules configuration (maps to MergeRules model).
+ */
+data class MergeRulesSyncConfig(
+    val inventory: MergeRule = MergeRule.NEWER,
+    val experience: MergeRule = MergeRule.HIGHER,
+    val health: MergeRule = MergeRule.CURRENT_SERVER,
+    val potionEffects: MergeRule = MergeRule.UNION
+) {
+    fun toMergeRules(): MergeRules = MergeRules(
+        inventory = inventory,
+        experience = experience,
+        health = health,
+        potionEffects = potionEffects
+    )
+}
+
+/**
+ * Lock transfer configuration for server switches.
+ */
+data class TransferLockSyncConfig(
+    val enabled: Boolean = true,
+    val timeoutSeconds: Int = 10
+)
+
+/**
+ * Heartbeat configuration for server health monitoring.
+ */
+data class HeartbeatSyncConfig(
+    val intervalSeconds: Int = 30,
+    val timeoutSeconds: Int = 90
 )
