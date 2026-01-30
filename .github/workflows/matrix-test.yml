@@ -52,7 +52,7 @@ jobs:
         run: ./gradlew shadowJar
 
       - name: Upload plugin JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: plugin-jar
           path: build/libs/xInventories-*.jar
@@ -98,7 +98,7 @@ jobs:
         continue-on-error: ${{ matrix.paper-version == '1.20.5' || matrix.paper-version == '1.20.6' }}
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: test-results-${{ matrix.paper-version }}
@@ -173,7 +173,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload server log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: server-log-${{ matrix.paper-version }}
