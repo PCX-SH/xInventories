@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.storage
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
@@ -25,7 +25,7 @@ import java.util.UUID
  * SQLite storage implementation.
  */
 class SqliteStorage(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val dbFile: String
 ) : AbstractStorage(plugin) {
 
@@ -37,7 +37,7 @@ class SqliteStorage(
     override suspend fun doInitialize() {
         withContext(Dispatchers.IO) {
             // Create database file
-            databaseFile = File(plugin.dataFolder, dbFile)
+            databaseFile = File(plugin.plugin.dataFolder, dbFile)
             databaseFile.parentFile?.mkdirs()
 
             // Load SQLite driver

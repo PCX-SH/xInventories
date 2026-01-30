@@ -1,7 +1,7 @@
 package sh.pcx.xinventories.internal.hook
 
 import kotlinx.coroutines.runBlocking
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.OfflinePlayer
 import java.time.Instant
@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter
  * - %xinventories_locked% - "true" or "false"
  * - %xinventories_lock_reason% - Lock reason if locked
  */
-class PlaceholderAPIHook(private val plugin: XInventories) : PlaceholderExpansion() {
+class PlaceholderAPIHook(private val plugin: PluginContext) : PlaceholderExpansion() {
 
     companion object {
         private val TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -40,10 +40,10 @@ class PlaceholderAPIHook(private val plugin: XInventories) : PlaceholderExpansio
 
     override fun getIdentifier(): String = "xinventories"
 
-    override fun getAuthor(): String = plugin.description.authors.joinToString(", ")
+    override fun getAuthor(): String = plugin.plugin.description.authors.joinToString(", ")
 
     @Suppress("DEPRECATION")
-    override fun getVersion(): String = plugin.description.version
+    override fun getVersion(): String = plugin.plugin.description.version
 
     override fun persist(): Boolean = true
 
@@ -174,7 +174,7 @@ class PlaceholderAPIHook(private val plugin: XInventories) : PlaceholderExpansio
 
             "version" -> {
                 @Suppress("DEPRECATION")
-                plugin.description.version
+                plugin.plugin.description.version
             }
 
             else -> null

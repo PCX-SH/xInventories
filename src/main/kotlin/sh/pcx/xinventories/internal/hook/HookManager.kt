@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.hook
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.integration.XInventoriesEconomyProvider
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 /**
  * Manages integration hooks with other plugins.
  */
-class HookManager(private val plugin: XInventories) {
+class HookManager(private val plugin: PluginContext) {
 
     private var placeholderAPIHook: PlaceholderAPIHook? = null
     private var vaultHook: VaultHook? = null

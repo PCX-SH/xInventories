@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.import
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.*
 import sh.pcx.xinventories.internal.service.EconomyService
 import sh.pcx.xinventories.internal.service.GroupService
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Handles source detection, mapping configuration, and data conversion.
  */
 class ImportService(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val scope: CoroutineScope,
     private val storageService: StorageService,
     private val groupService: GroupService,
@@ -412,7 +412,7 @@ class ImportService(
     /**
      * Gets the default mapping file location.
      */
-    fun getMappingFile(): File = File(plugin.dataFolder, "import-mapping.yml")
+    fun getMappingFile(): File = File(plugin.plugin.dataFolder, "import-mapping.yml")
 
     /**
      * Gets the last import result.

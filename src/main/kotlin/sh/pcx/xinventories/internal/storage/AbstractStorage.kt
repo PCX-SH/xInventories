@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.storage
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
@@ -15,7 +15,7 @@ import java.util.UUID
  * Provides common functionality and error handling.
  */
 abstract class AbstractStorage(
-    protected val plugin: XInventories
+    protected val plugin: PluginContext
 ) : Storage {
 
     protected var initialized = false

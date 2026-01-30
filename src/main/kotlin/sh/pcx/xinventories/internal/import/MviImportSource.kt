@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.import
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.*
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
@@ -20,12 +20,12 @@ import java.util.UUID
  *
  * Repository: https://github.com/Multiverse/Multiverse-Inventories
  */
-class MviImportSource(private val plugin: XInventories) : ImportSource {
+class MviImportSource(private val plugin: PluginContext) : ImportSource {
 
     override val name: String = "Multiverse-Inventories"
     override val id: String = "mvi"
 
-    private val dataFolder: File = File(plugin.dataFolder.parentFile, "Multiverse-Inventories")
+    private val dataFolder: File = File(plugin.plugin.dataFolder.parentFile, "Multiverse-Inventories")
     private val groupsFile: File = File(dataFolder, "groups.yml")
     private val worldsFolder: File = File(dataFolder, "worlds")
     private val groupDataFolder: File = File(dataFolder, "groups")

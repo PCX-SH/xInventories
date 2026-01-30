@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.storage
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
@@ -28,7 +28,7 @@ import java.util.UUID
  *     <uuid>/
  *       <group>_<gamemode>.yml
  */
-class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
+class YamlStorage(plugin: PluginContext) : AbstractStorage(plugin) {
 
     override val name = "YAML"
 
@@ -41,7 +41,7 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
     private lateinit var tempGroupsDir: File
 
     override suspend fun doInitialize() {
-        dataDir = File(plugin.dataFolder, "data")
+        dataDir = File(plugin.plugin.dataFolder, "data")
         playersDir = File(dataDir, "players")
         versionsDir = File(dataDir, "versions")
         deathsDir = File(dataDir, "deaths")

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.config
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.StorageType
 import sh.pcx.xinventories.internal.model.ConflictStrategy
@@ -13,7 +13,7 @@ import java.io.File
 /**
  * Manages loading and saving of all configuration files.
  */
-class ConfigManager(private val plugin: XInventories) {
+class ConfigManager(private val plugin: PluginContext) {
 
     var mainConfig: MainConfig = MainConfig()
         private set
@@ -24,9 +24,9 @@ class ConfigManager(private val plugin: XInventories) {
     var messagesConfig: MessagesConfig = MessagesConfig()
         private set
 
-    private val groupsFile: File = File(plugin.dataFolder, "groups.yml")
-    private val messagesFile: File = File(plugin.dataFolder, "messages.yml")
-    private val configFile: File = File(plugin.dataFolder, "config.yml")
+    private val groupsFile: File = File(plugin.plugin.dataFolder, "groups.yml")
+    private val messagesFile: File = File(plugin.plugin.dataFolder, "messages.yml")
+    private val configFile: File = File(plugin.plugin.dataFolder, "config.yml")
 
     /**
      * The config migrator instance for handling version migrations.
@@ -66,7 +66,7 @@ class ConfigManager(private val plugin: XInventories) {
                 if (result.migrationsApplied > 0) {
                     Logging.info("Config migration completed: v${result.fromVersion} -> v${result.toVersion}")
                     // Reload the Bukkit config to pick up migrated values
-                    plugin.reloadConfig()
+                    plugin.plugin.reloadConfig()
                 }
             }
             is MigrationResult.Failure -> {
@@ -82,7 +82,7 @@ class ConfigManager(private val plugin: XInventories) {
      * Reloads all configuration files.
      */
     fun reloadAll(): Boolean {
-        plugin.reloadConfig()
+        plugin.plugin.reloadConfig()
         return loadAll()
     }
 
@@ -192,7 +192,7 @@ class ConfigManager(private val plugin: XInventories) {
     }
 
     private fun loadMainConfig() {
-        val config = plugin.config
+        val config = plugin.plugin.config
 
         val storageType = try {
             StorageType.valueOf(config.getString("storage.type", "YAML")!!.uppercase())
@@ -298,7 +298,7 @@ class ConfigManager(private val plugin: XInventories) {
 
     private fun loadGroupsConfig() {
         if (!groupsFile.exists()) {
-            plugin.saveResource("groups.yml", false)
+            plugin.plugin.saveResource("groups.yml", false)
         }
 
         val yaml = YamlConfiguration.loadConfiguration(groupsFile)
@@ -534,7 +534,7 @@ class ConfigManager(private val plugin: XInventories) {
 
     private fun loadMessagesConfig() {
         if (!messagesFile.exists()) {
-            plugin.saveResource("messages.yml", false)
+            plugin.plugin.saveResource("messages.yml", false)
         }
 
         val yaml = YamlConfiguration.loadConfiguration(messagesFile)
@@ -673,7 +673,7 @@ class ConfigManager(private val plugin: XInventories) {
      */
     fun saveMainConfig(updatedConfig: MainConfig) {
         try {
-            val config = plugin.config
+            val config = plugin.plugin.config
 
             // Update shared slots configuration
             config.set("shared-slots.enabled", updatedConfig.sharedSlots.enabled)
@@ -696,7 +696,7 @@ class ConfigManager(private val plugin: XInventories) {
             config.set("shared-slots.slots", slotsList)
 
             // Save the config file
-            plugin.saveConfig()
+            plugin.plugin.saveConfig()
 
             // Update the internal config reference
             mainConfig = updatedConfig

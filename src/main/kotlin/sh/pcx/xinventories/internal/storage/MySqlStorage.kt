@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.storage
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.config.MysqlConfig
 import sh.pcx.xinventories.internal.model.DeathRecord
 import sh.pcx.xinventories.internal.model.InventoryVersion
@@ -26,7 +26,7 @@ import java.util.UUID
  * MySQL storage implementation with HikariCP connection pooling.
  */
 class MySqlStorage(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val config: MysqlConfig
 ) : AbstractStorage(plugin) {
 

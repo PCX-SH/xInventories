@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.integration
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.PlaceholderCondition
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
@@ -10,7 +10,7 @@ import org.bukkit.entity.Player
  * Integration with PlaceholderAPI for placeholder-based conditions.
  * Uses soft dependency pattern - checks if PAPI is present before using.
  */
-class PlaceholderAPIIntegration(private val plugin: XInventories) {
+class PlaceholderAPIIntegration(private val plugin: PluginContext) {
 
     private var papiAvailable: Boolean = false
 

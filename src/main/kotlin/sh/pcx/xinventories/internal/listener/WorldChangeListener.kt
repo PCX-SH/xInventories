@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.listener
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.launch
 import org.bukkit.event.EventHandler
@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerTeleportEvent
 /**
  * Handles world change events for inventory switching.
  */
-class WorldChangeListener(private val plugin: XInventories) : Listener {
+class WorldChangeListener(private val plugin: PluginContext) : Listener {
 
     private val inventoryService get() = plugin.serviceManager.inventoryService
     private val config get() = plugin.configManager.mainConfig
@@ -35,7 +35,7 @@ class WorldChangeListener(private val plugin: XInventories) : Listener {
         val delayTicks = config.performance.saveDelayTicks.toLong()
 
         if (delayTicks > 0) {
-            plugin.server.scheduler.runTaskLater(plugin, Runnable {
+            plugin.plugin.server.scheduler.runTaskLater(plugin.plugin, Runnable {
                 handleWorldChange(player.uniqueId, fromWorld, toWorld)
             }, delayTicks)
         } else {
@@ -44,7 +44,7 @@ class WorldChangeListener(private val plugin: XInventories) : Listener {
     }
 
     private fun handleWorldChange(playerUuid: java.util.UUID, fromWorld: String, toWorld: String) {
-        val player = plugin.server.getPlayer(playerUuid) ?: return
+        val player = plugin.plugin.server.getPlayer(playerUuid) ?: return
 
         plugin.launch {
             try {

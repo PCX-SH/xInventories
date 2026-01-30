@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.listener
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -15,7 +15,7 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent
 /**
  * Listener that prevents inventory modifications for locked players.
  */
-class InventoryLockListener(private val plugin: XInventories) : Listener {
+class InventoryLockListener(private val plugin: PluginContext) : Listener {
 
     private val lockingService get() = plugin.serviceManager.lockingService
     private val config get() = plugin.configManager.mainConfig.locking

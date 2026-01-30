@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.listener
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ import java.util.UUID
 /**
  * Handles inventory-related events like death.
  */
-class InventoryListener(private val plugin: XInventories) : Listener {
+class InventoryListener(private val plugin: PluginContext) : Listener {
 
     private val inventoryService get() = plugin.serviceManager.inventoryService
     private val groupService get() = plugin.serviceManager.groupService

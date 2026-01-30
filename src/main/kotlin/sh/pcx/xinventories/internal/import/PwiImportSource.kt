@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.import
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.*
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
@@ -21,13 +21,13 @@ import java.util.UUID
  * Repository: https://github.com/EbonJaeger/perworldinventory-kt
  * Note: PWI is archived as of Dec 2021 but API is still functional.
  */
-class PwiImportSource(private val plugin: XInventories) : ImportSource {
+class PwiImportSource(private val plugin: PluginContext) : ImportSource {
 
     override val name: String = "PerWorldInventory"
     override val id: String = "pwi"
 
-    private val dataFolder: File = File(plugin.dataFolder.parentFile, "PerWorldInventory/data")
-    private val configFolder: File = File(plugin.dataFolder.parentFile, "PerWorldInventory")
+    private val dataFolder: File = File(plugin.plugin.dataFolder.parentFile, "PerWorldInventory/data")
+    private val configFolder: File = File(plugin.plugin.dataFolder.parentFile, "PerWorldInventory")
     private val worldsFile: File = File(configFolder, "worlds.yml")
 
     override val isAvailable: Boolean

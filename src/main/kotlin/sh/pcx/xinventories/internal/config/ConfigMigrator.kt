@@ -1,7 +1,7 @@
 package sh.pcx.xinventories.internal.config
 
 import org.bukkit.configuration.file.YamlConfiguration
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.config.migrations.Migration_1_to_2
 import sh.pcx.xinventories.internal.util.Logging
 import java.io.File
@@ -39,7 +39,7 @@ interface ConfigMigration {
  * This class detects the current config version, backs up the old config,
  * and applies sequential migrations to bring the config up to date.
  */
-class ConfigMigrator(private val plugin: XInventories) {
+class ConfigMigrator(private val plugin: PluginContext) {
 
     companion object {
         /**
@@ -206,7 +206,7 @@ class ConfigMigrator(private val plugin: XInventories) {
             return BackupResult.Success(null)
         }
 
-        val backupDir = File(plugin.dataFolder, BACKUP_DIR)
+        val backupDir = File(plugin.plugin.dataFolder, BACKUP_DIR)
         if (!backupDir.exists() && !backupDir.mkdirs()) {
             return BackupResult.Failure(
                 error = "Failed to create backup directory: ${backupDir.absolutePath}"
@@ -237,7 +237,7 @@ class ConfigMigrator(private val plugin: XInventories) {
      * @return List of backup files, sorted by date (newest first)
      */
     fun listBackups(configFileName: String): List<File> {
-        val backupDir = File(plugin.dataFolder, BACKUP_DIR)
+        val backupDir = File(plugin.plugin.dataFolder, BACKUP_DIR)
         if (!backupDir.exists()) {
             return emptyList()
         }

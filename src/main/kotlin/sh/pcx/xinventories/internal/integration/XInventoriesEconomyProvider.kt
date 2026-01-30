@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.integration
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.service.EconomyService
 import sh.pcx.xinventories.internal.service.GroupService
 import sh.pcx.xinventories.internal.util.Logging
@@ -18,7 +18,7 @@ import org.bukkit.plugin.ServicePriority
  * economy operations, routing them to per-group balances when configured.
  */
 class XInventoriesEconomyProvider(
-    private val plugin: XInventories,
+    private val plugin: PluginContext,
     private val economyService: EconomyService,
     private val groupService: GroupService
 ) : Economy {
@@ -38,7 +38,7 @@ class XInventoriesEconomyProvider(
             Bukkit.getServicesManager().register(
                 Economy::class.java,
                 this,
-                plugin,
+                plugin.plugin,
                 ServicePriority.High
             )
             registered = true

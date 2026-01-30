@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.listener
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.launch
 import org.bukkit.event.EventHandler
@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerGameModeChangeEvent
 /**
  * Handles gamemode change events for separate gamemode inventories.
  */
-class GameModeListener(private val plugin: XInventories) : Listener {
+class GameModeListener(private val plugin: PluginContext) : Listener {
 
     private val inventoryService get() = plugin.serviceManager.inventoryService
     private val groupService get() = plugin.serviceManager.groupService
@@ -39,7 +39,7 @@ class GameModeListener(private val plugin: XInventories) : Listener {
         Logging.debug { "Player ${player.name} changing gamemode: $oldGameMode -> $newGameMode" }
 
         // Handle gamemode change after a tick to ensure the gamemode is fully changed
-        plugin.server.scheduler.runTaskLater(plugin, Runnable {
+        plugin.plugin.server.scheduler.runTaskLater(plugin.plugin, Runnable {
             plugin.launch {
                 try {
                     inventoryService.handleGameModeChange(player, oldGameMode, newGameMode)

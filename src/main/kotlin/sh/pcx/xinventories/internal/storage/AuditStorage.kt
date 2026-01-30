@@ -1,7 +1,7 @@
 package sh.pcx.xinventories.internal.storage
 
 import kotlinx.coroutines.launch
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.AuditAction
 import sh.pcx.xinventories.internal.model.AuditEntry
 import sh.pcx.xinventories.internal.util.Logging
@@ -17,11 +17,11 @@ import java.util.concurrent.ConcurrentLinkedQueue
  * Storage backend for audit log entries.
  * Uses SQLite for persistent storage with in-memory buffering for performance.
  */
-class AuditStorage(private val plugin: XInventories) {
+class AuditStorage(private val plugin: PluginContext) {
 
     private var connection: Connection? = null
     private val writeBuffer = ConcurrentLinkedQueue<AuditEntry>()
-    private val dbFile: File = File(plugin.dataFolder, "data/audit.db")
+    private val dbFile: File = File(plugin.plugin.dataFolder, "data/audit.db")
 
     /**
      * Initializes the audit storage.

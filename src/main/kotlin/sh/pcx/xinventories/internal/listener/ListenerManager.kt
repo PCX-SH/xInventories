@@ -1,13 +1,13 @@
 package sh.pcx.xinventories.internal.listener
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.event.HandlerList
 
 /**
  * Manages registration and unregistration of all event listeners.
  */
-class ListenerManager(private val plugin: XInventories) {
+class ListenerManager(private val context: PluginContext) {
 
     private val listeners = mutableListOf<org.bukkit.event.Listener>()
     private var registered = false
@@ -22,15 +22,15 @@ class ListenerManager(private val plugin: XInventories) {
         }
 
         // Create listeners
-        listeners.add(ConnectionListener(plugin))
-        listeners.add(WorldChangeListener(plugin))
-        listeners.add(GameModeListener(plugin))
-        listeners.add(InventoryListener(plugin))
-        listeners.add(InventoryLockListener(plugin))
+        listeners.add(ConnectionListener(context))
+        listeners.add(WorldChangeListener(context))
+        listeners.add(GameModeListener(context))
+        listeners.add(InventoryListener(context))
+        listeners.add(InventoryLockListener(context))
 
         // Register with Bukkit
         listeners.forEach { listener ->
-            plugin.server.pluginManager.registerEvents(listener, plugin)
+            context.plugin.server.pluginManager.registerEvents(listener, context.plugin)
         }
 
         registered = true
@@ -44,7 +44,7 @@ class ListenerManager(private val plugin: XInventories) {
         if (!registered) return
 
         // Unregister all handlers for this plugin
-        HandlerList.unregisterAll(plugin)
+        HandlerList.unregisterAll(context.plugin)
 
         listeners.clear()
         registered = false

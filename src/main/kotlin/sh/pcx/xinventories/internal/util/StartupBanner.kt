@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.util
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 
 /**
  * Displays a colorful startup banner and plugin information on enable.
@@ -19,11 +19,12 @@ object StartupBanner {
 
     // ASCII art logo lines (without color codes - applied dynamically)
     private val LOGO_LINES = listOf(
-        " __  ___                      __             _",
-        " \\ \\/ (_)___ _   _____  ____  / /_____  _____(_)__  _____",
-        "  \\  /| | __ \\ | / / _ \\/ __ \\/ __/ __ \\/ ___/ / _ \\/ ___/",
-        "  /  \\| | / / | V /  __/ / / / /_/ /_/ / /  / /  __(__  )",
-        " /_/\\_\\_/_/ /_/|___/\\___/_/ /_/\\__/\\____/_/  /_/\\___/____/"
+        "██╗  ██╗██╗███╗   ██╗██╗   ██╗███████╗███╗   ██╗████████╗ ██████╗ ██████╗ ██╗███████╗███████╗",
+        "╚██╗██╔╝██║████╗  ██║██║   ██║██╔════╝████╗  ██║╚══██╔══╝██╔═══██╗██╔══██╗██║██╔════╝██╔════╝",
+        " ╚███╔╝ ██║██╔██╗ ██║██║   ██║█████╗  ██╔██╗ ██║   ██║   ██║   ██║██████╔╝██║█████╗  ███████╗",
+        " ██╔██╗ ██║██║╚██╗██║╚██╗ ██╔╝██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██╔══██╗██║██╔══╝  ╚════██║",
+        "██╔╝ ██╗██║██║ ╚████║ ╚████╔╝ ███████╗██║ ╚████║   ██║   ╚██████╔╝██║  ██║██║███████╗███████║",
+        "╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝╚══════╝"
     )
 
     /**
@@ -31,7 +32,7 @@ object StartupBanner {
      *
      * @param plugin The main plugin instance
      */
-    fun display(plugin: XInventories) {
+    fun display(plugin: PluginContext) {
         val config = plugin.configManager.mainConfig
         val startupConfig = config.startup
 
@@ -40,7 +41,7 @@ object StartupBanner {
             return
         }
 
-        val logger = plugin.logger
+        val logger = plugin.plugin.logger
 
         // Print empty line for separation
         logger.info("")
@@ -53,8 +54,8 @@ object StartupBanner {
         logger.info("")
 
         // Print version and author info
-        logger.info("${GREEN}Version:$RESET ${plugin.description.version}")
-        logger.info("${GREEN}Author:$RESET ${plugin.description.authors.joinToString(", ")}")
+        logger.info("${GREEN}Version:$RESET ${plugin.plugin.description.version}")
+        logger.info("${GREEN}Author:$RESET ${plugin.plugin.description.authors.joinToString(", ")}")
 
         // Print stats if enabled
         if (startupConfig.showStats) {
@@ -69,9 +70,9 @@ object StartupBanner {
      *
      * @param plugin The main plugin instance
      */
-    private fun displayStats(plugin: XInventories) {
+    private fun displayStats(plugin: PluginContext) {
         val config = plugin.configManager.mainConfig
-        val logger = plugin.logger
+        val logger = plugin.plugin.logger
 
         // Storage type
         logger.info("${GREEN}Storage:$RESET ${config.storage.type.name}")

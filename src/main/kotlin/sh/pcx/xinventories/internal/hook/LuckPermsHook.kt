@@ -7,7 +7,7 @@ import net.luckperms.api.context.ContextSet
 import net.luckperms.api.context.ImmutableContextSet
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 
 /**
@@ -25,7 +25,7 @@ import sh.pcx.xinventories.internal.util.Logging
  * /lp user <player> permission set some.permission true xinventories:group=creative
  * ```
  */
-class LuckPermsHook(private val plugin: XInventories) {
+class LuckPermsHook(private val plugin: PluginContext) {
 
     private var luckPerms: LuckPerms? = null
     private var contextCalculator: XInventoriesContextCalculator? = null
@@ -128,7 +128,7 @@ class LuckPermsHook(private val plugin: XInventories) {
      * Context calculator that provides the current xInventories group as a context.
      */
     private class XInventoriesContextCalculator(
-        private val plugin: XInventories
+        private val plugin: PluginContext
     ) : ContextCalculator<Player> {
 
         override fun calculate(target: Player, consumer: ContextConsumer) {

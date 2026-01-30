@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.import
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.*
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.Bukkit
@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream
  * This implementation provides basic NBT reading capability.
  * For full NBT support, consider using BKCommonLib when available.
  */
-class MyWorldsImportSource(private val plugin: XInventories) : ImportSource {
+class MyWorldsImportSource(private val plugin: PluginContext) : ImportSource {
 
     override val name: String = "MyWorlds"
     override val id: String = "myworlds"

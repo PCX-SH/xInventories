@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.storage
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.model.ConfiscatedItem
 import sh.pcx.xinventories.internal.util.Logging
 import java.io.File
@@ -15,10 +15,10 @@ import java.util.UUID
  * Items are stored here when they violate restrictions with MOVE_TO_VAULT action.
  * Players can later retrieve their confiscated items through a GUI or command.
  */
-class ConfiscationStorage(private val plugin: XInventories) {
+class ConfiscationStorage(private val plugin: PluginContext) {
 
     private var connection: Connection? = null
-    private val dbFile: File = File(plugin.dataFolder, "data/confiscations.db")
+    private val dbFile: File = File(plugin.plugin.dataFolder, "data/confiscations.db")
 
     /**
      * Initializes the confiscation storage.

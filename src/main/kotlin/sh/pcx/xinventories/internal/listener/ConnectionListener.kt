@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.listener
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import kotlinx.coroutines.launch
 import org.bukkit.event.EventHandler
@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 /**
  * Handles player connection events (join/quit).
  */
-class ConnectionListener(private val plugin: XInventories) : Listener {
+class ConnectionListener(private val plugin: PluginContext) : Listener {
 
     private val inventoryService get() = plugin.serviceManager.inventoryService
 

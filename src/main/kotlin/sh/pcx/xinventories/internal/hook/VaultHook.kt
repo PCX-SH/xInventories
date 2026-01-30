@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.hook
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import net.milkbowl.vault.permission.Permission
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -8,7 +8,7 @@ import org.bukkit.entity.Player
 /**
  * Integration with Vault for permission checking.
  */
-class VaultHook(private val plugin: XInventories) {
+class VaultHook(private val plugin: PluginContext) {
 
     private var permission: Permission? = null
     private var initialized = false
