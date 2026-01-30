@@ -14,6 +14,7 @@ import sh.pcx.xinventories.internal.model.RestrictionAction
 import sh.pcx.xinventories.internal.model.RestrictionConfig
 import sh.pcx.xinventories.internal.model.VersionTrigger
 import sh.pcx.xinventories.internal.util.Logging
+import sh.pcx.xinventories.internal.util.SchedulerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -173,6 +174,8 @@ class InventoryService(
             // Save current inventory with old gamemode
             val data = PlayerData.fromPlayer(player, groupName)
             data.gameMode = oldGameMode
+            // Load extended data (statistics, advancements, recipes) if enabled
+            data.loadFromPlayerExtended(player, group.settings)
             storageService.savePlayerData(data)
         }
 
@@ -197,6 +200,8 @@ class InventoryService(
 
         val groupObj = groupService.getGroup(group) ?: return false
         val data = PlayerData.fromPlayer(player, group)
+        // Load extended data (statistics, advancements, recipes) if enabled
+        data.loadFromPlayerExtended(player, groupObj.settings)
 
         // Fire event - always sync since we may be on main thread
         // Paper requires async events to be called from async threads
@@ -346,6 +351,8 @@ class InventoryService(
         // Save current inventory
         if (config.features.saveOnWorldChange) {
             val data = PlayerData.fromPlayer(player, fromGroup.name)
+            // Load extended data (statistics, advancements, recipes) if enabled
+            fromGroupInternal?.let { data.loadFromPlayerExtended(player, it.settings) }
             // Exclude shared slots from saved data
             plugin.serviceManager.sharedSlotService.excludeSharedSlotsFromData(data)
             storageService.savePlayerData(data)
@@ -360,6 +367,9 @@ class InventoryService(
                 GroupChangeEvent.ChangeReason.WORLD_CHANGE
             )
             plugin.server.pluginManager.callEvent(groupChangeEvent)
+
+            // Signal LuckPerms context update (if available)
+            plugin.hookManager.signalLuckPermsContextUpdate(player)
         }
 
         // Load new inventory (use override if provided)
@@ -456,46 +466,92 @@ class InventoryService(
     // Private helpers
 
     private fun applyInventory(player: Player, data: PlayerData, settings: GroupSettings) {
-        // Run on main thread
-        plugin.server.scheduler.runTask(plugin, Runnable {
-            data.applyToPlayer(player, settings)
-        })
+        // Run on player's region thread (Folia) or main thread (Paper/Spigot)
+        SchedulerCompat.runTask(plugin, player) { p ->
+            data.applyToPlayer(p, settings)
+        }
     }
 
     private fun clearPlayerInventory(player: Player, settings: GroupSettings) {
-        plugin.server.scheduler.runTask(plugin, Runnable {
-            player.inventory.clear()
-            player.inventory.armorContents = arrayOfNulls(4)
-            player.inventory.setItemInOffHand(null)
+        // Run on player's region thread (Folia) or main thread (Paper/Spigot)
+        SchedulerCompat.runTask(plugin, player) { p ->
+            p.inventory.clear()
+            p.inventory.armorContents = arrayOfNulls(4)
+            p.inventory.setItemInOffHand(null)
 
             if (settings.saveEnderChest) {
-                player.enderChest.clear()
+                p.enderChest.clear()
             }
 
             if (settings.saveHealth) {
-                player.health = 20.0
+                p.health = 20.0
             }
 
             if (settings.saveHunger) {
-                player.foodLevel = 20
+                p.foodLevel = 20
             }
 
             if (settings.saveSaturation) {
-                player.saturation = 5.0f
+                p.saturation = 5.0f
             }
 
             if (settings.saveExperience) {
-                player.exp = 0f
-                player.level = 0
-                player.totalExperience = 0
+                p.exp = 0f
+                p.level = 0
+                p.totalExperience = 0
             }
 
             if (settings.savePotionEffects) {
-                player.activePotionEffects.forEach { effect ->
-                    player.removePotionEffect(effect.type)
+                p.activePotionEffects.forEach { effect ->
+                    p.removePotionEffect(effect.type)
                 }
             }
-        })
+
+            // Clear statistics if enabled (reset to 0)
+            if (settings.saveStatistics) {
+                org.bukkit.Statistic.entries.forEach { stat ->
+                    try {
+                        when (stat.type) {
+                            org.bukkit.Statistic.Type.UNTYPED -> p.setStatistic(stat, 0)
+                            org.bukkit.Statistic.Type.BLOCK -> {
+                                org.bukkit.Material.entries.filter { it.isBlock }.forEach { material ->
+                                    try { p.setStatistic(stat, material, 0) } catch (_: Exception) {}
+                                }
+                            }
+                            org.bukkit.Statistic.Type.ITEM -> {
+                                org.bukkit.Material.entries.filter { it.isItem }.forEach { material ->
+                                    try { p.setStatistic(stat, material, 0) } catch (_: Exception) {}
+                                }
+                            }
+                            org.bukkit.Statistic.Type.ENTITY -> {
+                                org.bukkit.entity.EntityType.entries.filter { it.isAlive }.forEach { entityType ->
+                                    try { p.setStatistic(stat, entityType, 0) } catch (_: Exception) {}
+                                }
+                            }
+                        }
+                    } catch (_: Exception) {}
+                }
+            }
+
+            // Clear advancements if enabled (revoke all)
+            if (settings.saveAdvancements) {
+                org.bukkit.Bukkit.advancementIterator().forEach { advancement ->
+                    val progress = p.getAdvancementProgress(advancement)
+                    progress.awardedCriteria.forEach { criteria ->
+                        progress.revokeCriteria(criteria)
+                    }
+                }
+            }
+
+            // Clear recipes if enabled (undiscover all)
+            if (settings.saveRecipes) {
+                org.bukkit.Bukkit.recipeIterator().forEach { recipe ->
+                    if (recipe is org.bukkit.Keyed) {
+                        try { p.undiscoverRecipe(recipe.key) } catch (_: Exception) {}
+                    }
+                }
+            }
+        }
     }
 
     private fun notifySwitch(player: Player, fromGroup: String, toGroup: String) {

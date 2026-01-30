@@ -61,6 +61,36 @@ class ServiceManager(
     lateinit var importService: sh.pcx.xinventories.internal.import.ImportService
         private set
 
+    // Quality of Life services
+    lateinit var mergeService: MergeService
+        private set
+
+    lateinit var exportService: ExportService
+        private set
+
+    // Admin Tools services
+    var auditService: AuditService? = null
+        private set
+
+    lateinit var bulkOperationService: BulkOperationService
+        private set
+
+    lateinit var metricsService: MetricsService
+        private set
+
+    lateinit var antiDupeService: AntiDupeService
+        private set
+
+    // Advanced Features services
+    lateinit var nbtFilterService: NBTFilterService
+        private set
+
+    lateinit var expirationService: ExpirationService
+        private set
+
+    lateinit var temporaryGroupService: TemporaryGroupService
+        private set
+
     // Sync service (nullable - only initialized when sync is enabled)
     var syncService: SyncService? = null
         private set
@@ -164,6 +194,58 @@ class ServiceManager(
         importService.initialize()
         Logging.debug { "ImportService initialized" }
 
+        // Quality of Life services
+
+        // Merge service (depends on storage)
+        mergeService = MergeService(plugin, scope, storageService)
+        mergeService.initialize()
+        Logging.debug { "MergeService initialized" }
+
+        // Export service (depends on storage)
+        exportService = ExportService(plugin, scope, storageService)
+        exportService.initialize()
+        Logging.debug { "ExportService initialized" }
+
+        // Admin Tools services
+
+        // Metrics service (no dependencies)
+        metricsService = MetricsService(plugin, scope)
+        metricsService.initialize()
+        Logging.debug { "MetricsService initialized" }
+
+        // Audit service (depends on scope)
+        auditService = AuditService(plugin, scope)
+        auditService?.initialize()
+        Logging.debug { "AuditService initialized" }
+
+        // Bulk operation service (depends on storage, template service, audit service)
+        bulkOperationService = BulkOperationService(plugin, scope)
+        Logging.debug { "BulkOperationService initialized" }
+
+        // Anti-dupe service (depends on scope)
+        antiDupeService = AntiDupeService(plugin, scope)
+        antiDupeService.initialize()
+        Logging.debug { "AntiDupeService initialized" }
+
+        // Advanced Features services
+
+        // NBT filter service (depends on message service)
+        nbtFilterService = NBTFilterService(plugin, scope, messageService)
+        nbtFilterService.initialize()
+        Logging.debug { "NBTFilterService initialized" }
+
+        // Expiration service (depends on storage, backup service)
+        expirationService = ExpirationService(plugin, scope, storageService, backupService)
+        expirationService.initialize()
+        Logging.debug { "ExpirationService initialized" }
+
+        // Temporary group service (depends on storage, group, inventory, message)
+        temporaryGroupService = TemporaryGroupService(
+            plugin, scope, storageService, groupService, inventoryService, messageService
+        )
+        temporaryGroupService.initialize()
+        Logging.debug { "TemporaryGroupService initialized" }
+
         // Sync service (optional - depends on config)
         initializeSyncService()
 
@@ -264,6 +346,70 @@ class ServiceManager(
             Logging.error("Error shutting down SyncService", e)
         }
 
+        // Temporary group service
+        try {
+            temporaryGroupService.shutdown()
+            Logging.debug { "TemporaryGroupService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down TemporaryGroupService", e)
+        }
+
+        // Expiration service
+        try {
+            expirationService.shutdown()
+            Logging.debug { "ExpirationService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down ExpirationService", e)
+        }
+
+        // NBT filter service
+        try {
+            nbtFilterService.shutdown()
+            Logging.debug { "NBTFilterService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down NBTFilterService", e)
+        }
+
+        // Anti-dupe service
+        try {
+            antiDupeService.shutdown()
+            Logging.debug { "AntiDupeService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down AntiDupeService", e)
+        }
+
+        // Audit service
+        try {
+            auditService?.shutdown()
+            Logging.debug { "AuditService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down AuditService", e)
+        }
+
+        // Metrics service
+        try {
+            metricsService.shutdown()
+            Logging.debug { "MetricsService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down MetricsService", e)
+        }
+
+        // Export service
+        try {
+            exportService.shutdown()
+            Logging.debug { "ExportService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down ExportService", e)
+        }
+
+        // Merge service
+        try {
+            mergeService.shutdown()
+            Logging.debug { "MergeService shut down" }
+        } catch (e: Exception) {
+            Logging.error("Error shutting down MergeService", e)
+        }
+
         // Template service
         try {
             templateService.shutdown()
@@ -333,6 +479,18 @@ class ServiceManager(
 
         // Reload template service
         // templateService.reload() is called by TemplateCommand when needed
+
+        // Reload audit service
+        auditService?.reload()
+
+        // Reload anti-dupe service
+        antiDupeService.reload()
+
+        // Reload NBT filter service
+        nbtFilterService.reload()
+
+        // Reload expiration service
+        expirationService.reload()
 
         // Note: Storage service doesn't support hot-reload
         // (would need to restart plugin to change storage type)

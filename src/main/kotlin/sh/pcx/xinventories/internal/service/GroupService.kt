@@ -496,11 +496,188 @@ class GroupService(private val plugin: XInventories) {
         return groups[groupName]?.matchesPattern(worldName) ?: false
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    // World Group Inheritance
+    // ═══════════════════════════════════════════════════════════════════
+
+    // Cache for resolved settings to avoid repeated inheritance resolution
+    private val resolvedSettingsCache = ConcurrentHashMap<String, GroupSettings>()
+
+    /**
+     * Resolves the effective settings for a group, including inherited settings.
+     *
+     * This method walks up the inheritance chain and merges parent settings
+     * with child settings, where child settings override parent settings.
+     *
+     * @param groupName The name of the group
+     * @return The resolved settings, or default settings if group not found
+     */
+    fun resolveSettings(groupName: String): GroupSettings {
+        // Check cache first
+        resolvedSettingsCache[groupName]?.let { return it }
+
+        val group = getGroup(groupName) ?: return GroupSettings()
+
+        // If no parent, just return the group's own settings
+        val parentName = group.parent
+        if (parentName == null) {
+            resolvedSettingsCache[groupName] = group.settings
+            return group.settings
+        }
+
+        // Check for circular inheritance
+        val visited = mutableSetOf<String>()
+        if (hasCircularInheritance(groupName, visited)) {
+            Logging.warning("Circular inheritance detected for group '$groupName', using own settings")
+            resolvedSettingsCache[groupName] = group.settings
+            return group.settings
+        }
+
+        // Resolve parent settings recursively
+        val parentSettings = resolveSettings(parentName)
+
+        // Merge parent with child (child overrides)
+        val merged = parentSettings.mergeWith(group.settings)
+        resolvedSettingsCache[groupName] = merged
+
+        Logging.debug { "Resolved settings for '$groupName' (parent: '$parentName')" }
+        return merged
+    }
+
+    /**
+     * Gets the resolved settings for a group as an API-friendly result.
+     *
+     * @param groupName The name of the group
+     * @return Result containing the resolved settings or an error
+     */
+    fun resolveSettingsResult(groupName: String): Result<GroupSettings> {
+        val group = getGroup(groupName)
+            ?: return Result.failure(IllegalArgumentException("Group '$groupName' not found"))
+
+        return try {
+            Result.success(resolveSettings(groupName))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Checks if a group has circular inheritance.
+     *
+     * @param groupName The starting group name
+     * @param visited Set of already visited group names
+     * @return true if circular inheritance is detected
+     */
+    fun hasCircularInheritance(groupName: String, visited: MutableSet<String> = mutableSetOf()): Boolean {
+        if (visited.contains(groupName)) {
+            return true
+        }
+
+        val group = getGroup(groupName) ?: return false
+        val parentName = group.parent ?: return false
+
+        visited.add(groupName)
+        return hasCircularInheritance(parentName, visited)
+    }
+
+    /**
+     * Validates inheritance for all groups.
+     *
+     * @return Map of group name to list of validation errors
+     */
+    fun validateInheritance(): Map<String, List<String>> {
+        val errors = mutableMapOf<String, MutableList<String>>()
+
+        for ((name, group) in groups) {
+            val groupErrors = mutableListOf<String>()
+
+            // Check parent exists
+            group.parent?.let { parentName ->
+                if (!groups.containsKey(parentName)) {
+                    groupErrors.add("Parent group '$parentName' does not exist")
+                }
+            }
+
+            // Check for circular inheritance
+            if (hasCircularInheritance(name)) {
+                groupErrors.add("Circular inheritance detected")
+            }
+
+            if (groupErrors.isNotEmpty()) {
+                errors[name] = groupErrors
+            }
+        }
+
+        return errors
+    }
+
+    /**
+     * Gets the inheritance chain for a group.
+     *
+     * @param groupName The starting group name
+     * @return List of group names from child to root, or empty if group not found
+     */
+    fun getInheritanceChain(groupName: String): List<String> {
+        val chain = mutableListOf<String>()
+        val visited = mutableSetOf<String>()
+
+        var current: String? = groupName
+        while (current != null && !visited.contains(current)) {
+            val group = getGroup(current) ?: break
+            chain.add(current)
+            visited.add(current)
+            current = group.parent
+        }
+
+        return chain
+    }
+
+    /**
+     * Gets all groups that inherit from a given group (direct children).
+     *
+     * @param groupName The parent group name
+     * @return List of child group names
+     */
+    fun getChildGroups(groupName: String): List<String> {
+        return groups.values
+            .filter { it.parent == groupName }
+            .map { it.name }
+    }
+
+    /**
+     * Gets all groups that inherit from a given group (all descendants).
+     *
+     * @param groupName The ancestor group name
+     * @return List of descendant group names
+     */
+    fun getAllDescendants(groupName: String): List<String> {
+        val descendants = mutableListOf<String>()
+        val toProcess = getChildGroups(groupName).toMutableList()
+
+        while (toProcess.isNotEmpty()) {
+            val child = toProcess.removeAt(0)
+            descendants.add(child)
+            toProcess.addAll(getChildGroups(child))
+        }
+
+        return descendants
+    }
+
+    /**
+     * Clears the resolved settings cache.
+     * Should be called when group settings or inheritance changes.
+     */
+    fun clearSettingsCache() {
+        resolvedSettingsCache.clear()
+        Logging.debug { "Cleared resolved settings cache" }
+    }
+
     /**
      * Saves current groups to configuration.
      */
     fun saveToConfig() {
         plugin.configManager.saveGroupsConfig()
+        clearSettingsCache() // Clear cache when config changes
     }
 
     /**
