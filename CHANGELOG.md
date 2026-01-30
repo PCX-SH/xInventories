@@ -62,6 +62,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Server heartbeat monitoring
   - Cache invalidation across servers
 
+#### CI/CD & Code Quality
+- **Nightly Builds** - Automatic development builds on every push to main
+  - Available at [Nightly Release](https://github.com/PCX-SH/xInventories/releases/tag/nightly)
+  - Pre-release builds for testing new features
+- **GitHub Actions Workflows**
+  - Automated testing on PRs and pushes
+  - Code coverage reporting with Codecov
+  - Static analysis with Detekt
+  - Security scanning with CodeQL
+  - Multi-version Paper testing (1.20.5 - 1.21.4)
+  - Automatic PR labeling and stale issue cleanup
+  - API documentation generation with Dokka
+- **Dependabot** - Automated dependency updates
+
 ### Changed
 - Updated test suite to 1578 tests (up from 991)
 - Added `version` field to PlayerData for sync conflict detection

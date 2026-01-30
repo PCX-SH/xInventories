@@ -8,7 +8,8 @@
   <a href="https://github.com/PCX-SH/xInventories/actions/workflows/build.yml"><img src="https://github.com/PCX-SH/xInventories/actions/workflows/build.yml/badge.svg" alt="Build Status"></a>
   <a href="https://github.com/PCX-SH/xInventories/actions/workflows/test.yml"><img src="https://github.com/PCX-SH/xInventories/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
   <a href="https://codecov.io/gh/PCX-SH/xInventories"><img src="https://codecov.io/gh/PCX-SH/xInventories/branch/main/graph/badge.svg" alt="Code Coverage"></a>
-  <a href="https://github.com/PCX-SH/xInventories/releases/latest"><img src="https://img.shields.io/github/v/release/PCX-SH/xInventories?color=blue&label=release" alt="Latest Release"></a>
+  <a href="https://github.com/PCX-SH/xInventories/releases/latest"><img src="https://img.shields.io/github/v/release/PCX-SH/xInventories?color=blue&label=stable" alt="Stable Release"></a>
+  <a href="https://github.com/PCX-SH/xInventories/releases/tag/nightly"><img src="https://img.shields.io/badge/nightly-latest-purple" alt="Nightly Build"></a>
 </p>
 
 <p align="center">
@@ -73,9 +74,16 @@ A powerful per-world inventory management plugin for Paper 1.20.5+ servers. Sepa
 - **Paper 1.20.5+** (1.20.5 - 1.21.11+ supported, not compatible with Spigot)
 - **Java 21+**
 
+## Downloads
+
+| Release | Description | Link |
+|---------|-------------|------|
+| **Stable** | Recommended for production servers | [Latest Release](https://github.com/PCX-SH/xInventories/releases/latest) |
+| **Nightly** | Latest development build (may be unstable) | [Nightly Build](https://github.com/PCX-SH/xInventories/releases/tag/nightly) |
+
 ## Installation
 
-1. Download `xInventories-1.1.0.jar` (lightweight ~1.7MB)
+1. Download `xInventories.jar` (~1.7MB) from the links above
 2. Place in your server's `plugins/` folder
 3. Restart your server (Paper will automatically download required libraries)
 4. Configure `plugins/xInventories/config.yml` as needed
