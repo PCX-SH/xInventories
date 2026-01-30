@@ -10,6 +10,7 @@ import org.bukkit.event.inventory.InventoryAction
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.inventory.Inventory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -21,6 +22,7 @@ class GUIManager(private val plugin: XInventories) : Listener {
 
     private val openGUIs = ConcurrentHashMap<UUID, GUI>()
     private val openInventories = ConcurrentHashMap<UUID, Inventory>()
+    private val chatInputHandlers = ConcurrentHashMap<UUID, (String) -> Unit>()
 
     fun initialize() {
         plugin.server.pluginManager.registerEvents(this, plugin)
@@ -144,6 +146,44 @@ class GUIManager(private val plugin: XInventories) : Listener {
         }
     }
 
+    /**
+     * Registers a chat input handler for a player.
+     * The handler will be called with the player's next chat message.
+     */
+    fun registerChatInput(player: Player, handler: (String) -> Unit) {
+        chatInputHandlers[player.uniqueId] = handler
+        Logging.debug("Registered chat input handler for ${player.name}")
+    }
+
+    /**
+     * Cancels any pending chat input handler for a player.
+     */
+    fun cancelChatInput(player: Player) {
+        chatInputHandlers.remove(player.uniqueId)
+    }
+
+    /**
+     * Checks if a player has a chat input handler registered.
+     */
+    fun hasChatInput(player: Player): Boolean = chatInputHandlers.containsKey(player.uniqueId)
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    fun onPlayerChat(event: AsyncPlayerChatEvent) {
+        val handler = chatInputHandlers.remove(event.player.uniqueId) ?: return
+
+        // Cancel the chat event so the message isn't broadcast
+        event.isCancelled = true
+
+        // Run the handler on the main thread
+        plugin.server.scheduler.runTask(plugin, Runnable {
+            try {
+                handler(event.message)
+            } catch (e: Exception) {
+                Logging.error("Error in chat input handler for ${event.player.name}", e)
+            }
+        })
+    }
+
     fun shutdown() {
         // Close all open GUIs
         openGUIs.keys.toList().forEach { uuid ->
@@ -151,5 +191,6 @@ class GUIManager(private val plugin: XInventories) : Listener {
         }
         openGUIs.clear()
         openInventories.clear()
+        chatInputHandlers.clear()
     }
 }

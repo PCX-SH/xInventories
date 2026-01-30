@@ -17,7 +17,7 @@ import org.bukkit.inventory.Inventory
 class MainMenuGUI(plugin: XInventories) : AbstractGUI(
     plugin,
     Component.text("xInventories Admin", NamedTextColor.DARK_AQUA),
-    27
+    45
 ) {
 
     init {
@@ -27,6 +27,8 @@ class MainMenuGUI(plugin: XInventories) : AbstractGUI(
     private fun setupItems() {
         // Fill border
         fillBorder(GUIComponents.filler())
+
+        // === Row 1: Core Management ===
 
         // Groups button
         setItem(1, 1, GUIItemBuilder()
@@ -83,8 +85,92 @@ class MainMenuGUI(plugin: XInventories) : AbstractGUI(
             .build()
         )
 
+        // === Row 2: Administration Tools ===
+
+        // Template Manager
+        setItem(2, 1, GUIItemBuilder()
+            .material(Material.BOOKSHELF)
+            .name("Template Manager", NamedTextColor.GOLD)
+            .lore("Create and manage inventory templates")
+            .lore("")
+            .lore("Templates can be applied to")
+            .lore("players or entire groups")
+            .lore("")
+            .lore("Click to open")
+            .onClick { event ->
+                val player = event.whoClicked as Player
+                TemplateManagerGUI(plugin).open(player)
+            }
+            .build()
+        )
+
+        // Group Browser
+        setItem(2, 3, GUIItemBuilder()
+            .material(Material.COMPASS)
+            .name("Group Browser", NamedTextColor.YELLOW)
+            .lore("Browse groups with player counts")
+            .lore("")
+            .lore("Quick actions for groups")
+            .lore("like clear or apply templates")
+            .lore("")
+            .lore("Click to open")
+            .onClick { event ->
+                val player = event.whoClicked as Player
+                GroupBrowserGUI(plugin).open(player)
+            }
+            .build()
+        )
+
+        // Bulk Operations
+        setItem(2, 5, GUIItemBuilder()
+            .material(Material.COMMAND_BLOCK)
+            .name("Bulk Operations", NamedTextColor.LIGHT_PURPLE)
+            .lore("Perform operations on all")
+            .lore("players in a group")
+            .lore("")
+            .lore("Clear, apply templates,")
+            .lore("reset stats, or export")
+            .lore("")
+            .lore("Click to open")
+            .onClick { event ->
+                val player = event.whoClicked as Player
+                BulkOperationsGUI(plugin).open(player)
+            }
+            .build()
+        )
+
+        // Inventory Search
+        setItem(2, 7, GUIItemBuilder()
+            .material(Material.SPYGLASS)
+            .name("Inventory Search", NamedTextColor.AQUA)
+            .lore("Search for items across")
+            .lore("all player inventories")
+            .lore("")
+            .lore("Find by material, name,")
+            .lore("or enchantment")
+            .lore("")
+            .lore("Click to open")
+            .onClick { event ->
+                val player = event.whoClicked as Player
+                InventorySearchGUI(plugin).open(player)
+            }
+            .build()
+        )
+
+        // === Row 3: Info section ===
+
+        // Info item
+        setItem(3, 4, GUIItemBuilder()
+            .material(Material.BOOK)
+            .name("xInventories", NamedTextColor.GOLD)
+            .lore("Per-world inventory management")
+            .lore("")
+            .lore("Use /xinv help for commands")
+            .build()
+        )
+
         // Close button
-        setItem(2, 4, GUIComponents.closeButton())
+        setItem(4, 4, GUIComponents.closeButton())
     }
 
     private fun showStorageInfo(player: Player) {
