@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter
  * - Save/cancel buttons
  */
 class ConditionalGroupsGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val groupName: String
 ) : AbstractGUI(
     plugin,

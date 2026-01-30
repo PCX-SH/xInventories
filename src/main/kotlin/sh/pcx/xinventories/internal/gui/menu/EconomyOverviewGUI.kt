@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -27,7 +27,7 @@ import java.util.UUID
  * - Economy health metrics
  */
 class EconomyOverviewGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val selectedGroup: String? = null,
     private var currentPage: Int = 0
 ) : AbstractGUI(
@@ -85,7 +85,7 @@ class EconomyOverviewGUI(
                 topPlayers = playerBalances.mapNotNull { (uuid, balances) ->
                     val balance = balances[selectedGroup] ?: return@mapNotNull null
                     if (balance <= 0.0) return@mapNotNull null
-                    val player = plugin.server.getOfflinePlayer(uuid)
+                    val player = plugin.plugin.server.getOfflinePlayer(uuid)
                     val name = player.name ?: uuid.toString().take(8)
                     name to balance
                 }.sortedByDescending { it.second }

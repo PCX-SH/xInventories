@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.model.BackupMetadata
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
  * - Pagination
  */
 class BackupManagerGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private var currentPage: Int = 0,
     private val confirmingRestore: String? = null,
     private val confirmingDelete: String? = null

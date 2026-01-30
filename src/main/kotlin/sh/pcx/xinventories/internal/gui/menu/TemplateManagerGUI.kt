@@ -9,7 +9,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter
  * - Pagination
  */
 class TemplateManagerGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val page: Int = 0
 ) : AbstractGUI(
     plugin,
@@ -209,7 +209,7 @@ class TemplateManagerGUI(
  * GUI for creating a new template from the player's current inventory.
  */
 class CreateTemplateGUI(
-    plugin: XInventories
+    plugin: PluginContext
 ) : AbstractGUI(
     plugin,
     Component.text("Create Template", NamedTextColor.DARK_AQUA),
@@ -273,7 +273,7 @@ class CreateTemplateGUI(
  * GUI for template quick actions (apply, delete, etc.).
  */
 class TemplateActionsGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val template: InventoryTemplate
 ) : AbstractGUI(
     plugin,
@@ -375,7 +375,7 @@ class TemplateActionsGUI(
  * GUI for selecting a player to apply a template to.
  */
 class TemplatePlayerSelectorGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val template: InventoryTemplate,
     private val page: Int = 0
 ) : AbstractGUI(
@@ -507,7 +507,7 @@ class TemplatePlayerSelectorGUI(
  * GUI for confirming template application to a player.
  */
 class TemplateApplyConfirmGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val template: InventoryTemplate,
     private val targetPlayer: Player
 ) : AbstractGUI(
@@ -588,7 +588,7 @@ class TemplateApplyConfirmGUI(
  * GUI for confirming template deletion.
  */
 class TemplateDeleteConfirmGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val template: InventoryTemplate
 ) : AbstractGUI(
     plugin,
@@ -660,7 +660,7 @@ class TemplateDeleteConfirmGUI(
  * GUI for viewing/editing template contents.
  */
 class TemplateEditorGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val template: InventoryTemplate
 ) : AbstractGUI(
     plugin,

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -17,7 +17,7 @@ import org.bukkit.inventory.Inventory
  * GUI for managing all world-to-group assignments.
  */
 class WorldManagerGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val page: Int = 0
 ) : AbstractGUI(
     plugin,

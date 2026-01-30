@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -35,7 +35,7 @@ import java.util.UUID
  * - Pagination for results
  */
 class InventorySearchGUI(
-    plugin: XInventories
+    plugin: PluginContext
 ) : AbstractGUI(
     plugin,
     Component.text("Inventory Search", NamedTextColor.DARK_AQUA),
@@ -129,7 +129,7 @@ class InventorySearchGUI(
  * GUI for selecting a material to search for.
  */
 class MaterialSelectorGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val page: Int = 0,
     private val category: MaterialCategory = MaterialCategory.ALL
 ) : AbstractGUI(
@@ -308,7 +308,7 @@ enum class MaterialCategory {
  * GUI for selecting an enchantment to search for.
  */
 class EnchantmentSelectorGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val page: Int = 0
 ) : AbstractGUI(
     plugin,
@@ -436,7 +436,7 @@ enum class SearchType {
  * GUI for selecting search scope.
  */
 class SearchScopeSelectGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val searchType: SearchType,
     private val material: Material? = null,
     private val enchantment: Enchantment? = null,
@@ -679,7 +679,7 @@ data class SearchResult(
  * GUI for selecting a group to search in.
  */
 class SearchGroupSelectGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val searchType: SearchType,
     private val material: Material?,
     private val enchantment: Enchantment?,
@@ -912,7 +912,7 @@ class SearchGroupSelectGUI(
  * GUI for displaying search results.
  */
 class SearchResultsGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val results: List<SearchResult>,
     private val searchType: SearchType,
     private val material: Material?,
@@ -1066,7 +1066,7 @@ class SearchResultsGUI(
     }
 
     private fun exportResults(player: Player) {
-        val exportFile = File(plugin.dataFolder, "exports/search-${System.currentTimeMillis()}.csv")
+        val exportFile = File(plugin.plugin.dataFolder, "exports/search-${System.currentTimeMillis()}.csv")
         exportFile.parentFile?.mkdirs()
 
         val csv = StringBuilder()

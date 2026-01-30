@@ -8,7 +8,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -28,7 +28,7 @@ import java.util.UUID
  * - Link to existing GroupDetailGUI
  */
 class GroupBrowserGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val page: Int = 0
 ) : AbstractGUI(
     plugin,
@@ -251,7 +251,7 @@ class GroupBrowserGUI(
  * GUI for quick actions on a group.
  */
 class GroupQuickActionsGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val group: Group
 ) : AbstractGUI(
     plugin,
@@ -353,7 +353,7 @@ class GroupQuickActionsGUI(
  * GUI for confirming group inventory clear.
  */
 class GroupClearConfirmGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val group: Group
 ) : AbstractGUI(
     plugin,
@@ -431,7 +431,7 @@ class GroupClearConfirmGUI(
  * GUI for selecting a template to apply to a group.
  */
 class GroupTemplateSelectGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val group: Group,
     private val page: Int = 0
 ) : AbstractGUI(
@@ -566,7 +566,7 @@ class GroupTemplateSelectGUI(
  * GUI for confirming template application to a group.
  */
 class GroupTemplateConfirmGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val group: Group,
     private val template: sh.pcx.xinventories.internal.model.InventoryTemplate
 ) : AbstractGUI(

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.config.SharedSlotConfigEntry
 import sh.pcx.xinventories.internal.config.SharedSlotsConfigSection
 import sh.pcx.xinventories.internal.gui.AbstractGUI
@@ -31,7 +31,7 @@ import org.bukkit.inventory.Inventory
  * - Save/cancel buttons
  */
 class SharedSlotsEditorGUI(
-    plugin: XInventories
+    plugin: PluginContext
 ) : AbstractGUI(
     plugin,
     Component.text("Shared Slots Editor", NamedTextColor.DARK_GREEN),

@@ -7,7 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItemBuilder
@@ -30,7 +30,7 @@ import java.io.File
  * - Cancel button for running operations
  */
 class BulkOperationsGUI(
-    plugin: XInventories
+    plugin: PluginContext
 ) : AbstractGUI(
     plugin,
     Component.text("Bulk Operations", NamedTextColor.DARK_AQUA),
@@ -159,7 +159,7 @@ class BulkOperationsGUI(
  * GUI for selecting a group for bulk operations.
  */
 class BulkOperationGroupSelectGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val operationType: BulkOperationType,
     private val page: Int = 0
 ) : AbstractGUI(
@@ -305,7 +305,7 @@ class BulkOperationGroupSelectGUI(
  * GUI for selecting a template for bulk apply operations.
  */
 class BulkTemplateSelectGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val group: Group,
     private val page: Int = 0
 ) : AbstractGUI(
@@ -440,7 +440,7 @@ class BulkTemplateSelectGUI(
  * GUI for confirming a bulk operation.
  */
 class BulkOperationConfirmGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val group: Group,
     private val operationType: BulkOperationType,
     private val template: InventoryTemplate? = null
@@ -580,7 +580,7 @@ class BulkOperationConfirmGUI(
                     plugin.serviceManager.bulkOperationService.resetStatsForGroup(player, group.name)
                 }
                 BulkOperationType.EXPORT -> {
-                    val exportFile = File(plugin.dataFolder, "exports/${group.name}-${System.currentTimeMillis()}.json")
+                    val exportFile = File(plugin.plugin.dataFolder, "exports/${group.name}-${System.currentTimeMillis()}.json")
                     plugin.serviceManager.bulkOperationService.exportGroup(player, group.name, exportFile)
                 }
             }
@@ -626,7 +626,7 @@ class BulkOperationConfirmGUI(
  * GUI for viewing active bulk operation status.
  */
 class BulkOperationStatusGUI(
-    plugin: XInventories
+    plugin: PluginContext
 ) : AbstractGUI(
     plugin,
     Component.text("Operation Status", NamedTextColor.DARK_AQUA),

@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -18,14 +18,14 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Manages GUI instances and handles inventory events.
  */
-class GUIManager(private val plugin: XInventories) : Listener {
+class GUIManager(private val plugin: PluginContext) : Listener {
 
     private val openGUIs = ConcurrentHashMap<UUID, GUI>()
     private val openInventories = ConcurrentHashMap<UUID, Inventory>()
     private val chatInputHandlers = ConcurrentHashMap<UUID, (String) -> Unit>()
 
     fun initialize() {
-        plugin.server.pluginManager.registerEvents(this, plugin)
+        plugin.plugin.server.pluginManager.registerEvents(this, plugin.plugin)
         Logging.debug("GUIManager initialized and events registered")
     }
 
@@ -175,7 +175,7 @@ class GUIManager(private val plugin: XInventories) : Listener {
         event.isCancelled = true
 
         // Run the handler on the main thread
-        plugin.server.scheduler.runTask(plugin, Runnable {
+        plugin.plugin.server.scheduler.runTask(plugin.plugin, Runnable {
             try {
                 handler(event.message)
             } catch (e: Exception) {
@@ -187,7 +187,7 @@ class GUIManager(private val plugin: XInventories) : Listener {
     fun shutdown() {
         // Close all open GUIs
         openGUIs.keys.toList().forEach { uuid ->
-            plugin.server.getPlayer(uuid)?.closeInventory()
+            plugin.plugin.server.getPlayer(uuid)?.closeInventory()
         }
         openGUIs.clear()
         openInventories.clear()

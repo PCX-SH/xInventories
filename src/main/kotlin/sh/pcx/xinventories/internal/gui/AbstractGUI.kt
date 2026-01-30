@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.util.Logging
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack
  * Abstract base class for GUI implementations.
  */
 abstract class AbstractGUI(
-    protected val plugin: XInventories,
+    protected val plugin: PluginContext,
     override val title: Component,
     override val size: Int
 ) : GUI {

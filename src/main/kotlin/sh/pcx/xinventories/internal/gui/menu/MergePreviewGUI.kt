@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -28,7 +28,7 @@ import org.bukkit.inventory.ItemStack
  * Row 4-5: Target inventory preview (18 slots) + action buttons
  */
 class MergePreviewGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val admin: Player,
     private val pendingMerge: PendingMerge
 ) : AbstractGUI(

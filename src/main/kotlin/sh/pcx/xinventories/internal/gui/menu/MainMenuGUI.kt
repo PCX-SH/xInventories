@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -14,7 +14,7 @@ import org.bukkit.inventory.Inventory
 /**
  * Main admin menu for xInventories.
  */
-class MainMenuGUI(plugin: XInventories) : AbstractGUI(
+class MainMenuGUI(plugin: PluginContext) : AbstractGUI(
     plugin,
     Component.text("xInventories Admin", NamedTextColor.DARK_AQUA),
     45

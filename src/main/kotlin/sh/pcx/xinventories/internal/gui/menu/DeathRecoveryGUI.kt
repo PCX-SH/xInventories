@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -27,7 +27,7 @@ import java.util.*
  * Shows death history with locations, causes, and inventory contents.
  */
 class DeathRecoveryGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val targetUUID: UUID,
     private val targetName: String,
     private val page: Int = 0
@@ -463,7 +463,7 @@ class DeathRecoveryGUI(
  * GUI for previewing a death record's inventory contents.
  */
 class DeathPreviewGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val targetUUID: UUID,
     private val targetName: String,
     private val deathRecord: DeathRecord

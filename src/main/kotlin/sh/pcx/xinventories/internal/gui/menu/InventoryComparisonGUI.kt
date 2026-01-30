@@ -9,7 +9,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -32,7 +32,7 @@ enum class ComparisonViewMode {
  * highlighting differences between them.
  */
 class InventoryComparisonGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val player1Uuid: UUID,
     private val player1Name: String,
     private val player2Uuid: UUID,

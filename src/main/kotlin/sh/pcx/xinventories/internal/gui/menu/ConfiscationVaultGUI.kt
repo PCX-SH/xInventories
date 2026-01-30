@@ -8,7 +8,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -23,7 +23,7 @@ import java.util.UUID
  * Items end up here when they violate restrictions with MOVE_TO_VAULT action.
  */
 class ConfiscationVaultGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val targetUuid: UUID,
     private val targetName: String,
     private val isAdmin: Boolean = false,
@@ -81,7 +81,7 @@ class ConfiscationVaultGUI(
                         player.sendMessage(Component.text("You can only claim your own items!", NamedTextColor.RED))
                         return@onClick
                     }
-                    val targetPlayer = if (isAdmin) plugin.server.getPlayer(targetUuid) else player
+                    val targetPlayer = if (isAdmin) plugin.plugin.server.getPlayer(targetUuid) else player
                     if (targetPlayer == null) {
                         player.sendMessage(Component.text("Target player is not online!", NamedTextColor.RED))
                         return@onClick
@@ -226,7 +226,7 @@ class ConfiscationVaultGUI(
                     return@GUIItem
                 }
 
-                val targetPlayer = if (isAdmin) plugin.server.getPlayer(targetUuid) else player
+                val targetPlayer = if (isAdmin) plugin.plugin.server.getPlayer(targetUuid) else player
                 if (targetPlayer == null) {
                     player.sendMessage(Component.text("Target player is not online!", NamedTextColor.RED))
                     return@GUIItem

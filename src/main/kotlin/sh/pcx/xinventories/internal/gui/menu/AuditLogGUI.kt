@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -35,7 +35,7 @@ import java.util.UUID
  * - Export to file button
  */
 class AuditLogGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val filterAction: AuditAction? = null,
     private val filterPlayer: UUID? = null,
     private val filterPlayerName: String? = null,
@@ -145,7 +145,7 @@ class AuditLogGUI(
                         if (input.lowercase() == "cancel") {
                             AuditLogGUI(plugin, filterAction, filterPlayer, filterPlayerName, filterFrom, filterTo, currentPage).open(player)
                         } else {
-                            val targetPlayer = plugin.server.getOfflinePlayer(input)
+                            val targetPlayer = plugin.plugin.server.getOfflinePlayer(input)
                             AuditLogGUI(plugin, filterAction, targetPlayer.uniqueId, input, filterFrom, filterTo, 0).open(player)
                         }
                     }
@@ -352,7 +352,7 @@ class AuditLogGUI(
 
         plugin.scope.launch {
             val timestamp = System.currentTimeMillis()
-            val exportDir = File(plugin.dataFolder, "exports")
+            val exportDir = File(plugin.plugin.dataFolder, "exports")
             exportDir.mkdirs()
             val file = File(exportDir, "audit_export_$timestamp.csv")
 

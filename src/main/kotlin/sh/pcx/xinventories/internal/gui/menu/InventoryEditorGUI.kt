@@ -14,7 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -29,7 +29,7 @@ import java.util.*
  * Allows drag-and-drop item placement, adding/removing items, and modifying amounts.
  */
 class InventoryEditorGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val targetUUID: UUID,
     private val targetName: String,
     private val groupName: String,
@@ -526,7 +526,7 @@ class InventoryEditorGUI(
  * A simple confirmation dialog GUI.
  */
 class ConfirmationGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     title: Component,
     private val line1: String,
     private val line2: String,

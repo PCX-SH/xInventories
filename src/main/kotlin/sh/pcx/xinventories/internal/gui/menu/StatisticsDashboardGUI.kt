@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItemBuilder
@@ -29,7 +29,7 @@ import sh.pcx.xinventories.internal.service.StorageMetrics
  * - Colored indicators (green=good, yellow=warning, red=critical)
  */
 class StatisticsDashboardGUI(
-    plugin: XInventories
+    plugin: PluginContext
 ) : AbstractGUI(
     plugin,
     Component.text("Statistics Dashboard", NamedTextColor.GOLD),

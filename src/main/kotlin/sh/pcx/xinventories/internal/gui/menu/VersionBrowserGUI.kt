@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -28,7 +28,7 @@ import java.util.*
  * Shows all saved versions with timestamps, allows previewing and restoring.
  */
 class VersionBrowserGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val targetUUID: UUID,
     private val targetName: String,
     private val groupFilter: String? = null,
@@ -535,7 +535,7 @@ class VersionBrowserGUI(
  * GUI for previewing a specific version's contents.
  */
 class VersionPreviewGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val targetUUID: UUID,
     private val targetName: String,
     private val version: InventoryVersion

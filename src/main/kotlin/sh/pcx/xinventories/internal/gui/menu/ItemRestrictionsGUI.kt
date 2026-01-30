@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -35,7 +35,7 @@ import org.bukkit.inventory.ItemStack
  * - Show current restriction count
  */
 class ItemRestrictionsGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val groupName: String
 ) : AbstractGUI(
     plugin,
@@ -496,24 +496,24 @@ class ItemRestrictionsGUI(
 
 /**
  * Input manager extension for chat input handling.
- * This should be part of XInventories plugin class.
+ * This should be part of PluginContext.
  */
-val XInventories.inputManager: InputManager
+val PluginContext.inputManager: InputManager
     get() = InputManager.getInstance(this)
 
 /**
  * Simple input manager for awaiting chat input from players.
  */
-class InputManager private constructor(private val plugin: XInventories) {
+class InputManager private constructor(private val plugin: PluginContext) {
     private val pendingInputs = mutableMapOf<java.util.UUID, (String) -> Unit>()
 
     init {
-        plugin.server.pluginManager.registerEvents(object : org.bukkit.event.Listener {
+        plugin.plugin.server.pluginManager.registerEvents(object : org.bukkit.event.Listener {
             @org.bukkit.event.EventHandler(priority = org.bukkit.event.EventPriority.LOWEST)
             fun onChat(event: org.bukkit.event.player.AsyncPlayerChatEvent) {
                 val callback = pendingInputs.remove(event.player.uniqueId) ?: return
                 event.isCancelled = true
-                plugin.server.scheduler.runTask(plugin, Runnable {
+                plugin.plugin.server.scheduler.runTask(plugin.plugin, Runnable {
                     callback(event.message)
                 })
             }
@@ -522,7 +522,7 @@ class InputManager private constructor(private val plugin: XInventories) {
             fun onQuit(event: org.bukkit.event.player.PlayerQuitEvent) {
                 pendingInputs.remove(event.player.uniqueId)
             }
-        }, plugin)
+        }, plugin.plugin)
     }
 
     fun awaitChatInput(player: Player, callback: (String) -> Unit) {
@@ -532,7 +532,7 @@ class InputManager private constructor(private val plugin: XInventories) {
     companion object {
         private var instance: InputManager? = null
 
-        fun getInstance(plugin: XInventories): InputManager {
+        fun getInstance(plugin: PluginContext): InputManager {
             return instance ?: InputManager(plugin).also { instance = it }
         }
     }

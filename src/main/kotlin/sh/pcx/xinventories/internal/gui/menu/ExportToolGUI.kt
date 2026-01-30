@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -27,7 +27,7 @@ import java.util.UUID
  * - Show export file location when done
  */
 class ExportToolGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val scope: ExportScope = ExportScope.SELECT,
     private val selectedPlayer: UUID? = null,
     private val selectedPlayerName: String? = null,
@@ -75,7 +75,7 @@ class ExportToolGUI(
                     val storageService = plugin.serviceManager.storageService
                     val allUUIDs = storageService.getAllPlayerUUIDs()
                     players = allUUIDs.map { uuid ->
-                        val player = plugin.server.getOfflinePlayer(uuid)
+                        val player = plugin.plugin.server.getOfflinePlayer(uuid)
                         uuid to (player.name ?: uuid.toString().take(8))
                     }.sortedBy { it.second }
                     totalPages = maxOf(1, (players.size + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE)

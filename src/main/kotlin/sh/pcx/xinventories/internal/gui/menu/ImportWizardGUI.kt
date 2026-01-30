@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -31,7 +31,7 @@ import sh.pcx.xinventories.internal.model.ImportSource
  * 6. Results summary
  */
 class ImportWizardGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val step: ImportStep = ImportStep.DETECT_SOURCES,
     private val selectedSourceId: String? = null,
     private val mapping: ImportMapping? = null,

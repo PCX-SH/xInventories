@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -20,7 +20,7 @@ import java.util.*
  * GUI for listing players with stored inventory data.
  */
 class PlayerListGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val page: Int = 0,
     private val showOnlineOnly: Boolean = true
 ) : AbstractGUI(

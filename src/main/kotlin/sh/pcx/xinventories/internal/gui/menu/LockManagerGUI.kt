@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.gui.menu
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.event.InventoryUnlockEvent
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
@@ -35,7 +35,7 @@ import java.util.UUID
  * - Bulk unlock option
  */
 class LockManagerGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private var filterMode: FilterMode = FilterMode.ALL
 ) : AbstractGUI(
     plugin,

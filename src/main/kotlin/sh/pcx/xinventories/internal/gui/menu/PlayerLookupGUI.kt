@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.internal.gui.AbstractGUI
 import sh.pcx.xinventories.internal.gui.GUIComponents
 import sh.pcx.xinventories.internal.gui.GUIItem
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Provides search functionality, recent players, and online players sections.
  */
 class PlayerLookupGUI(
-    plugin: XInventories,
+    plugin: PluginContext,
     private val searchQuery: String = "",
     private val page: Int = 0
 ) : AbstractGUI(
