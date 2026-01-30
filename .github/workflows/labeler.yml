@@ -1,0 +1,23 @@
+name: PR Labeler
+
+# Automatically label pull requests based on the files changed
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Label PR based on changed files
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Configuration file location (relative to repo root)
+          configuration-path: .github/labeler.yml
+          # Sync labels - remove labels when files no longer match
+          sync-labels: true

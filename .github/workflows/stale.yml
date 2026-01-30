@@ -1,0 +1,60 @@
+name: Stale Issue/PR Cleanup
+
+# Automatically mark and close stale issues and pull requests
+on:
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Mark and close stale issues and PRs
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Issue settings
+          # Mark issues stale after 60 days of inactivity
+          days-before-issue-stale: 60
+          # Close stale issues after 7 more days
+          days-before-issue-close: 7
+          stale-issue-label: 'stale'
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 7 days if no further activity occurs.
+            If this issue is still relevant, please comment or update to keep it open.
+          close-issue-message: >
+            This issue has been automatically closed due to inactivity. Feel free to
+            reopen if you believe this still needs attention.
+
+          # Pull request settings
+          # Mark PRs stale after 30 days of inactivity
+          days-before-pr-stale: 30
+          # Close stale PRs after 7 more days
+          days-before-pr-close: 7
+          stale-pr-label: 'stale'
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 7 days if no further activity occurs.
+            Please update your branch or comment to keep it open.
+          close-pr-message: >
+            This pull request has been automatically closed due to inactivity. Feel free to
+            reopen if you'd like to continue working on this.
+
+          # Labels that exempt issues/PRs from being marked stale
+          exempt-issue-labels: 'pinned,security,bug,enhancement'
+          exempt-pr-labels: 'pinned,security,work-in-progress'
+
+          # Don't stale issues/PRs with these labels
+          exempt-all-milestones: true
+
+          # Process limits per run
+          operations-per-run: 100

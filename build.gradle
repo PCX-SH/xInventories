@@ -1,8 +1,13 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.1.21'
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.21'
+    id 'org.jetbrains.dokka' version '1.9.20'
     id 'com.gradleup.shadow' version '9.3.1'
     id 'xyz.jpenilla.run-paper' version '3.0.2'
+    // Code coverage with JaCoCo
+    id 'jacoco'
+    // Static analysis with Detekt
+    id 'io.gitlab.arturbosch.detekt' version '1.23.7'
 }
 
 group = 'sh.pcx'
@@ -137,5 +142,69 @@ test {
         showExceptions true
         showCauses true
         showStackTraces true
+    }
+}
+
+// ==================== Dokka Configuration ====================
+// API documentation generation
+
+tasks.dokkaHtml.configure {
+    moduleName.set("xInventories")
+    dokkaSourceSets {
+        named("main") {
+            sourceLink {
+                localDirectory.set(file("src/main/kotlin"))
+                remoteUrl.set(uri("https://github.com/PCX-SH/xInventories/tree/main/src/main/kotlin").toURL())
+                remoteLineSuffix.set("#L")
+            }
+            // Skip deprecated members
+            skipDeprecated.set(false)
+            // Report undocumented members
+            reportUndocumented.set(false)
+            // Suppress inherited members from external libraries
+            suppressInheritedMembers.set(true)
+        }
+    }
+}
+
+// ==================== JaCoCo Configuration ====================
+// Code coverage reporting for test suite
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+// ==================== Detekt Configuration ====================
+// Static analysis for Kotlin code quality
+
+detekt {
+    // Use default config as baseline
+    buildUponDefaultConfig = true
+    // Enable all rules by default
+    allRules = false
+    // Configuration file (optional - uses defaults if not present)
+    config.setFrom(files("$projectDir/detekt.yml"))
+    // Don't fail build on issues - just report them
+    ignoreFailures = true
+    // Baseline file for suppressing existing issues (optional)
+    // baseline = file("$projectDir/detekt-baseline.xml")
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt).configureEach {
+    reports {
+        // Enable SARIF for GitHub Security tab integration
+        sarif.required = true
+        html.required = true
+        xml.required = true
+        txt.required = false
     }
 }

@@ -1,0 +1,37 @@
+# Label configuration for actions/labeler
+# Labels are applied to PRs based on the files changed
+
+# Documentation changes
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.md'
+          - 'docs/**'
+
+# Test-related changes
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/test/**'
+
+# Core plugin code changes
+core:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/main/**'
+
+# Configuration file changes
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.yml'
+          - '*.yaml'
+          - '*.gradle'
+          - '*.gradle.kts'
+          - 'gradle.properties'
+
+# GitHub Actions and workflow changes
+github-actions:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'

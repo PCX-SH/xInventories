@@ -1,0 +1,61 @@
+# Test workflow - Runs tests on PRs and pushes to main
+# Ensures code quality by running the full test suite
+# Uses JUnit 5 with Kotlin test framework
+
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Matrix strategy for testing multiple Java versions
+    # Currently only Java 21 since it's required by Paper 1.20.5+
+    strategy:
+      matrix:
+        java-version: [ '21' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Run the test suite
+      - name: Run tests
+        run: ./gradlew test
+
+      # Upload test results for review even on failure
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-java-${{ matrix.java-version }}
+          path: |
+            build/reports/tests/
+            build/test-results/
+          retention-days: 7
+
+      # Publish test results as PR comment/check
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: 'build/test-results/test/TEST-*.xml'
+          fail_on_failure: true
+          require_tests: true

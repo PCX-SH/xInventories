@@ -1,0 +1,59 @@
+name: Wiki Sync
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'README.md'
+      - 'CONTRIBUTING.md'
+      - 'docs/**/*.md'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare wiki content
+        run: |
+          mkdir -p wiki-content
+
+          # Copy README.md as Home.md
+          if [ -f "README.md" ]; then
+            cp README.md wiki-content/Home.md
+            echo "Copied README.md -> Home.md"
+          fi
+
+          # Copy CONTRIBUTING.md as Contributing.md
+          if [ -f "CONTRIBUTING.md" ]; then
+            cp CONTRIBUTING.md wiki-content/Contributing.md
+            echo "Copied CONTRIBUTING.md -> Contributing.md"
+          fi
+
+          # Copy docs folder if it exists
+          if [ -d "docs" ]; then
+            for file in docs/*.md; do
+              if [ -f "$file" ]; then
+                # Get filename without path
+                filename=$(basename "$file")
+                cp "$file" "wiki-content/$filename"
+                echo "Copied $file -> $filename"
+              fi
+            done
+          fi
+
+          # List prepared content
+          echo "Wiki content prepared:"
+          ls -la wiki-content/
+
+      - name: Sync to GitHub Wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          path: wiki-content
+          # The action uses GITHUB_TOKEN by default
+          # Wiki must be initialized manually first (create at least one page)
