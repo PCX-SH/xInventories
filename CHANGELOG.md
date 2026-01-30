@@ -71,9 +71,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Reduced jar size from 6.6MB to 1.7MB** using Paper's library loader
   - Dependencies are now downloaded automatically at server startup
   - Only bStats is bundled in the jar (relocated to avoid conflicts)
-- Added cross-version Paper compatibility (1.21.0 - 1.21.11+)
+- Added cross-version Paper compatibility (1.20.5 - 1.21.11+)
   - Created `AttributeCompat` utility for runtime attribute detection
-  - Handles `GENERIC_MAX_HEALTH` → `MAX_HEALTH` rename in Paper 1.21.2+
+  - Handles `GENERIC_MAX_HEALTH` -> `MAX_HEALTH` rename in Paper 1.21.2+
+  - Created `VersionDetector` for Minecraft version detection at runtime
+  - Updated `api-version` to 1.20 for broader compatibility
 
 ### Fixed
 - Fixed CronExpression day matching when only day-of-week is specified

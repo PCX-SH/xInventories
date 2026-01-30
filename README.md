@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/BANNER.png" alt="xInventories Banner">
 </p>
 
-A powerful per-world inventory management plugin for Paper 1.21+ servers. Separate player inventories, experience, health, and more across different worlds or world groups.
+A powerful per-world inventory management plugin for Paper 1.20.5+ servers. Separate player inventories, experience, health, and more across different worlds or world groups.
 
 ## Features
 
@@ -45,7 +45,7 @@ A powerful per-world inventory management plugin for Paper 1.21+ servers. Separa
 
 ## Requirements
 
-- **Paper 1.21+** (1.21.0 - 1.21.11+ supported, not compatible with Spigot)
+- **Paper 1.20.5+** (1.20.5 - 1.21.11+ supported, not compatible with Spigot)
 - **Java 21+**
 
 ## Installation
@@ -429,7 +429,7 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 
 - **JUnit 5** - Test framework
 - **MockK** - Kotlin mocking library
-- **MockBukkit** - Bukkit API mocking for Paper 1.21
+- **MockBukkit** - Bukkit API mocking for Paper
 - **kotlinx-coroutines-test** - Coroutine testing utilities
 
 ### Test Categories
@@ -445,7 +445,7 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 ## FAQ
 
 **Q: Does this work with Spigot?**
-A: No, xInventories requires Paper 1.21+ (1.21.0 - 1.21.11+ all supported). It uses Paper-specific APIs and the native Adventure library.
+A: No, xInventories requires Paper 1.20.5+ (1.20.5 - 1.21.11+ all supported). It uses Paper-specific APIs and the native Adventure library.
 
 **Q: How do I share inventories between servers?**
 A: For BungeeCord/Velocity networks, enable Redis sync in config.yml. This provides real-time synchronization with distributed locking to prevent conflicts. Alternatively, use MySQL storage with all servers pointing to the same database.

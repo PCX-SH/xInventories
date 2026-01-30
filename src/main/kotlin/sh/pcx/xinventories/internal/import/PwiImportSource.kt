@@ -9,7 +9,7 @@ import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
+import sh.pcx.xinventories.internal.compat.PotionEffectCompat
 import java.io.File
 import java.time.Instant
 import java.util.UUID
@@ -320,7 +320,7 @@ class PwiImportSource(private val plugin: XInventories) : ImportSource {
             section.getConfigurationSection("potion-effects")?.let { effectsSection ->
                 effectsSection.getKeys(false).forEach { effectName ->
                     try {
-                        val effectType = PotionEffectType.getByName(effectName)
+                        val effectType = PotionEffectCompat.getByName(effectName)
                         if (effectType != null) {
                             val effectData = effectsSection.getConfigurationSection(effectName)
                             val duration = effectData?.getInt("duration", 600) ?: 600

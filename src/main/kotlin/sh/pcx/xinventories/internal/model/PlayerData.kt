@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.model
 
 import sh.pcx.xinventories.api.model.InventoryContents
 import sh.pcx.xinventories.api.model.PlayerInventorySnapshot
-import sh.pcx.xinventories.internal.util.AttributeCompat
+import sh.pcx.xinventories.internal.compat.AttributeCompat
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

@@ -526,12 +526,10 @@ class PotionSerializerTest {
         }
 
         @Test
-        @DisplayName("should document that string roundtrip fails due to namespace in serialized format")
-        fun stringRoundtripFailsDueToNamespaceInSerializedFormat() {
-            // Note: This test documents a known limitation of the current implementation.
+        @DisplayName("should support string roundtrip with namespaced format")
+        fun stringRoundtripWithNamespacedFormat() {
             // serializeEffectsToString outputs "minecraft:speed:..." (with namespace)
-            // deserializeEffectsFromString splits by ":" and expects parts[0] to be the type
-            // This causes deserialization to fail as "minecraft" is not a valid potion type
+            // deserializeEffectsFromString now properly handles this format
             val original = listOf(
                 PotionEffect(PotionEffectType.SPEED, 100, 1, false, true, false)
             )
@@ -541,11 +539,17 @@ class PotionSerializerTest {
             // Verify the serialized format includes namespace
             assertTrue(serialized.startsWith("minecraft:"), "Serialized format should include namespace")
 
-            // Deserializing the serialized format fails (returns empty list)
+            // Deserializing the serialized format should work now
             val deserialized = PotionSerializer.deserializeEffectsFromString(serialized)
 
-            // This documents the current behavior - roundtrip doesn't work due to format mismatch
-            assertTrue(deserialized.isEmpty(), "Deserialization fails due to namespace in format")
+            // Roundtrip should preserve all data
+            assertEquals(1, deserialized.size, "Should deserialize one effect")
+            assertEquals(PotionEffectType.SPEED, deserialized[0].type)
+            assertEquals(100, deserialized[0].duration)
+            assertEquals(1, deserialized[0].amplifier)
+            assertEquals(false, deserialized[0].isAmbient)
+            assertEquals(true, deserialized[0].hasParticles())
+            assertEquals(false, deserialized[0].hasIcon())
         }
 
         @Test
@@ -627,7 +631,7 @@ class PotionSerializerTest {
         }
 
         @Test
-        @DisplayName("should handle very large effect lists (map format)")
+        @DisplayName("should handle very large effect lists")
         fun handleLargeEffectLists() {
             val effects = (1..100).map {
                 PotionEffect(PotionEffectType.SPEED, it * 10, it % 10, it % 2 == 0, it % 3 == 0, it % 4 == 0)
@@ -639,10 +643,11 @@ class PotionSerializerTest {
 
             assertEquals(100, deserializedMap.size)
 
-            // String serialization does not work for roundtrip due to namespace format issue
+            // String serialization also works for roundtrip
             val serializedString = PotionSerializer.serializeEffectsToString(effects)
-            // Verify serialization produces output
-            assertTrue(serializedString.isNotEmpty())
+            val deserializedString = PotionSerializer.deserializeEffectsFromString(serializedString)
+
+            assertEquals(100, deserializedString.size)
             assertTrue(serializedString.contains(";"), "Should contain semicolon separators")
         }
 

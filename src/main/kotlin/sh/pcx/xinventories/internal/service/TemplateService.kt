@@ -18,7 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
+import sh.pcx.xinventories.internal.compat.PotionEffectCompat
 import java.io.File
 import java.time.Instant
 import java.util.UUID
@@ -220,7 +220,7 @@ class TemplateService(
         val parts = effectStr.split(":")
         if (parts.isEmpty()) return null
 
-        val effectType = PotionEffectType.getByName(parts[0].uppercase()) ?: return null
+        val effectType = PotionEffectCompat.getByName(parts[0]) ?: return null
         val duration = parts.getOrNull(1)?.toIntOrNull() ?: 600 // Default 30 seconds
         val amplifier = parts.getOrNull(2)?.toIntOrNull() ?: 0
 

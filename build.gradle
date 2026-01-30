@@ -18,10 +18,10 @@ repositories {
 }
 
 dependencies {
-    // Paper API - targeting 1.21.11
+    // Paper API - targeting 1.21.11 (supports 1.20.5+)
     compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
 
-    // Kotlin - provided by Paper 1.21+
+    // Kotlin - provided by Paper 1.21+, loaded via plugin.yml libraries for 1.20.5-1.20.6
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib'
 
     // Coroutines - downloaded by Paper's library loader at runtime

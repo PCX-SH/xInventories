@@ -32,7 +32,7 @@ Thank you for your interest in contributing to xInventories! This document provi
    ```bash
    gradle runServer
    ```
-   This uses the `run-paper` plugin to spin up a Paper 1.21.1 test server with the plugin installed.
+   This uses the `run-paper` plugin to spin up a Paper test server with the plugin installed.
 
 ## Project Structure
 
@@ -134,7 +134,7 @@ Add MySQL connection pooling configuration
 
 1. **Create a feature branch** from `main`
 2. **Make your changes** with clear commits
-3. **Test thoroughly** on a Paper 1.21.1 server
+3. **Test thoroughly** on a Paper 1.20.5+ server
 4. **Update documentation** if needed (README, config comments)
 5. **Submit a pull request** with:
    - Clear description of changes

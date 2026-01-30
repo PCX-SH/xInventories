@@ -3,7 +3,7 @@ package sh.pcx.xinventories.api.model
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
-import sh.pcx.xinventories.internal.util.AttributeCompat
+import sh.pcx.xinventories.internal.compat.AttributeCompat
 import java.time.Instant
 import java.util.UUID
 

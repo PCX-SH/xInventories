@@ -83,6 +83,10 @@ object PotionSerializer {
 
     /**
      * Deserializes effects from a compact string format.
+     *
+     * Handles both formats:
+     * - Namespaced: "minecraft:speed:200:2:true:false:true"
+     * - Simple: "speed:200:2:true:false:true"
      */
     fun deserializeEffectsFromString(data: String): List<PotionEffect> {
         if (data.isBlank()) return emptyList()
@@ -90,14 +94,25 @@ object PotionSerializer {
         return data.split(";").mapNotNull { effectStr ->
             try {
                 val parts = effectStr.split(":")
-                if (parts.size < 6) return@mapNotNull null
 
-                val type = parsePotionEffectType(parts[0]) ?: return@mapNotNull null
-                val duration = parts[1].toIntOrNull() ?: return@mapNotNull null
-                val amplifier = parts[2].toIntOrNull() ?: return@mapNotNull null
-                val ambient = parts[3].toBooleanStrictOrNull() ?: false
-                val particles = parts[4].toBooleanStrictOrNull() ?: true
-                val icon = parts[5].toBooleanStrictOrNull() ?: true
+                // Handle namespaced format (minecraft:effect:duration:...)
+                // vs simple format (effect:duration:...)
+                val (typeKey, dataOffset) = if (parts.size >= 7 && parts[0] == "minecraft") {
+                    // Namespaced format: parts[0]=minecraft, parts[1]=effect_name
+                    "${parts[0]}:${parts[1]}" to 2
+                } else if (parts.size >= 6) {
+                    // Simple format: parts[0]=effect_name
+                    parts[0] to 1
+                } else {
+                    return@mapNotNull null
+                }
+
+                val type = parsePotionEffectType(typeKey) ?: return@mapNotNull null
+                val duration = parts.getOrNull(dataOffset)?.toIntOrNull() ?: return@mapNotNull null
+                val amplifier = parts.getOrNull(dataOffset + 1)?.toIntOrNull() ?: return@mapNotNull null
+                val ambient = parts.getOrNull(dataOffset + 2)?.toBooleanStrictOrNull() ?: false
+                val particles = parts.getOrNull(dataOffset + 3)?.toBooleanStrictOrNull() ?: true
+                val icon = parts.getOrNull(dataOffset + 4)?.toBooleanStrictOrNull() ?: true
 
                 PotionEffect(type, duration, amplifier, ambient, particles, icon)
             } catch (e: Exception) {
