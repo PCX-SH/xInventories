@@ -161,7 +161,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dependabot** - Automated dependency updates
 
 ### Changed
-- Updated test suite to 2485 tests (up from 991)
+- Updated test suite to 3801 tests (up from 991)
 - Added `version` field to PlayerData for sync conflict detection
 - Added `balances` field to PlayerData for per-group economy
 - Added `statistics`, `advancements`, `recipes` fields to PlayerData

@@ -483,9 +483,9 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 
 | Category | Tests | Description |
 |----------|-------|-------------|
-| **Unit Tests** | 1500+ | Serializers, models, cache, configuration, GUI logic, services |
+| **Unit Tests** | 2800+ | Serializers, models, cache, configuration, GUI logic, services, commands, hooks |
 | **Integration Tests** | 950+ | Storage backends, services, API, economy, templates |
-| **Total** | **2485 passing** | 23 skipped (MockBukkit limitations) |
+| **Total** | **3801 passing** | 23 skipped (MockBukkit limitations) |
 
 ### Running Tests
 
