@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.api
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.SyncAPI
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
  * Implementation of the SyncAPI.
  * Adapts internal SyncService to the public API interface.
  */
-class SyncAPIImpl(private val plugin: XInventories) : SyncAPI {
+class SyncAPIImpl(private val plugin: PluginContext) : SyncAPI {
 
     private val syncService get() = plugin.serviceManager.syncService
 

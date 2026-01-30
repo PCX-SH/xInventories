@@ -1,7 +1,7 @@
 package sh.pcx.xinventories.internal.api
 
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.EconomyAPI
 import java.util.UUID
 
@@ -9,7 +9,7 @@ import java.util.UUID
  * Implementation of the EconomyAPI.
  * Adapts internal EconomyService to the public API interface.
  */
-class EconomyAPIImpl(private val plugin: XInventories) : EconomyAPI {
+class EconomyAPIImpl(private val plugin: PluginContext) : EconomyAPI {
 
     private val economyService get() = plugin.serviceManager.economyService
 

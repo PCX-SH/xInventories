@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.api
 
 import kotlinx.coroutines.runBlocking
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.InventoryVersionInfo
 import sh.pcx.xinventories.api.InventoryVersioningAPI
 import sh.pcx.xinventories.api.VersionTrigger
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture
  * Implementation of the InventoryVersioningAPI.
  * Adapts internal VersioningService to the public API interface.
  */
-class VersioningAPIImpl(private val plugin: XInventories) : InventoryVersioningAPI {
+class VersioningAPIImpl(private val plugin: PluginContext) : InventoryVersioningAPI {
 
     private val versioningService get() = plugin.serviceManager.versioningService
 

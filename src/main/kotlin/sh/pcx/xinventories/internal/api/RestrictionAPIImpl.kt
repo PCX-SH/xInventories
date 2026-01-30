@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.api
 
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.RestrictionAPI
 import sh.pcx.xinventories.internal.model.ItemPattern
 import sh.pcx.xinventories.internal.model.RestrictionAction
@@ -13,7 +13,7 @@ import sh.pcx.xinventories.internal.model.RestrictionMode
  * Implementation of the RestrictionAPI.
  * Adapts internal RestrictionService to the public API interface.
  */
-class RestrictionAPIImpl(private val plugin: XInventories) : RestrictionAPI {
+class RestrictionAPIImpl(private val plugin: PluginContext) : RestrictionAPI {
 
     private val restrictionService get() = plugin.serviceManager.restrictionService
     private val groupService get() = plugin.serviceManager.groupService

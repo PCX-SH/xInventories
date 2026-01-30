@@ -1,7 +1,7 @@
 package sh.pcx.xinventories.internal.api
 
 import kotlinx.coroutines.runBlocking
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.ImportAPI
 import sh.pcx.xinventories.internal.model.ImportMapping
 import sh.pcx.xinventories.internal.model.ImportOptions
@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
  * Implementation of the ImportAPI.
  * Adapts internal ImportService to the public API interface.
  */
-class ImportAPIImpl(private val plugin: XInventories) : ImportAPI {
+class ImportAPIImpl(private val plugin: PluginContext) : ImportAPI {
 
     private val importService get() = plugin.serviceManager.importService
 

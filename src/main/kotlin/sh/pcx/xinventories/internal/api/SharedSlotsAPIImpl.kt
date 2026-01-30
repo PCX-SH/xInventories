@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.api
 
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.SharedSlotsAPI
 import sh.pcx.xinventories.internal.model.ItemConfig
 import sh.pcx.xinventories.internal.model.SharedSlotEntry
@@ -14,7 +14,7 @@ import java.util.UUID
  * Implementation of the SharedSlotsAPI.
  * Adapts internal SharedSlotService to the public API interface.
  */
-class SharedSlotsAPIImpl(private val plugin: XInventories) : SharedSlotsAPI {
+class SharedSlotsAPIImpl(private val plugin: PluginContext) : SharedSlotsAPI {
 
     private val sharedSlotService get() = plugin.serviceManager.sharedSlotService
 

@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.api
 
 import kotlinx.coroutines.runBlocking
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.TemplateAPI
 import sh.pcx.xinventories.api.model.InventoryGroup
 import sh.pcx.xinventories.internal.model.InventoryTemplate
@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture
  * Implementation of the TemplateAPI.
  * Adapts internal TemplateService to the public API interface.
  */
-class TemplateAPIImpl(private val plugin: XInventories) : TemplateAPI {
+class TemplateAPIImpl(private val plugin: PluginContext) : TemplateAPI {
 
     private val templateService get() = plugin.serviceManager.templateService
     private val groupService get() = plugin.serviceManager.groupService

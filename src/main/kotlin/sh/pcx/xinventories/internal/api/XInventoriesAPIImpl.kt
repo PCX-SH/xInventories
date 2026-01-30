@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.api
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.*
 import sh.pcx.xinventories.api.event.*
 import sh.pcx.xinventories.api.model.*
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture
 /**
  * Implementation of the public xInventories API.
  */
-class XInventoriesAPIImpl(private val plugin: XInventories) : XInventoriesAPI {
+class XInventoriesAPIImpl(private val plugin: PluginContext) : XInventoriesAPI {
 
     private val switchHandlers = mutableListOf<Pair<(InventorySwitchContext) -> Unit, SubscriptionImpl>>()
     private val saveHandlers = mutableListOf<Pair<(InventorySaveContext) -> Unit, SubscriptionImpl>>()
@@ -364,7 +364,7 @@ class XInventoriesAPIImpl(private val plugin: XInventories) : XInventoriesAPI {
         switchHandlers.forEach { (handler, sub) ->
             if (!sub.isCancelled()) {
                 try { handler(context) } catch (e: Exception) {
-                    plugin.logger.warning("Error in switch handler: ${e.message}")
+                    plugin.plugin.logger.warning("Error in switch handler: ${e.message}")
                 }
             }
         }
@@ -374,7 +374,7 @@ class XInventoriesAPIImpl(private val plugin: XInventories) : XInventoriesAPI {
         saveHandlers.forEach { (handler, sub) ->
             if (!sub.isCancelled()) {
                 try { handler(context) } catch (e: Exception) {
-                    plugin.logger.warning("Error in save handler: ${e.message}")
+                    plugin.plugin.logger.warning("Error in save handler: ${e.message}")
                 }
             }
         }
@@ -384,7 +384,7 @@ class XInventoriesAPIImpl(private val plugin: XInventories) : XInventoriesAPI {
         loadHandlers.forEach { (handler, sub) ->
             if (!sub.isCancelled()) {
                 try { handler(context) } catch (e: Exception) {
-                    plugin.logger.warning("Error in load handler: ${e.message}")
+                    plugin.plugin.logger.warning("Error in load handler: ${e.message}")
                 }
             }
         }
@@ -394,7 +394,7 @@ class XInventoriesAPIImpl(private val plugin: XInventories) : XInventoriesAPI {
         groupChangeHandlers.forEach { (handler, sub) ->
             if (!sub.isCancelled()) {
                 try { handler(context) } catch (e: Exception) {
-                    plugin.logger.warning("Error in group change handler: ${e.message}")
+                    plugin.plugin.logger.warning("Error in group change handler: ${e.message}")
                 }
             }
         }

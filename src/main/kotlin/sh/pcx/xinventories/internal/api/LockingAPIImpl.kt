@@ -1,6 +1,6 @@
 package sh.pcx.xinventories.internal.api
 
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.InventoryLockingAPI
 import sh.pcx.xinventories.internal.model.InventoryLock
 import sh.pcx.xinventories.internal.model.LockScope
@@ -11,7 +11,7 @@ import java.util.UUID
  * Implementation of the InventoryLockingAPI.
  * Adapts internal LockingService to the public API interface.
  */
-class LockingAPIImpl(private val plugin: XInventories) : InventoryLockingAPI {
+class LockingAPIImpl(private val plugin: PluginContext) : InventoryLockingAPI {
 
     private val lockingService get() = plugin.serviceManager.lockingService
 

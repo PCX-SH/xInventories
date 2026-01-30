@@ -2,7 +2,7 @@ package sh.pcx.xinventories.internal.api
 
 import kotlinx.coroutines.runBlocking
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.DeathRecordInfo
 import sh.pcx.xinventories.api.DeathRecoveryAPI
 import sh.pcx.xinventories.internal.model.DeathRecord
@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture
  * Implementation of the DeathRecoveryAPI.
  * Adapts internal DeathRecoveryService to the public API interface.
  */
-class DeathRecoveryAPIImpl(private val plugin: XInventories) : DeathRecoveryAPI {
+class DeathRecoveryAPIImpl(private val plugin: PluginContext) : DeathRecoveryAPI {
 
     private val deathRecoveryService get() = plugin.serviceManager.deathRecoveryService
 

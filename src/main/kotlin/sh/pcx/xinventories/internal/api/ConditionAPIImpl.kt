@@ -1,7 +1,7 @@
 package sh.pcx.xinventories.internal.api
 
 import org.bukkit.entity.Player
-import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.PluginContext
 import sh.pcx.xinventories.api.ConditionAPI
 import sh.pcx.xinventories.internal.service.ConditionEvaluationResult
 
@@ -9,7 +9,7 @@ import sh.pcx.xinventories.internal.service.ConditionEvaluationResult
  * Implementation of the ConditionAPI.
  * Adapts internal ConditionEvaluator to the public API interface.
  */
-class ConditionAPIImpl(private val plugin: XInventories) : ConditionAPI {
+class ConditionAPIImpl(private val plugin: PluginContext) : ConditionAPI {
 
     private val conditionEvaluator get() = plugin.serviceManager.conditionEvaluator
     private val groupService get() = plugin.serviceManager.groupService
