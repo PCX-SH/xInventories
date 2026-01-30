@@ -34,21 +34,47 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          # Extract the changelog section for this version
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+
+          # Extract content between this version header and the next version header
+          CHANGELOG=$(awk -v ver="$VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if (index($0, "[" ver "]")) found=1
+              next
+            }
+            found { print }
+          ' CHANGELOG.md)
+
+          # Handle multi-line output
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           name: xInventories v${{ steps.get_version.outputs.VERSION }}
           body: |
-            ## xInventories v${{ steps.get_version.outputs.VERSION }}
+            ## Installation
 
-            ### Installation
-            1. Download `xInventories-${{ steps.get_version.outputs.VERSION }}.jar`
+            1. Download `xInventories-${{ steps.get_version.outputs.VERSION }}.jar` below
             2. Place in your server's `plugins/` folder
-            3. Restart your server
+            3. Restart your server (Paper will download dependencies automatically)
 
             ### Requirements
-            - Paper 1.20.5+
-            - Java 21+
+            - **Paper 1.20.5+** (1.20.5 - 1.21.11+)
+            - **Java 21+**
+
+            ---
+
+            ## What's Changed
+
+            ${{ steps.changelog.outputs.CHANGELOG }}
 
             ---
 
@@ -56,4 +82,3 @@ jobs:
           files: build/libs/xInventories-*.jar
           draft: false
           prerelease: false
-          generate_release_notes: true
