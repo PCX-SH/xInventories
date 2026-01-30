@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -72,7 +73,7 @@ class CaffeineCacheTest {
         fun `get returns null for non-existent key`() {
             val result = cache.get("nonexistent")
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -83,7 +84,7 @@ class CaffeineCacheTest {
 
             val result = cache.get("key1")
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -233,7 +234,7 @@ class CaffeineCacheTest {
             val removed = cache.invalidate("key1")
 
             assertEquals("value1", removed)
-            assertNull(cache.get("key1"))
+            Assertions.assertNull(cache.get("key1"))
         }
 
         @Test
@@ -241,7 +242,7 @@ class CaffeineCacheTest {
         fun `invalidate returns null for non-existent key`() {
             val removed = cache.invalidate("nonexistent")
 
-            assertNull(removed)
+            Assertions.assertNull(removed)
         }
 
         @Test
@@ -252,7 +253,7 @@ class CaffeineCacheTest {
 
             cache.invalidate("key1")
 
-            assertNull(cache.get("key1"))
+            Assertions.assertNull(cache.get("key1"))
             assertEquals("value2", cache.get("key2"))
         }
     }
@@ -271,8 +272,8 @@ class CaffeineCacheTest {
             val removed = cache.invalidateIf { it.startsWith("prefix_") }
 
             assertEquals(2, removed)
-            assertNull(cache.get("prefix_key1"))
-            assertNull(cache.get("prefix_key2"))
+            Assertions.assertNull(cache.get("prefix_key1"))
+            Assertions.assertNull(cache.get("prefix_key2"))
             assertEquals("value3", cache.get("other_key"))
         }
 
@@ -398,8 +399,8 @@ class CaffeineCacheTest {
                 null
             }
 
-            assertNull(result1)
-            assertNull(result2)
+            Assertions.assertNull(result1)
+            Assertions.assertNull(result2)
             assertEquals(2, loadCount.get(), "Loader should be called twice since null is not cached")
         }
 

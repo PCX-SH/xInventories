@@ -11,6 +11,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -166,7 +167,7 @@ class SqliteStorageTest {
             assertTrue(storage.savePlayerData(data))
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
 
             storage.shutdown()
         }
@@ -201,7 +202,7 @@ class SqliteStorageTest {
             storage.initialize()
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded, "Data should persist after re-initialize call")
+            Assertions.assertNotNull(loaded, "Data should persist after re-initialize call")
 
             storage.shutdown()
         }
@@ -269,7 +270,7 @@ class SqliteStorageTest {
             assertTrue(result)
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, gameMode)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(gameMode, loaded?.gameMode)
 
             storage.shutdown()
@@ -308,7 +309,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.uuid, loaded?.uuid)
             assertEquals(original.playerName, loaded?.playerName)
             assertEquals(original.group, loaded?.group)
@@ -326,7 +327,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNull(loaded, "Loading non-existent player should return null")
+            Assertions.assertNull(loaded, "Loading non-existent player should return null")
 
             storage.shutdown()
         }
@@ -343,7 +344,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, null)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(testUuid1, loaded?.uuid)
             assertEquals(testGroup, loaded?.group)
 
@@ -358,7 +359,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNull(loaded)
+            Assertions.assertNull(loaded)
         }
     }
 
@@ -382,7 +383,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.health, loaded!!.health)
             assertEquals(original.maxHealth, loaded.maxHealth)
             assertEquals(original.foodLevel, loaded.foodLevel)
@@ -407,7 +408,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.timestamp.toEpochMilli(), loaded!!.timestamp.toEpochMilli())
 
             storage.shutdown()
@@ -425,11 +426,11 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.mainInventory.size, loaded!!.mainInventory.size)
             assertEquals(original.armorInventory.size, loaded.armorInventory.size)
             assertEquals(original.enderChest.size, loaded.enderChest.size)
-            assertNotNull(loaded.offhand)
+            Assertions.assertNotNull(loaded.offhand)
 
             storage.shutdown()
         }
@@ -447,7 +448,7 @@ class SqliteStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.potionEffects.size, loaded!!.potionEffects.size)
 
             storage.shutdown()
@@ -650,7 +651,7 @@ class SqliteStorageTest {
 
             // Verify updated values
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(20.0, loaded!!.health)
             assertEquals(50, loaded.level)
 
@@ -986,7 +987,7 @@ class SqliteStorageTest {
             storage2.initialize()
 
             val loaded = storage2.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(testUuid1, loaded?.uuid)
 
             storage2.shutdown()
@@ -1142,7 +1143,7 @@ class SqliteStorageTest {
             storage.savePlayerData(data)
 
             val loaded = storage.loadPlayerData(testUuid1, specialGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(specialGroup, loaded?.group)
 
             storage.shutdown()
@@ -1160,7 +1161,7 @@ class SqliteStorageTest {
             storage.savePlayerData(data)
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(specialName, loaded?.playerName)
 
             storage.shutdown()
@@ -1180,7 +1181,7 @@ class SqliteStorageTest {
             storage.savePlayerData(data)
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(0.0001, loaded!!.health, 0.0001)
             assertEquals(10000.0, loaded.maxHealth, 0.001)
 
@@ -1202,7 +1203,7 @@ class SqliteStorageTest {
             storage.savePlayerData(data)
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(Int.MAX_VALUE, loaded!!.level)
             assertEquals(Int.MAX_VALUE, loaded.totalExperience)
 
@@ -1220,11 +1221,11 @@ class SqliteStorageTest {
             storage.savePlayerData(data)
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertTrue(loaded!!.mainInventory.isEmpty())
             assertTrue(loaded.armorInventory.isEmpty())
             assertTrue(loaded.enderChest.isEmpty())
-            assertNull(loaded.offhand)
+            Assertions.assertNull(loaded.offhand)
 
             storage.shutdown()
         }

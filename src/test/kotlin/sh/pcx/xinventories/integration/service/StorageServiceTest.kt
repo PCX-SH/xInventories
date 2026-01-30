@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.bukkit.GameMode
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.model.CacheStatistics
 import sh.pcx.xinventories.api.model.StorageType
@@ -356,7 +357,7 @@ class StorageServiceTest {
 
             val result = service.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(42, result?.level)
             coVerify(exactly = 0) { mockStorage.loadPlayerData(any(), any(), any()) }
         }
@@ -398,7 +399,7 @@ class StorageServiceTest {
             val service = createStorageServiceWithMockStorage(config, this)
             val result = service.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(99, result?.level)
             coVerify { mockStorage.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL) }
         }
@@ -430,7 +431,7 @@ class StorageServiceTest {
             val service = createStorageServiceWithMockStorage(config, this)
             val result = service.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -444,7 +445,7 @@ class StorageServiceTest {
             val service = createStorageServiceWithMockStorage(config, this)
             val result = service.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             coVerify { mockStorage.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL) }
         }
     }
@@ -472,7 +473,7 @@ class StorageServiceTest {
             jobField.isAccessible = true
             val writeBehindJob = jobField.get(service) as? Job
 
-            assertNotNull(writeBehindJob)
+            Assertions.assertNotNull(writeBehindJob)
             assertTrue(writeBehindJob!!.isActive)
         }
 
@@ -531,7 +532,7 @@ class StorageServiceTest {
             jobField.isAccessible = true
             val writeBehindJob = jobField.get(service) as? Job
 
-            assertNull(writeBehindJob)
+            Assertions.assertNull(writeBehindJob)
         }
     }
 
@@ -875,7 +876,7 @@ class StorageServiceTest {
 
             val stats = service.getCacheStats()
 
-            assertNotNull(stats)
+            Assertions.assertNotNull(stats)
             assertTrue(stats.maxSize > 0)
         }
 
@@ -964,7 +965,7 @@ class StorageServiceTest {
             val jobField = StorageService::class.java.getDeclaredField("writeBehindJob")
             jobField.isAccessible = true
             val jobBefore = jobField.get(service) as? Job
-            assertNotNull(jobBefore)
+            Assertions.assertNotNull(jobBefore)
 
             service.shutdown()
 
@@ -1041,7 +1042,7 @@ class StorageServiceTest {
                 null
             }
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -1297,8 +1298,8 @@ class StorageServiceTest {
             val result1 = service.load(testUuid1, "world", GameMode.SURVIVAL)
             val result2 = service.loadPlayerData(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNotNull(result1)
-            assertNotNull(result2)
+            Assertions.assertNotNull(result1)
+            Assertions.assertNotNull(result2)
             assertEquals(result1?.uuid, result2?.uuid)
         }
     }

@@ -13,6 +13,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -255,7 +256,7 @@ class YamlStorageTest {
             assertTrue(result)
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(50, loaded!!.level, "Saved level should be updated value")
         }
 
@@ -308,7 +309,7 @@ class YamlStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded, "Loaded data should not be null")
+            Assertions.assertNotNull(loaded, "Loaded data should not be null")
             assertEquals(original.uuid, loaded!!.uuid)
             assertEquals(original.playerName, loaded.playerName)
             assertEquals(original.group, loaded.group)
@@ -329,7 +330,7 @@ class YamlStorageTest {
 
             val loaded = storage.loadPlayerData(nonExistentUuid, testGroup, GameMode.SURVIVAL)
 
-            assertNull(loaded, "Load should return null for non-existent player")
+            Assertions.assertNull(loaded, "Load should return null for non-existent player")
         }
 
         @Test
@@ -342,7 +343,7 @@ class YamlStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, "nonexistent", GameMode.SURVIVAL)
 
-            assertNull(loaded, "Load should return null for non-existent group")
+            Assertions.assertNull(loaded, "Load should return null for non-existent group")
         }
 
         @Test
@@ -355,7 +356,7 @@ class YamlStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.CREATIVE)
 
-            assertNull(loaded, "Load should return null for non-existent game mode")
+            Assertions.assertNull(loaded, "Load should return null for non-existent game mode")
         }
 
         @Test
@@ -365,7 +366,7 @@ class YamlStorageTest {
 
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNull(loaded)
+            Assertions.assertNull(loaded)
         }
     }
 
@@ -387,7 +388,7 @@ class YamlStorageTest {
             storage.savePlayerData(original)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.uuid, loaded!!.uuid)
             assertEquals(original.playerName, loaded.playerName)
             assertEquals(original.group, loaded.group)
@@ -414,13 +415,13 @@ class YamlStorageTest {
             storage.savePlayerData(original)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
 
             // Check main inventory
             assertEquals(original.mainInventory.size, loaded!!.mainInventory.size)
             original.mainInventory.forEach { (slot, item) ->
                 val loadedItem = loaded.mainInventory[slot]
-                assertNotNull(loadedItem, "Main inventory slot $slot should exist")
+                Assertions.assertNotNull(loadedItem, "Main inventory slot $slot should exist")
                 assertEquals(item.type, loadedItem!!.type)
                 assertEquals(item.amount, loadedItem.amount)
             }
@@ -429,12 +430,12 @@ class YamlStorageTest {
             assertEquals(original.armorInventory.size, loaded.armorInventory.size)
             original.armorInventory.forEach { (slot, item) ->
                 val loadedItem = loaded.armorInventory[slot]
-                assertNotNull(loadedItem, "Armor slot $slot should exist")
+                Assertions.assertNotNull(loadedItem, "Armor slot $slot should exist")
                 assertEquals(item.type, loadedItem!!.type)
             }
 
             // Check offhand
-            assertNotNull(loaded.offhand)
+            Assertions.assertNotNull(loaded.offhand)
             assertEquals(original.offhand?.type, loaded.offhand?.type)
 
             // Check ender chest
@@ -451,7 +452,7 @@ class YamlStorageTest {
             storage.savePlayerData(original)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(original.potionEffects.size, loaded!!.potionEffects.size)
 
             original.potionEffects.forEachIndexed { index, effect ->
@@ -472,10 +473,10 @@ class YamlStorageTest {
             storage.savePlayerData(original)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertTrue(loaded!!.mainInventory.isEmpty())
             assertTrue(loaded.armorInventory.isEmpty())
-            assertNull(loaded.offhand)
+            Assertions.assertNull(loaded.offhand)
             assertTrue(loaded.enderChest.isEmpty())
             assertTrue(loaded.potionEffects.isEmpty())
         }
@@ -550,8 +551,8 @@ class YamlStorageTest {
             val result = storage.deletePlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
             assertTrue(result, "Delete should return true")
-            assertNull(storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL))
-            assertNotNull(storage.loadPlayerData(testUuid1, testGroup, GameMode.CREATIVE))
+            Assertions.assertNull(storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL))
+            Assertions.assertNotNull(storage.loadPlayerData(testUuid1, testGroup, GameMode.CREATIVE))
         }
 
         @Test
@@ -628,9 +629,9 @@ class YamlStorageTest {
             val result = storage.deletePlayerData(testUuid1, "survival", null)
 
             assertTrue(result)
-            assertNull(storage.loadPlayerData(testUuid1, "survival", GameMode.SURVIVAL))
-            assertNull(storage.loadPlayerData(testUuid1, "survival", GameMode.CREATIVE))
-            assertNotNull(storage.loadPlayerData(testUuid1, "creative", GameMode.CREATIVE))
+            Assertions.assertNull(storage.loadPlayerData(testUuid1, "survival", GameMode.SURVIVAL))
+            Assertions.assertNull(storage.loadPlayerData(testUuid1, "survival", GameMode.CREATIVE))
+            Assertions.assertNotNull(storage.loadPlayerData(testUuid1, "creative", GameMode.CREATIVE))
         }
 
         @Test
@@ -669,7 +670,7 @@ class YamlStorageTest {
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
             // Should return null instead of crashing
-            assertNull(loaded, "Load should return null for corrupted file")
+            Assertions.assertNull(loaded, "Load should return null for corrupted file")
         }
 
         @Test
@@ -690,7 +691,7 @@ class YamlStorageTest {
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
             // Should return null since required fields are missing
-            assertNull(loaded, "Load should return null for incomplete file")
+            Assertions.assertNull(loaded, "Load should return null for incomplete file")
         }
 
         @Test
@@ -737,9 +738,9 @@ class YamlStorageTest {
             val count = storage.savePlayerDataBatch(dataList)
 
             assertEquals(3, count, "All entries should be saved")
-            assertNotNull(storage.loadPlayerData(testUuid1, "survival", GameMode.SURVIVAL))
-            assertNotNull(storage.loadPlayerData(testUuid2, "survival", GameMode.SURVIVAL))
-            assertNotNull(storage.loadPlayerData(testUuid3, "survival", GameMode.SURVIVAL))
+            Assertions.assertNotNull(storage.loadPlayerData(testUuid1, "survival", GameMode.SURVIVAL))
+            Assertions.assertNotNull(storage.loadPlayerData(testUuid2, "survival", GameMode.SURVIVAL))
+            Assertions.assertNotNull(storage.loadPlayerData(testUuid3, "survival", GameMode.SURVIVAL))
         }
 
         @Test
@@ -868,7 +869,7 @@ class YamlStorageTest {
             val loadResult = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
 
             assertFalse(saveResult)
-            assertNull(loadResult)
+            Assertions.assertNull(loadResult)
         }
     }
 
@@ -907,7 +908,7 @@ class YamlStorageTest {
 
             // File should exist with sanitized name
             val files = playerDir.listFiles()
-            assertNotNull(files)
+            Assertions.assertNotNull(files)
             assertTrue(files!!.isNotEmpty())
 
             // Filename should not contain special characters
@@ -977,12 +978,12 @@ class YamlStorageTest {
 
             // Check player 1 has 2 files
             val player1Files = File(playersDir, testUuid1.toString()).listFiles()
-            assertNotNull(player1Files)
+            Assertions.assertNotNull(player1Files)
             assertEquals(2, player1Files!!.size)
 
             // Check player 2 has 1 file
             val player2Files = File(playersDir, testUuid2.toString()).listFiles()
-            assertNotNull(player2Files)
+            Assertions.assertNotNull(player2Files)
             assertEquals(1, player2Files!!.size)
         }
     }
@@ -1195,7 +1196,7 @@ class YamlStorageTest {
             val result = storage.savePlayerData(data)
 
             assertTrue(result)
-            assertNotNull(storage.loadPlayerData(testUuid1, longGroup, GameMode.SURVIVAL))
+            Assertions.assertNotNull(storage.loadPlayerData(testUuid1, longGroup, GameMode.SURVIVAL))
         }
 
         @Test
@@ -1209,7 +1210,7 @@ class YamlStorageTest {
 
             assertTrue(result)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals("Player_123", loaded!!.playerName)
         }
 
@@ -1230,7 +1231,7 @@ class YamlStorageTest {
 
             assertTrue(result)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(Int.MAX_VALUE, loaded!!.level)
             assertEquals(Int.MAX_VALUE, loaded.totalExperience)
         }
@@ -1255,7 +1256,7 @@ class YamlStorageTest {
 
             assertTrue(result)
             val loaded = storage.loadPlayerData(testUuid1, testGroup, GameMode.SURVIVAL)
-            assertNotNull(loaded)
+            Assertions.assertNotNull(loaded)
             assertEquals(0.0, loaded!!.health)
             assertEquals(0, loaded.level)
         }

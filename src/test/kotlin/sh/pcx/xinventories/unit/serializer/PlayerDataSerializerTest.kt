@@ -8,6 +8,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -154,13 +155,13 @@ class PlayerDataSerializerTest {
 
             // Inventory section should be present (YAML paths create nested sections)
             // Use the full path with dots as set by the serializer
-            assertNotNull(yaml.get("inventory.main"), "inventory.main should be set")
-            assertNotNull(yaml.get("inventory.armor"), "inventory.armor should be set")
-            assertNotNull(yaml.get("inventory.offhand"), "inventory.offhand should be set")
-            assertNotNull(yaml.get("inventory.ender-chest"), "inventory.ender-chest should be set")
+            Assertions.assertNotNull(yaml.get("inventory.main"), "inventory.main should be set")
+            Assertions.assertNotNull(yaml.get("inventory.armor"), "inventory.armor should be set")
+            Assertions.assertNotNull(yaml.get("inventory.offhand"), "inventory.offhand should be set")
+            Assertions.assertNotNull(yaml.get("inventory.ender-chest"), "inventory.ender-chest should be set")
 
             // Potion effects should be present
-            assertNotNull(yaml.getList("potion-effects"))
+            Assertions.assertNotNull(yaml.getList("potion-effects"))
         }
 
         @Test
@@ -208,7 +209,7 @@ class PlayerDataSerializerTest {
 
             val deserialized = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(deserialized)
+            Assertions.assertNotNull(deserialized)
             assertEquals(original.uuid, deserialized!!.uuid)
             assertEquals(original.playerName, deserialized.playerName)
             assertEquals(original.group, deserialized.group)
@@ -235,7 +236,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -247,7 +248,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -259,7 +260,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -272,7 +273,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(20.0, result!!.health)
             assertEquals(20.0, result.maxHealth)
             assertEquals(20, result.foodLevel)
@@ -295,7 +296,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(GameMode.SURVIVAL, result!!.gameMode)
         }
 
@@ -309,7 +310,7 @@ class PlayerDataSerializerTest {
 
             val deserialized = PlayerDataSerializer.fromYaml(yaml1)
 
-            assertNotNull(deserialized, "Deserialized data should not be null")
+            Assertions.assertNotNull(deserialized, "Deserialized data should not be null")
 
             // Compare the data fields instead of YAML strings (format may vary)
             assertEquals(original.uuid, deserialized!!.uuid)
@@ -443,7 +444,7 @@ class PlayerDataSerializerTest {
 
             val deserialized = PlayerDataSerializer.fromSqlMap(sqlMap)
 
-            assertNotNull(deserialized)
+            Assertions.assertNotNull(deserialized)
             assertEquals(original.uuid, deserialized!!.uuid)
             assertEquals(original.playerName, deserialized.playerName)
             assertEquals(original.group, deserialized.group)
@@ -471,7 +472,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -484,7 +485,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -497,7 +498,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -511,7 +512,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(20.0, result!!.health)
             assertEquals(20.0, result.maxHealth)
             assertEquals(20, result.foodLevel)
@@ -535,7 +536,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(GameMode.SURVIVAL, result!!.gameMode)
         }
 
@@ -556,7 +557,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(15.5, result!!.health)
             assertEquals(24.0, result.maxHealth)
             assertEquals(18, result.foodLevel)
@@ -580,10 +581,10 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertTrue(result!!.mainInventory.isEmpty())
             assertTrue(result.armorInventory.isEmpty())
-            assertNull(result.offhand)
+            Assertions.assertNull(result.offhand)
             assertTrue(result.enderChest.isEmpty())
             assertTrue(result.potionEffects.isEmpty())
         }
@@ -626,7 +627,7 @@ class PlayerDataSerializerTest {
 
             val yamlString = PlayerDataSerializer.snapshotToYamlString(snapshot)
 
-            assertNotNull(yamlString)
+            Assertions.assertNotNull(yamlString)
             assertTrue(yamlString.isNotEmpty())
             assertTrue(yamlString.contains("uuid:"))
             assertTrue(yamlString.contains("player-name:"))
@@ -641,7 +642,7 @@ class PlayerDataSerializerTest {
 
             val restored = PlayerDataSerializer.snapshotFromYamlString(yamlString)
 
-            assertNotNull(restored, "Restored snapshot should not be null. YAML: $yamlString")
+            Assertions.assertNotNull(restored, "Restored snapshot should not be null. YAML: $yamlString")
             assertEquals(original.uuid, restored!!.uuid)
             assertEquals(original.playerName, restored.playerName)
             assertEquals(original.group, restored.group)
@@ -674,7 +675,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.snapshotFromYamlString(incompleteYaml)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -685,7 +686,7 @@ class PlayerDataSerializerTest {
             val yamlString = PlayerDataSerializer.snapshotToYamlString(original)
             val restored = PlayerDataSerializer.snapshotFromYamlString(yamlString)
 
-            assertNotNull(restored, "Restored snapshot should not be null. YAML: $yamlString")
+            Assertions.assertNotNull(restored, "Restored snapshot should not be null. YAML: $yamlString")
             assertEquals(original.uuid, restored!!.uuid)
             assertEquals(original.playerName, restored.playerName)
             assertEquals(original.group, restored.group)
@@ -794,7 +795,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.parseCacheKey(key)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(testUuid, result!!.first)
             assertEquals(testGroup, result.second)
             assertEquals(GameMode.SURVIVAL, result.third)
@@ -807,10 +808,10 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.parseCacheKey(key)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(testUuid, result!!.first)
             assertEquals(testGroup, result.second)
-            assertNull(result.third)
+            Assertions.assertNull(result.third)
         }
 
         @Test
@@ -820,7 +821,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.parseCacheKey(invalidKey)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -828,7 +829,7 @@ class PlayerDataSerializerTest {
         fun testParseCacheKeyWithEmptyString() {
             val result = PlayerDataSerializer.parseCacheKey("")
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -838,7 +839,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.parseCacheKey(invalidKey)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -848,10 +849,10 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.parseCacheKey(key)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(testUuid, result!!.first)
             assertEquals(testGroup, result.second)
-            assertNull(result.third) // Invalid gamemode becomes null
+            Assertions.assertNull(result.third) // Invalid gamemode becomes null
         }
 
         @Test
@@ -860,7 +861,7 @@ class PlayerDataSerializerTest {
             val key = PlayerDataSerializer.cacheKey(testUuid, testGroup, GameMode.CREATIVE)
             val parsed = PlayerDataSerializer.parseCacheKey(key)
 
-            assertNotNull(parsed)
+            Assertions.assertNotNull(parsed)
             assertEquals(testUuid, parsed!!.first)
             assertEquals(testGroup, parsed.second)
             assertEquals(GameMode.CREATIVE, parsed.third)
@@ -872,10 +873,10 @@ class PlayerDataSerializerTest {
             val key = PlayerDataSerializer.cacheKey(testUuid, testGroup, null)
             val parsed = PlayerDataSerializer.parseCacheKey(key)
 
-            assertNotNull(parsed)
+            Assertions.assertNotNull(parsed)
             assertEquals(testUuid, parsed!!.first)
             assertEquals(testGroup, parsed.second)
-            assertNull(parsed.third)
+            Assertions.assertNull(parsed.third)
         }
     }
 
@@ -897,7 +898,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(UUID.fromString("12345678-1234-1234-1234-123456789abc"), result!!.uuid)
         }
 
@@ -911,7 +912,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -925,7 +926,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(UUID.fromString("12345678-1234-1234-1234-123456789abc"), result!!.uuid)
         }
 
@@ -940,7 +941,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -953,7 +954,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(uuid, restored!!.uuid)
         }
 
@@ -966,7 +967,7 @@ class PlayerDataSerializerTest {
             val sqlMap = PlayerDataSerializer.toSqlMap(data)
             val restored = PlayerDataSerializer.fromSqlMap(sqlMap)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(uuid, restored!!.uuid)
         }
     }
@@ -1001,7 +1002,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(testTimestamp, result!!.timestamp)
         }
 
@@ -1017,7 +1018,7 @@ class PlayerDataSerializerTest {
             val result = PlayerDataSerializer.fromYaml(yaml)
             val after = System.currentTimeMillis()
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             val timestampMillis = result!!.timestamp.toEpochMilli()
             assertTrue(timestampMillis >= before && timestampMillis <= after)
         }
@@ -1044,7 +1045,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(testTimestamp, result!!.timestamp)
         }
 
@@ -1061,7 +1062,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(Instant.ofEpochMilli(timestamp), result!!.timestamp)
         }
 
@@ -1078,7 +1079,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(Instant.ofEpochMilli(1700000L), result!!.timestamp)
         }
 
@@ -1091,7 +1092,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(data.timestamp, restored!!.timestamp)
         }
 
@@ -1103,7 +1104,7 @@ class PlayerDataSerializerTest {
             val sqlMap = PlayerDataSerializer.toSqlMap(data)
             val restored = PlayerDataSerializer.fromSqlMap(sqlMap)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(data.timestamp, restored!!.timestamp)
         }
     }
@@ -1126,7 +1127,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(gameMode, restored!!.gameMode)
         }
 
@@ -1139,7 +1140,7 @@ class PlayerDataSerializerTest {
             val sqlMap = PlayerDataSerializer.toSqlMap(data)
             val restored = PlayerDataSerializer.fromSqlMap(sqlMap)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(gameMode, restored!!.gameMode)
         }
 
@@ -1154,7 +1155,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(GameMode.SURVIVAL, result!!.gameMode)
         }
 
@@ -1170,7 +1171,7 @@ class PlayerDataSerializerTest {
 
             val result = PlayerDataSerializer.fromSqlMap(row)
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(GameMode.SURVIVAL, result!!.gameMode)
         }
 
@@ -1186,7 +1187,7 @@ class PlayerDataSerializerTest {
             val result = PlayerDataSerializer.fromYaml(yaml)
 
             // Should default to SURVIVAL since lowercase "survival" != "SURVIVAL"
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             // The implementation uses valueOf which is case-sensitive
             assertEquals(GameMode.SURVIVAL, result!!.gameMode)
         }
@@ -1210,7 +1211,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(specialName, restored!!.playerName)
         }
 
@@ -1224,7 +1225,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(specialGroup, restored!!.group)
         }
 
@@ -1240,7 +1241,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(0.1, restored!!.health, 0.001)
             assertEquals(1024.0, restored.maxHealth, 0.001)
         }
@@ -1258,7 +1259,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(0.999f, restored!!.experience, 0.001f)
             assertEquals(32767, restored.level)
             assertEquals(Int.MAX_VALUE, restored.totalExperience)
@@ -1282,7 +1283,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(0.0, restored!!.health)
             assertEquals(0.0, restored.maxHealth)
             assertEquals(0, restored.foodLevel)
@@ -1316,17 +1317,17 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored, "Restored data should not be null")
+            Assertions.assertNotNull(restored, "Restored data should not be null")
             // Check the original data was set correctly
             assertEquals(36, data.mainInventory.size, "Original main inventory size")
             assertEquals(4, data.armorInventory.size, "Original armor inventory size")
             assertEquals(27, data.enderChest.size, "Original ender chest size")
-            assertNotNull(data.offhand, "Original offhand")
+            Assertions.assertNotNull(data.offhand, "Original offhand")
 
             // Check restored data has inventories (size may vary based on serialization)
-            assertNotNull(restored!!.mainInventory, "Restored main inventory not null")
-            assertNotNull(restored.armorInventory, "Restored armor inventory not null")
-            assertNotNull(restored.enderChest, "Restored ender chest not null")
+            Assertions.assertNotNull(restored!!.mainInventory, "Restored main inventory not null")
+            Assertions.assertNotNull(restored.armorInventory, "Restored armor inventory not null")
+            Assertions.assertNotNull(restored.enderChest, "Restored ender chest not null")
         }
 
         @Test
@@ -1344,7 +1345,7 @@ class PlayerDataSerializerTest {
             PlayerDataSerializer.toYaml(data, yaml)
             val restored = PlayerDataSerializer.fromYaml(yaml)
 
-            assertNotNull(restored)
+            Assertions.assertNotNull(restored)
             assertEquals(5, restored!!.potionEffects.size)
         }
     }

@@ -1,6 +1,7 @@
 package sh.pcx.xinventories.unit.model
 
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -55,7 +56,7 @@ class GroupTest {
             assertTrue(group.worlds.isEmpty())
             assertTrue(group.patterns.isEmpty())
             assertEquals(0, group.priority)
-            assertNull(group.parent)
+            Assertions.assertNull(group.parent)
             assertEquals(GroupSettings(), group.settings)
             assertFalse(group.isDefault)
         }
@@ -516,7 +517,7 @@ class GroupTest {
         fun parentDefaultsToNull() {
             val group = Group(name = "test")
 
-            assertNull(group.parent)
+            Assertions.assertNull(group.parent)
         }
 
         @Test
@@ -544,7 +545,7 @@ class GroupTest {
 
             group.parent = null
 
-            assertNull(group.parent)
+            Assertions.assertNull(group.parent)
         }
     }
 
@@ -588,7 +589,7 @@ class GroupTest {
             assertTrue(apiModel.worlds.isEmpty())
             assertTrue(apiModel.patterns.isEmpty())
             assertEquals(0, apiModel.priority)
-            assertNull(apiModel.parent)
+            Assertions.assertNull(apiModel.parent)
             assertEquals(GroupSettings(), apiModel.settings)
             assertFalse(apiModel.isDefault)
         }

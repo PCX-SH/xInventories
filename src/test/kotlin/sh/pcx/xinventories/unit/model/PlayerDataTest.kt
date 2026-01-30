@@ -11,6 +11,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import sh.pcx.xinventories.api.model.GroupSettings
 import sh.pcx.xinventories.api.model.InventoryContents
 import sh.pcx.xinventories.api.model.PlayerInventorySnapshot
@@ -61,7 +62,7 @@ class PlayerDataTest {
             // Inventory should be empty
             assertTrue(playerData.mainInventory.isEmpty())
             assertTrue(playerData.armorInventory.isEmpty())
-            assertNull(playerData.offhand)
+            Assertions.assertNull(playerData.offhand)
             assertTrue(playerData.enderChest.isEmpty())
 
             // State should be at defaults
@@ -76,7 +77,7 @@ class PlayerDataTest {
             assertTrue(playerData.potionEffects.isEmpty())
 
             // Metadata
-            assertNotNull(playerData.timestamp)
+            Assertions.assertNotNull(playerData.timestamp)
             assertFalse(playerData.dirty)
         }
 
@@ -166,7 +167,7 @@ class PlayerDataTest {
 
             val playerData = PlayerData.fromPlayer(player, "default")
 
-            assertNotNull(playerData.offhand)
+            Assertions.assertNotNull(playerData.offhand)
             assertEquals(Material.SHIELD, playerData.offhand?.type)
         }
 
@@ -367,8 +368,8 @@ class PlayerDataTest {
             playerData.applyToPlayer(player, defaultSettings)
 
             // Old items should be cleared
-            assertNull(player.inventory.getItem(5))
-            assertNull(player.inventory.getItem(10))
+            Assertions.assertNull(player.inventory.getItem(5))
+            Assertions.assertNull(player.inventory.getItem(10))
         }
     }
 
@@ -867,7 +868,7 @@ class PlayerDataTest {
         @Test
         @DisplayName("should manage offhand item")
         fun manageOffhandItem() {
-            assertNull(playerData.offhand)
+            Assertions.assertNull(playerData.offhand)
 
             playerData.offhand = ItemStack(Material.SHIELD)
             assertEquals(Material.SHIELD, playerData.offhand?.type)
@@ -876,7 +877,7 @@ class PlayerDataTest {
             assertEquals(Material.MAP, playerData.offhand?.type)
 
             playerData.offhand = null
-            assertNull(playerData.offhand)
+            Assertions.assertNull(playerData.offhand)
         }
 
         @Test
@@ -1153,7 +1154,7 @@ class PlayerDataTest {
             val playerData = PlayerData.empty(UUID.randomUUID(), "Test", "default", GameMode.SURVIVAL)
             val after = Instant.now()
 
-            assertNotNull(playerData.timestamp)
+            Assertions.assertNotNull(playerData.timestamp)
             assertTrue(playerData.timestamp >= before)
             assertTrue(playerData.timestamp <= after)
         }
@@ -1241,7 +1242,7 @@ class PlayerDataTest {
 
             assertTrue(playerData.mainInventory.isEmpty())
             assertTrue(playerData.armorInventory.isEmpty())
-            assertNull(playerData.offhand)
+            Assertions.assertNull(playerData.offhand)
             assertTrue(playerData.enderChest.isEmpty())
         }
 
@@ -1314,7 +1315,7 @@ class PlayerDataTest {
 
             assertEquals(2, playerData.mainInventory.size)
             assertEquals(1, playerData.armorInventory.size)
-            assertNotNull(playerData.offhand)
+            Assertions.assertNotNull(playerData.offhand)
             assertEquals(1, playerData.enderChest.size)
         }
     }
@@ -1512,7 +1513,7 @@ class PlayerDataTest {
 
             assertTrue(playerData.mainInventory.isEmpty())
             assertTrue(playerData.armorInventory.isEmpty())
-            assertNull(playerData.offhand)
+            Assertions.assertNull(playerData.offhand)
         }
 
         @Test
@@ -1538,7 +1539,7 @@ class PlayerDataTest {
 
             assertTrue(playerData.mainInventory.isEmpty())
             assertTrue(playerData.armorInventory.isEmpty())
-            assertNull(playerData.offhand)
+            Assertions.assertNull(playerData.offhand)
             assertTrue(playerData.enderChest.isEmpty())
             assertTrue(playerData.potionEffects.isEmpty())
         }
@@ -1580,7 +1581,7 @@ class PlayerDataTest {
 
             assertEquals(36, playerData.mainInventory.size)
             assertEquals(4, playerData.armorInventory.size)
-            assertNotNull(playerData.offhand)
+            Assertions.assertNotNull(playerData.offhand)
             assertEquals(27, playerData.enderChest.size)
         }
     }

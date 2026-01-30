@@ -1,6 +1,7 @@
 package sh.pcx.xinventories.unit.model
 
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -22,7 +23,7 @@ class WorldPatternTest {
         fun fromStringCreatesPatternFromValidRegex() {
             val pattern = WorldPattern.fromString("world.*")
 
-            assertNotNull(pattern)
+            Assertions.assertNotNull(pattern)
             assertEquals("world.*", pattern!!.pattern)
         }
 
@@ -31,7 +32,7 @@ class WorldPatternTest {
         fun fromStringReturnsNullForInvalidRegex() {
             val pattern = WorldPattern.fromString("[invalid")
 
-            assertNull(pattern)
+            Assertions.assertNull(pattern)
         }
 
         @Test
@@ -59,7 +60,7 @@ class WorldPatternTest {
             val patternString = "^(world|world_nether|world_the_end)$"
             val pattern = WorldPattern.fromString(patternString)
 
-            assertNotNull(pattern)
+            Assertions.assertNotNull(pattern)
             assertEquals(patternString, pattern!!.pattern)
         }
     }
@@ -282,7 +283,7 @@ class WorldPatternTest {
         fun fromStringReturnsNullForVariousInvalidPatterns(invalidPattern: String) {
             val pattern = WorldPattern.fromString(invalidPattern)
 
-            assertNull(pattern)
+            Assertions.assertNull(pattern)
         }
 
         @ParameterizedTest

@@ -8,6 +8,7 @@ import org.bukkit.World
 import org.bukkit.entity.Player
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.event.*
 import sh.pcx.xinventories.api.model.*
@@ -90,10 +91,10 @@ class XInventoriesAPITest {
 
             val future = api.getPlayerData(player, "survival")
 
-            assertNotNull(future)
+            Assertions.assertNotNull(future)
             assertTrue(future is CompletableFuture)
             val result = future.get(5, TimeUnit.SECONDS)
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(testUuid, result?.uuid)
         }
 
@@ -110,7 +111,7 @@ class XInventoriesAPITest {
             val future = api.getPlayerData(player, "creative", GameMode.CREATIVE)
 
             val result = future.get(5, TimeUnit.SECONDS)
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(GameMode.CREATIVE, result?.gameMode)
         }
 
@@ -124,7 +125,7 @@ class XInventoriesAPITest {
             val future = api.getPlayerData(player, "nonexistent")
 
             val result = future.get(5, TimeUnit.SECONDS)
-            assertNull(result)
+            Assertions.assertNull(result)
         }
     }
 
@@ -144,7 +145,7 @@ class XInventoriesAPITest {
             val future = api.getPlayerData(offlineUuid, "survival")
 
             val result = future.get(5, TimeUnit.SECONDS)
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(offlineUuid, result?.uuid)
         }
 
@@ -160,7 +161,7 @@ class XInventoriesAPITest {
             val future = api.getPlayerData(offlineUuid, "adventure", GameMode.ADVENTURE)
 
             val result = future.get(5, TimeUnit.SECONDS)
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals(GameMode.ADVENTURE, result?.gameMode)
         }
 
@@ -173,7 +174,7 @@ class XInventoriesAPITest {
             val future = api.getPlayerData(unknownUuid, "survival")
 
             val result = future.get(5, TimeUnit.SECONDS)
-            assertNull(result)
+            Assertions.assertNull(result)
         }
     }
 
@@ -416,7 +417,7 @@ class XInventoriesAPITest {
 
             val result = api.getGroup("survival")
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertEquals("survival", result?.name)
         }
 
@@ -427,7 +428,7 @@ class XInventoriesAPITest {
 
             val result = api.getGroup("nonexistent")
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
     }
 
@@ -1025,8 +1026,8 @@ class XInventoriesAPITest {
         fun returnsSubscriptionObject() {
             val subscription = api.onInventorySwitch { }
 
-            assertNotNull(subscription)
-            assertNotNull(subscription.id)
+            Assertions.assertNotNull(subscription)
+            Assertions.assertNotNull(subscription.id)
             assertTrue(subscription.isActive)
         }
 
@@ -1046,7 +1047,7 @@ class XInventoriesAPITest {
             val context = InventorySwitchContext(player, fromGroup, toGroup, fromWorld, toWorld, snapshot)
             api.dispatchSwitch(context)
 
-            assertNotNull(receivedContext)
+            Assertions.assertNotNull(receivedContext)
             assertEquals(fromGroup, receivedContext?.fromGroup)
             assertEquals(toGroup, receivedContext?.toGroup)
         }
@@ -1061,7 +1062,7 @@ class XInventoriesAPITest {
         fun returnsSubscriptionObject() {
             val subscription = api.onInventorySave { }
 
-            assertNotNull(subscription)
+            Assertions.assertNotNull(subscription)
             assertTrue(subscription.isActive)
         }
 
@@ -1078,7 +1079,7 @@ class XInventoriesAPITest {
             val context = InventorySaveContext(player, group, snapshot, async = true)
             api.dispatchSave(context)
 
-            assertNotNull(receivedContext)
+            Assertions.assertNotNull(receivedContext)
             assertEquals(group, receivedContext?.group)
             assertTrue(receivedContext?.async == true)
         }
@@ -1093,7 +1094,7 @@ class XInventoriesAPITest {
         fun returnsSubscriptionObject() {
             val subscription = api.onInventoryLoad { }
 
-            assertNotNull(subscription)
+            Assertions.assertNotNull(subscription)
             assertTrue(subscription.isActive)
         }
 
@@ -1110,7 +1111,7 @@ class XInventoriesAPITest {
             val context = InventoryLoadContext(player, group, snapshot, InventoryLoadEvent.LoadReason.API)
             api.dispatchLoad(context)
 
-            assertNotNull(receivedContext)
+            Assertions.assertNotNull(receivedContext)
             assertEquals(group, receivedContext?.group)
             assertEquals(InventoryLoadEvent.LoadReason.API, receivedContext?.reason)
         }
@@ -1125,7 +1126,7 @@ class XInventoriesAPITest {
         fun returnsSubscriptionObject() {
             val subscription = api.onGroupChange { }
 
-            assertNotNull(subscription)
+            Assertions.assertNotNull(subscription)
             assertTrue(subscription.isActive)
         }
 
@@ -1142,7 +1143,7 @@ class XInventoriesAPITest {
             val context = GroupChangeContext(player, oldGroup, newGroup)
             api.dispatchGroupChange(context)
 
-            assertNotNull(receivedContext)
+            Assertions.assertNotNull(receivedContext)
             assertEquals(oldGroup, receivedContext?.oldGroup)
             assertEquals(newGroup, receivedContext?.newGroup)
         }
@@ -1159,8 +1160,8 @@ class XInventoriesAPITest {
             val context = GroupChangeContext(player, null, newGroup)
             api.dispatchGroupChange(context)
 
-            assertNotNull(receivedContext)
-            assertNull(receivedContext?.oldGroup)
+            Assertions.assertNotNull(receivedContext)
+            Assertions.assertNull(receivedContext?.oldGroup)
             assertEquals(newGroup, receivedContext?.newGroup)
         }
     }
@@ -1335,7 +1336,7 @@ class XInventoriesAPITest {
 
             val result = XInventoriesProvider.get()
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertSame(api, result)
         }
 
@@ -1354,7 +1355,7 @@ class XInventoriesAPITest {
         fun getOrNullReturnsNullWhenNotRegistered() {
             val result = XInventoriesProvider.getOrNull()
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -1364,7 +1365,7 @@ class XInventoriesAPITest {
 
             val result = XInventoriesProvider.getOrNull()
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertSame(api, result)
         }
 

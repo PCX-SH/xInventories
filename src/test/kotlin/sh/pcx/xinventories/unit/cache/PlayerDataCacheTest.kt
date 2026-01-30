@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import org.bukkit.GameMode
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import sh.pcx.xinventories.internal.cache.PlayerDataCache
 import sh.pcx.xinventories.internal.config.CacheConfig
 import sh.pcx.xinventories.internal.model.PlayerData
@@ -87,7 +88,7 @@ class PlayerDataCacheTest {
             enabledCache.put(data)
             val retrieved = enabledCache.get(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNotNull(retrieved)
+            Assertions.assertNotNull(retrieved)
             assertEquals(testUuid1, retrieved?.uuid)
             assertEquals("world", retrieved?.group)
             assertEquals(GameMode.SURVIVAL, retrieved?.gameMode)
@@ -100,14 +101,14 @@ class PlayerDataCacheTest {
             enabledCache.put(data)
             // When stored with SURVIVAL, retrieval with null should not find it
             val retrievedNull = enabledCache.get(testUuid1, "world", null)
-            assertNull(retrievedNull)
+            Assertions.assertNull(retrievedNull)
 
             // Store data with the key that uses null gamemode approach
             val dataForNullKey = createTestPlayerData(testUuid1, "shared", GameMode.SURVIVAL)
             // Note: The cache key format is uuid_group_gamemode or uuid_group (when gamemode is null)
             // We need to test both patterns
             val retrievedWithMode = enabledCache.get(testUuid1, "shared", GameMode.SURVIVAL)
-            assertNull(retrievedWithMode) // Not stored yet
+            Assertions.assertNull(retrievedWithMode) // Not stored yet
         }
 
         @Test
@@ -124,9 +125,9 @@ class PlayerDataCacheTest {
             val retrieved2 = enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL)
             val retrieved3 = enabledCache.get(testUuid1, "end", GameMode.CREATIVE)
 
-            assertNotNull(retrieved1)
-            assertNotNull(retrieved2)
-            assertNotNull(retrieved3)
+            Assertions.assertNotNull(retrieved1)
+            Assertions.assertNotNull(retrieved2)
+            Assertions.assertNotNull(retrieved3)
             assertEquals("world", retrieved1?.group)
             assertEquals("nether", retrieved2?.group)
             assertEquals("end", retrieved3?.group)
@@ -146,9 +147,9 @@ class PlayerDataCacheTest {
             val retrieved2 = enabledCache.get(testUuid2, "world", GameMode.SURVIVAL)
             val retrieved3 = enabledCache.get(testUuid3, "world", GameMode.CREATIVE)
 
-            assertNotNull(retrieved1)
-            assertNotNull(retrieved2)
-            assertNotNull(retrieved3)
+            Assertions.assertNotNull(retrieved1)
+            Assertions.assertNotNull(retrieved2)
+            Assertions.assertNotNull(retrieved3)
             assertEquals(testUuid1, retrieved1?.uuid)
             assertEquals(testUuid2, retrieved2?.uuid)
             assertEquals(testUuid3, retrieved3?.uuid)
@@ -157,7 +158,7 @@ class PlayerDataCacheTest {
         @Test
         fun `should return null for non-existent entry`() {
             val retrieved = enabledCache.get(testUuid1, "world", GameMode.SURVIVAL)
-            assertNull(retrieved)
+            Assertions.assertNull(retrieved)
         }
 
         @Test
@@ -209,7 +210,7 @@ class PlayerDataCacheTest {
                 createTestPlayerData(testUuid1, "world", GameMode.SURVIVAL)
             }
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertFalse(loaderCalled)
         }
 
@@ -221,7 +222,7 @@ class PlayerDataCacheTest {
                 createTestPlayerData(testUuid1, "world", GameMode.SURVIVAL)
             }
 
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
             assertTrue(loaderCalled)
         }
 
@@ -250,7 +251,7 @@ class PlayerDataCacheTest {
                 null
             }
 
-            assertNull(result)
+            Assertions.assertNull(result)
         }
     }
 
@@ -402,9 +403,9 @@ class PlayerDataCacheTest {
             val count = enabledCache.invalidatePlayer(testUuid1)
 
             assertEquals(3, count)
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
-            assertNull(enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL))
-            assertNull(enabledCache.get(testUuid1, "end", GameMode.CREATIVE))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "end", GameMode.CREATIVE))
         }
 
         @Test
@@ -417,8 +418,8 @@ class PlayerDataCacheTest {
 
             enabledCache.invalidatePlayer(testUuid1)
 
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
-            assertNotNull(enabledCache.get(testUuid2, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNotNull(enabledCache.get(testUuid2, "world", GameMode.SURVIVAL))
         }
 
         @Test
@@ -461,9 +462,9 @@ class PlayerDataCacheTest {
             val count = enabledCache.invalidateGroup("world")
 
             assertEquals(3, count)
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
-            assertNull(enabledCache.get(testUuid2, "world", GameMode.CREATIVE))
-            assertNull(enabledCache.get(testUuid3, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid2, "world", GameMode.CREATIVE))
+            Assertions.assertNull(enabledCache.get(testUuid3, "world", GameMode.SURVIVAL))
         }
 
         @Test
@@ -476,8 +477,8 @@ class PlayerDataCacheTest {
 
             enabledCache.invalidateGroup("world")
 
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
-            assertNotNull(enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNotNull(enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL))
         }
 
         @Test
@@ -517,16 +518,16 @@ class PlayerDataCacheTest {
 
             val invalidated = enabledCache.invalidate(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNotNull(invalidated)
+            Assertions.assertNotNull(invalidated)
             assertEquals(testUuid1, invalidated?.uuid)
             assertEquals("world", invalidated?.group)
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
         }
 
         @Test
         fun `should return null when invalidating non-existent entry`() {
             val invalidated = enabledCache.invalidate(testUuid1, "world", GameMode.SURVIVAL)
-            assertNull(invalidated)
+            Assertions.assertNull(invalidated)
         }
 
         @Test
@@ -541,9 +542,9 @@ class PlayerDataCacheTest {
 
             enabledCache.invalidate(testUuid1, "world", GameMode.SURVIVAL)
 
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
-            assertNotNull(enabledCache.get(testUuid1, "world", GameMode.CREATIVE))
-            assertNotNull(enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNotNull(enabledCache.get(testUuid1, "world", GameMode.CREATIVE))
+            Assertions.assertNotNull(enabledCache.get(testUuid1, "nether", GameMode.SURVIVAL))
         }
 
         @Test
@@ -579,7 +580,7 @@ class PlayerDataCacheTest {
             disabledCache.put(data)
 
             val retrieved = disabledCache.get(testUuid1, "world", GameMode.SURVIVAL)
-            assertNull(retrieved)
+            Assertions.assertNull(retrieved)
         }
 
         @Test
@@ -591,7 +592,7 @@ class PlayerDataCacheTest {
             }
 
             assertTrue(loaderCalled)
-            assertNotNull(result)
+            Assertions.assertNotNull(result)
         }
 
         @Test
@@ -620,7 +621,7 @@ class PlayerDataCacheTest {
         @Test
         fun `should return null on invalidate when disabled`() {
             val result = disabledCache.invalidate(testUuid1, "world", GameMode.SURVIVAL)
-            assertNull(result)
+            Assertions.assertNull(result)
         }
 
         @Test
@@ -709,7 +710,7 @@ class PlayerDataCacheTest {
         fun `should return valid statistics`() {
             val stats = enabledCache.getStats()
 
-            assertNotNull(stats)
+            Assertions.assertNotNull(stats)
             assertTrue(stats.maxSize > 0)
             assertTrue(stats.hitCount >= 0)
             assertTrue(stats.missCount >= 0)
@@ -789,9 +790,9 @@ class PlayerDataCacheTest {
             val count = enabledCache.clear()
 
             assertTrue(count >= 0) // Caffeine returns estimated size
-            assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
-            assertNull(enabledCache.get(testUuid2, "world", GameMode.SURVIVAL))
-            assertNull(enabledCache.get(testUuid3, "nether", GameMode.CREATIVE))
+            Assertions.assertNull(enabledCache.get(testUuid1, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid2, "world", GameMode.SURVIVAL))
+            Assertions.assertNull(enabledCache.get(testUuid3, "nether", GameMode.CREATIVE))
         }
 
         @Test

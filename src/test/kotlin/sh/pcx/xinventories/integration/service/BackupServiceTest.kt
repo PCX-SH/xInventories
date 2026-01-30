@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.runTest
 import org.bukkit.GameMode
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.io.TempDir
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.api.model.BackupMetadata
@@ -237,7 +238,7 @@ class BackupServiceTest {
 
             val backupDir = File(dataFolder, "backups")
             val files = backupDir.listFiles { f -> f.name.startsWith("before_reset_") }
-            assertNotNull(files)
+            Assertions.assertNotNull(files)
             assertEquals(1, files!!.size)
             assertTrue(files[0].name.endsWith(".yml"))
         }
@@ -296,7 +297,7 @@ class BackupServiceTest {
 
             val backupDir = File(dataFolder, "backups")
             val files = backupDir.listFiles { f -> f.name.startsWith("gz_test_") }
-            assertNotNull(files)
+            Assertions.assertNotNull(files)
             assertEquals(1, files!!.size)
             assertTrue(files[0].extension == "gz")
         }
@@ -362,7 +363,7 @@ class BackupServiceTest {
 
             val backupDir = File(dataFolder, "backups")
             val files = backupDir.listFiles { f -> f.name.startsWith("yml_test_") }
-            assertNotNull(files)
+            Assertions.assertNotNull(files)
             assertEquals(1, files!!.size)
             assertTrue(files[0].extension == "yml")
         }
@@ -534,7 +535,7 @@ class BackupServiceTest {
 
             val retrievedBackup = backupService.getBackup(createdBackup.id)
 
-            assertNotNull(retrievedBackup)
+            Assertions.assertNotNull(retrievedBackup)
             assertEquals(createdBackup.id, retrievedBackup!!.id)
         }
 
@@ -546,7 +547,7 @@ class BackupServiceTest {
 
             val backup = backupService.getBackup("nonexistent123")
 
-            assertNull(backup)
+            Assertions.assertNull(backup)
         }
 
         @Test
@@ -562,7 +563,7 @@ class BackupServiceTest {
 
             val retrievedBackup = backupService.getBackup(createdBackup.id)
 
-            assertNotNull(retrievedBackup)
+            Assertions.assertNotNull(retrievedBackup)
             assertEquals(createdBackup.name, retrievedBackup!!.name)
             assertEquals(createdBackup.compressed, retrievedBackup.compressed)
             assertTrue(retrievedBackup.sizeBytes > 0)
@@ -712,7 +713,7 @@ class BackupServiceTest {
             backupService.deleteBackup(createdBackup.id)
             val retrievedBackup = backupService.getBackup(createdBackup.id)
 
-            assertNull(retrievedBackup)
+            Assertions.assertNull(retrievedBackup)
         }
 
         @Test
