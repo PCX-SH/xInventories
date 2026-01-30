@@ -13,7 +13,10 @@ class Group(
     var priority: Int = 0,
     var parent: String? = null,
     var settings: GroupSettings = GroupSettings(),
-    var isDefault: Boolean = false
+    var isDefault: Boolean = false,
+    var conditions: GroupConditions? = null,
+    var templateSettings: TemplateSettings? = null,
+    var restrictions: RestrictionConfig? = null
 ) {
     private val _worlds = worlds.toMutableSet()
     private val _patterns = patterns.toMutableList()
