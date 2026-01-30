@@ -1,41 +1,48 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.0.21'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.21'
-    id 'com.gradleup.shadow' version '8.3.5'
-    id 'xyz.jpenilla.run-paper' version '2.3.1'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.21'
+    id 'com.gradleup.shadow' version '9.3.1'
+    id 'xyz.jpenilla.run-paper' version '3.0.2'
 }
 
 group = 'sh.pcx'
-version = '1.0.1'
+version = '1.1.0'
 
 repositories {
     mavenCentral()
     maven { url = 'https://repo.papermc.io/repository/maven-public/' }
     maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
     maven { url = 'https://jitpack.io' }
+    // MyWorlds / BKCommonLib
+    maven { url = 'https://ci.mg-dev.eu/plugin/repository/everything' }
 }
 
 dependencies {
-    // Paper API
-    compileOnly 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
+    // Paper API - targeting 1.21.11
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
 
     // Kotlin - provided by Paper 1.21+
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib'
 
-    // Coroutines - must be shaded
+    // Coroutines - must be shaded (1.9.0 for better compatibility)
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
 
-    // Serialization - must be shaded
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3'
+    // Serialization - must be shaded (1.8.1 compatible with Kotlin 2.1.x)
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
 
     // Caching - must be shaded
-    implementation('com.github.ben-manes.caffeine:caffeine:3.1.8') {
+    implementation('com.github.ben-manes.caffeine:caffeine:3.2.3') {
         exclude group: 'com.google.errorprone'
         exclude group: 'org.checkerframework'
     }
 
     // Database - must be shaded
-    implementation('com.zaxxer:HikariCP:6.0.0') {
+    implementation('com.zaxxer:HikariCP:6.2.1') {
+        exclude group: 'org.slf4j'
+    }
+
+    // Redis client for cross-server sync - must be shaded
+    implementation('redis.clients:jedis:5.2.0') {
         exclude group: 'org.slf4j'
     }
 
@@ -45,16 +52,40 @@ dependencies {
     }
     compileOnly 'me.clip:placeholderapi:2.11.6'
 
-    // Testing
-    testImplementation 'org.jetbrains.kotlin:kotlin-test:2.0.21'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    testImplementation 'io.mockk:mockk:1.13.10'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
-    testImplementation 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
-    testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.14.0') {
-        exclude group: 'org.jetbrains.kotlin'
+    // bStats metrics
+    implementation 'org.bstats:bstats-bukkit:3.1.0'
+
+    // PerWorldInventory-kt (archived but API functional)
+    // Note: PWI has many transitive deps - exclude all and access via reflection at runtime
+    compileOnly('com.github.ebonjaeger:perworldinventory-kt:2.3.2') {
+        transitive = false
     }
-    testImplementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    // MyWorlds + BKCommonLib for NBT parsing
+    compileOnly('com.bergerkiller.bukkit:MyWorlds:1.20.4-v2') {
+        transitive = false
+    }
+    compileOnly('com.bergerkiller.bukkit:BKCommonLib:1.20.4-v3') {
+        transitive = false
+    }
+
+    // Testing - use kotlin-test-junit5 to bridge kotlin.test to JUnit 5
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5:2.1.21'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
+    testImplementation 'io.mockk:mockk:1.14.7'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.101.0') {
+        exclude group: 'org.jetbrains.kotlin'
+        exclude group: 'org.jetbrains.kotlinx'
+    }
+    testImplementation 'org.xerial:sqlite-jdbc:3.51.1.0'
+    // Vault API for economy tests
+    testImplementation('com.github.MilkBowl:VaultAPI:1.7.1') {
+        exclude group: 'org.bukkit', module: 'bukkit'
+    }
+
+    // Embedded Redis for sync tests
+    testImplementation 'com.github.codemonstur:embedded-redis:1.4.3'
 }
 
 kotlin {
@@ -72,10 +103,15 @@ processResources {
 shadowJar {
     archiveClassifier.set('')
 
+    // Relocate bStats to avoid conflicts with other plugins
+    relocate 'org.bstats', 'sh.pcx.xinventories.lib.bstats'
+
     // Minimize - exclude reflection-heavy libraries
     minimize {
         exclude dependency('com.zaxxer:HikariCP:.*')
         exclude dependency('com.github.ben-manes.caffeine:caffeine:.*')
+        exclude dependency('redis.clients:jedis:.*')
+        exclude dependency('org.bstats:bstats-bukkit:.*')
     }
 
     // Exclude compile-time only stuff
@@ -94,7 +130,7 @@ build {
 }
 
 runServer {
-    minecraftVersion '1.21.1'
+    minecraftVersion '1.21.11'
 }
 
 test {
