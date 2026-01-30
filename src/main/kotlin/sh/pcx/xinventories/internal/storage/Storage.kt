@@ -1,7 +1,10 @@
 package sh.pcx.xinventories.internal.storage
 
+import sh.pcx.xinventories.internal.model.DeathRecord
+import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
 import org.bukkit.GameMode
+import java.time.Instant
 import java.util.UUID
 
 /**
@@ -131,4 +134,95 @@ interface Storage {
      * Gets the name of this storage type.
      */
     val name: String
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Inventory Version Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Saves an inventory version.
+     *
+     * @param version The version to save
+     * @return true if successful
+     */
+    suspend fun saveVersion(version: InventoryVersion): Boolean
+
+    /**
+     * Loads versions for a player.
+     *
+     * @param playerUuid Player UUID
+     * @param group Optional group filter (null = all groups)
+     * @param limit Maximum number of versions to return
+     * @return List of versions, ordered by timestamp descending
+     */
+    suspend fun loadVersions(playerUuid: UUID, group: String?, limit: Int): List<InventoryVersion>
+
+    /**
+     * Loads a specific version by ID.
+     *
+     * @param versionId The version ID
+     * @return The version, or null if not found
+     */
+    suspend fun loadVersion(versionId: String): InventoryVersion?
+
+    /**
+     * Deletes a specific version.
+     *
+     * @param versionId The version ID to delete
+     * @return true if deleted
+     */
+    suspend fun deleteVersion(versionId: String): Boolean
+
+    /**
+     * Deletes all versions older than the specified timestamp.
+     *
+     * @param olderThan Delete versions before this timestamp
+     * @return Number of versions deleted
+     */
+    suspend fun pruneVersions(olderThan: Instant): Int
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Death Record Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Saves a death record.
+     *
+     * @param record The death record to save
+     * @return true if successful
+     */
+    suspend fun saveDeathRecord(record: DeathRecord): Boolean
+
+    /**
+     * Loads death records for a player.
+     *
+     * @param playerUuid Player UUID
+     * @param limit Maximum number of records to return
+     * @return List of death records, ordered by timestamp descending
+     */
+    suspend fun loadDeathRecords(playerUuid: UUID, limit: Int): List<DeathRecord>
+
+    /**
+     * Loads a specific death record by ID.
+     *
+     * @param deathId The death record ID
+     * @return The death record, or null if not found
+     */
+    suspend fun loadDeathRecord(deathId: String): DeathRecord?
+
+    /**
+     * Deletes a specific death record.
+     *
+     * @param deathId The death record ID to delete
+     * @return true if deleted
+     */
+    suspend fun deleteDeathRecord(deathId: String): Boolean
+
+    /**
+     * Deletes all death records older than the specified timestamp.
+     *
+     * @param olderThan Delete records before this timestamp
+     * @return Number of records deleted
+     */
+    suspend fun pruneDeathRecords(olderThan: Instant): Int
 }

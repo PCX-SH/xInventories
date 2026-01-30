@@ -1,9 +1,12 @@
 package sh.pcx.xinventories.internal.storage
 
 import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.internal.model.DeathRecord
+import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
 import sh.pcx.xinventories.internal.util.Logging
 import org.bukkit.GameMode
+import java.time.Instant
 import java.util.UUID
 
 /**
@@ -232,4 +235,170 @@ abstract class AbstractStorage(
         }
         return count
     }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Inventory Version Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun saveVersion(version: InventoryVersion): Boolean {
+        if (!initialized) {
+            Logging.warning("Cannot save version: storage not initialized")
+            return false
+        }
+
+        return try {
+            doSaveVersion(version)
+            Logging.debug { "Saved version ${version.id} for ${version.playerUuid}" }
+            true
+        } catch (e: Exception) {
+            Logging.error("Failed to save version ${version.id}", e)
+            false
+        }
+    }
+
+    override suspend fun loadVersions(playerUuid: UUID, group: String?, limit: Int): List<InventoryVersion> {
+        if (!initialized) {
+            Logging.warning("Cannot load versions: storage not initialized")
+            return emptyList()
+        }
+
+        return try {
+            doLoadVersions(playerUuid, group, limit)
+        } catch (e: Exception) {
+            Logging.error("Failed to load versions for $playerUuid", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun loadVersion(versionId: String): InventoryVersion? {
+        if (!initialized) {
+            Logging.warning("Cannot load version: storage not initialized")
+            return null
+        }
+
+        return try {
+            doLoadVersion(versionId)
+        } catch (e: Exception) {
+            Logging.error("Failed to load version $versionId", e)
+            null
+        }
+    }
+
+    override suspend fun deleteVersion(versionId: String): Boolean {
+        if (!initialized) {
+            Logging.warning("Cannot delete version: storage not initialized")
+            return false
+        }
+
+        return try {
+            doDeleteVersion(versionId)
+        } catch (e: Exception) {
+            Logging.error("Failed to delete version $versionId", e)
+            false
+        }
+    }
+
+    override suspend fun pruneVersions(olderThan: Instant): Int {
+        if (!initialized) {
+            Logging.warning("Cannot prune versions: storage not initialized")
+            return 0
+        }
+
+        return try {
+            doPruneVersions(olderThan)
+        } catch (e: Exception) {
+            Logging.error("Failed to prune versions", e)
+            0
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Death Record Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun saveDeathRecord(record: DeathRecord): Boolean {
+        if (!initialized) {
+            Logging.warning("Cannot save death record: storage not initialized")
+            return false
+        }
+
+        return try {
+            doSaveDeathRecord(record)
+            Logging.debug { "Saved death record ${record.id} for ${record.playerUuid}" }
+            true
+        } catch (e: Exception) {
+            Logging.error("Failed to save death record ${record.id}", e)
+            false
+        }
+    }
+
+    override suspend fun loadDeathRecords(playerUuid: UUID, limit: Int): List<DeathRecord> {
+        if (!initialized) {
+            Logging.warning("Cannot load death records: storage not initialized")
+            return emptyList()
+        }
+
+        return try {
+            doLoadDeathRecords(playerUuid, limit)
+        } catch (e: Exception) {
+            Logging.error("Failed to load death records for $playerUuid", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun loadDeathRecord(deathId: String): DeathRecord? {
+        if (!initialized) {
+            Logging.warning("Cannot load death record: storage not initialized")
+            return null
+        }
+
+        return try {
+            doLoadDeathRecord(deathId)
+        } catch (e: Exception) {
+            Logging.error("Failed to load death record $deathId", e)
+            null
+        }
+    }
+
+    override suspend fun deleteDeathRecord(deathId: String): Boolean {
+        if (!initialized) {
+            Logging.warning("Cannot delete death record: storage not initialized")
+            return false
+        }
+
+        return try {
+            doDeleteDeathRecord(deathId)
+        } catch (e: Exception) {
+            Logging.error("Failed to delete death record $deathId", e)
+            false
+        }
+    }
+
+    override suspend fun pruneDeathRecords(olderThan: Instant): Int {
+        if (!initialized) {
+            Logging.warning("Cannot prune death records: storage not initialized")
+            return 0
+        }
+
+        return try {
+            doPruneDeathRecords(olderThan)
+        } catch (e: Exception) {
+            Logging.error("Failed to prune death records", e)
+            0
+        }
+    }
+
+    // Abstract methods for version storage
+    protected abstract suspend fun doSaveVersion(version: InventoryVersion)
+    protected abstract suspend fun doLoadVersions(playerUuid: UUID, group: String?, limit: Int): List<InventoryVersion>
+    protected abstract suspend fun doLoadVersion(versionId: String): InventoryVersion?
+    protected abstract suspend fun doDeleteVersion(versionId: String): Boolean
+    protected abstract suspend fun doPruneVersions(olderThan: Instant): Int
+
+    // Abstract methods for death record storage
+    protected abstract suspend fun doSaveDeathRecord(record: DeathRecord)
+    protected abstract suspend fun doLoadDeathRecords(playerUuid: UUID, limit: Int): List<DeathRecord>
+    protected abstract suspend fun doLoadDeathRecord(deathId: String): DeathRecord?
+    protected abstract suspend fun doDeleteDeathRecord(deathId: String): Boolean
+    protected abstract suspend fun doPruneDeathRecords(olderThan: Instant): Int
 }

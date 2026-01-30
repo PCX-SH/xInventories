@@ -4,7 +4,10 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import sh.pcx.xinventories.XInventories
 import sh.pcx.xinventories.internal.config.MysqlConfig
+import sh.pcx.xinventories.internal.model.DeathRecord
+import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.VersionTrigger
 import sh.pcx.xinventories.internal.storage.query.Queries
 import sh.pcx.xinventories.internal.storage.query.Tables
 import sh.pcx.xinventories.internal.util.Logging
@@ -12,8 +15,10 @@ import sh.pcx.xinventories.internal.util.PlayerDataSerializer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.bukkit.GameMode
+import org.bukkit.configuration.file.YamlConfiguration
 import java.sql.Connection
 import java.sql.ResultSet
+import java.time.Instant
 import java.util.UUID
 
 /**
@@ -62,6 +67,8 @@ class MySqlStorage(
             dataSource?.connection?.use { conn ->
                 conn.createStatement().use { stmt ->
                     stmt.execute(Tables.CREATE_PLAYER_DATA_MYSQL)
+                    stmt.execute(Tables.CREATE_VERSIONS_MYSQL)
+                    stmt.execute(Tables.CREATE_DEATHS_MYSQL)
                 }
             }
 
@@ -104,6 +111,8 @@ class MySqlStorage(
                     stmt.setString(16, sqlData["offhand"] as String)
                     stmt.setString(17, sqlData["ender_chest"] as String)
                     stmt.setString(18, sqlData["potion_effects"] as String)
+                    stmt.setString(19, sqlData["balances"] as? String ?: "")
+                    stmt.setLong(20, sqlData["version"] as? Long ?: 0)
 
                     stmt.executeUpdate()
                 }
@@ -342,6 +351,8 @@ class MySqlStorage(
                             stmt.setString(16, sqlData["offhand"] as String)
                             stmt.setString(17, sqlData["ender_chest"] as String)
                             stmt.setString(18, sqlData["potion_effects"] as String)
+                            stmt.setString(19, sqlData["balances"] as? String ?: "")
+                            stmt.setLong(20, sqlData["version"] as? Long ?: 0)
 
                             stmt.addBatch()
                             count++
@@ -382,12 +393,285 @@ class MySqlStorage(
                 "armor_inventory" to rs.getString("armor_inventory"),
                 "offhand" to rs.getString("offhand"),
                 "ender_chest" to rs.getString("ender_chest"),
-                "potion_effects" to rs.getString("potion_effects")
+                "potion_effects" to rs.getString("potion_effects"),
+                "balances" to rs.getString("balances"),
+                "version" to rs.getLong("version")
             )
 
             PlayerDataSerializer.fromSqlMap(row)
         } catch (e: Exception) {
             Logging.error("Failed to parse player data from result set", e)
+            null
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Inventory Version Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun doSaveVersion(version: InventoryVersion) {
+        withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                // Serialize PlayerData to YAML string for storage
+                val dataYaml = YamlConfiguration()
+                PlayerDataSerializer.toYaml(version.data, dataYaml)
+                val dataString = dataYaml.saveToString()
+
+                // Serialize metadata to JSON-like string
+                val metadataString = version.metadata.entries.joinToString(";") { "${it.key}=${it.value}" }
+
+                conn.prepareStatement(Queries.INSERT_VERSION).use { stmt ->
+                    stmt.setString(1, version.id)
+                    stmt.setString(2, version.playerUuid.toString())
+                    stmt.setString(3, version.group)
+                    stmt.setString(4, version.gameMode?.name)
+                    stmt.setLong(5, version.timestamp.toEpochMilli())
+                    stmt.setString(6, version.trigger.name)
+                    stmt.setString(7, dataString)
+                    stmt.setString(8, metadataString)
+
+                    stmt.executeUpdate()
+                }
+            }
+        }
+    }
+
+    override suspend fun doLoadVersions(playerUuid: UUID, group: String?, limit: Int): List<InventoryVersion> {
+        return withContext(Dispatchers.IO) {
+            val versions = mutableListOf<InventoryVersion>()
+
+            getConnection().use { conn ->
+                val query = if (group != null) {
+                    Queries.SELECT_VERSIONS_BY_PLAYER_GROUP
+                } else {
+                    Queries.SELECT_VERSIONS_BY_PLAYER
+                }
+
+                conn.prepareStatement(query).use { stmt ->
+                    stmt.setString(1, playerUuid.toString())
+                    if (group != null) {
+                        stmt.setString(2, group)
+                        stmt.setInt(3, limit)
+                    } else {
+                        stmt.setInt(2, limit)
+                    }
+
+                    stmt.executeQuery().use { rs ->
+                        while (rs.next()) {
+                            val version = resultSetToVersion(rs)
+                            if (version != null) {
+                                versions.add(version)
+                            }
+                        }
+                    }
+                }
+            }
+
+            versions
+        }
+    }
+
+    override suspend fun doLoadVersion(versionId: String): InventoryVersion? {
+        return withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.SELECT_VERSION_BY_ID).use { stmt ->
+                    stmt.setString(1, versionId)
+
+                    stmt.executeQuery().use { rs ->
+                        if (rs.next()) {
+                            resultSetToVersion(rs)
+                        } else {
+                            null
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun doDeleteVersion(versionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.DELETE_VERSION_BY_ID).use { stmt ->
+                    stmt.setString(1, versionId)
+                    stmt.executeUpdate() > 0
+                }
+            }
+        }
+    }
+
+    override suspend fun doPruneVersions(olderThan: Instant): Int {
+        return withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.DELETE_VERSIONS_OLDER_THAN).use { stmt ->
+                    stmt.setLong(1, olderThan.toEpochMilli())
+                    stmt.executeUpdate()
+                }
+            }
+        }
+    }
+
+    private fun resultSetToVersion(rs: ResultSet): InventoryVersion? {
+        return try {
+            val id = rs.getString("id")
+            val playerUuid = UUID.fromString(rs.getString("player_uuid"))
+            val group = rs.getString("group_name")
+            val gameMode = rs.getString("gamemode")?.let { GameMode.valueOf(it) }
+            val timestamp = Instant.ofEpochMilli(rs.getLong("timestamp"))
+            val trigger = VersionTrigger.valueOf(rs.getString("trigger_type"))
+            val dataString = rs.getString("data")
+            val metadataString = rs.getString("metadata") ?: ""
+
+            // Parse data from YAML string
+            val dataYaml = YamlConfiguration()
+            dataYaml.loadFromString(dataString)
+            val data = PlayerDataSerializer.fromYaml(dataYaml)
+                ?: return null
+
+            // Parse metadata
+            val metadata = if (metadataString.isNotEmpty()) {
+                metadataString.split(";")
+                    .filter { it.contains("=") }
+                    .associate {
+                        val parts = it.split("=", limit = 2)
+                        parts[0] to parts.getOrElse(1) { "" }
+                    }
+            } else {
+                emptyMap()
+            }
+
+            InventoryVersion.fromStorage(id, playerUuid, group, gameMode, timestamp, trigger, data, metadata)
+        } catch (e: Exception) {
+            Logging.error("Failed to parse version from result set", e)
+            null
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Death Record Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun doSaveDeathRecord(record: DeathRecord) {
+        withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                // Serialize PlayerData to YAML string for storage
+                val dataYaml = YamlConfiguration()
+                PlayerDataSerializer.toYaml(record.inventoryData, dataYaml)
+                val dataString = dataYaml.saveToString()
+
+                conn.prepareStatement(Queries.INSERT_DEATH_RECORD).use { stmt ->
+                    stmt.setString(1, record.id)
+                    stmt.setString(2, record.playerUuid.toString())
+                    stmt.setLong(3, record.timestamp.toEpochMilli())
+                    stmt.setString(4, record.world)
+                    stmt.setDouble(5, record.x)
+                    stmt.setDouble(6, record.y)
+                    stmt.setDouble(7, record.z)
+                    stmt.setString(8, record.deathCause)
+                    stmt.setString(9, record.killerName)
+                    stmt.setString(10, record.killerUuid?.toString())
+                    stmt.setString(11, record.group)
+                    stmt.setString(12, record.gameMode.name)
+                    stmt.setString(13, dataString)
+
+                    stmt.executeUpdate()
+                }
+            }
+        }
+    }
+
+    override suspend fun doLoadDeathRecords(playerUuid: UUID, limit: Int): List<DeathRecord> {
+        return withContext(Dispatchers.IO) {
+            val records = mutableListOf<DeathRecord>()
+
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.SELECT_DEATHS_BY_PLAYER).use { stmt ->
+                    stmt.setString(1, playerUuid.toString())
+                    stmt.setInt(2, limit)
+
+                    stmt.executeQuery().use { rs ->
+                        while (rs.next()) {
+                            val record = resultSetToDeathRecord(rs)
+                            if (record != null) {
+                                records.add(record)
+                            }
+                        }
+                    }
+                }
+            }
+
+            records
+        }
+    }
+
+    override suspend fun doLoadDeathRecord(deathId: String): DeathRecord? {
+        return withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.SELECT_DEATH_BY_ID).use { stmt ->
+                    stmt.setString(1, deathId)
+
+                    stmt.executeQuery().use { rs ->
+                        if (rs.next()) {
+                            resultSetToDeathRecord(rs)
+                        } else {
+                            null
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override suspend fun doDeleteDeathRecord(deathId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.DELETE_DEATH_BY_ID).use { stmt ->
+                    stmt.setString(1, deathId)
+                    stmt.executeUpdate() > 0
+                }
+            }
+        }
+    }
+
+    override suspend fun doPruneDeathRecords(olderThan: Instant): Int {
+        return withContext(Dispatchers.IO) {
+            getConnection().use { conn ->
+                conn.prepareStatement(Queries.DELETE_DEATHS_OLDER_THAN).use { stmt ->
+                    stmt.setLong(1, olderThan.toEpochMilli())
+                    stmt.executeUpdate()
+                }
+            }
+        }
+    }
+
+    private fun resultSetToDeathRecord(rs: ResultSet): DeathRecord? {
+        return try {
+            val id = rs.getString("id")
+            val playerUuid = UUID.fromString(rs.getString("player_uuid"))
+            val timestamp = Instant.ofEpochMilli(rs.getLong("timestamp"))
+            val world = rs.getString("world")
+            val x = rs.getDouble("x")
+            val y = rs.getDouble("y")
+            val z = rs.getDouble("z")
+            val deathCause = rs.getString("death_cause")
+            val killerName = rs.getString("killer_name")
+            val killerUuid = rs.getString("killer_uuid")?.let { UUID.fromString(it) }
+            val group = rs.getString("group_name")
+            val gameMode = GameMode.valueOf(rs.getString("gamemode"))
+            val dataString = rs.getString("inventory_data")
+
+            // Parse data from YAML string
+            val dataYaml = YamlConfiguration()
+            dataYaml.loadFromString(dataString)
+            val inventoryData = PlayerDataSerializer.fromYaml(dataYaml)
+                ?: return null
+
+            DeathRecord.fromStorage(
+                id, playerUuid, timestamp, world, x, y, z,
+                deathCause, killerName, killerUuid, group, gameMode, inventoryData
+            )
+        } catch (e: Exception) {
+            Logging.error("Failed to parse death record from result set", e)
             null
         }
     }

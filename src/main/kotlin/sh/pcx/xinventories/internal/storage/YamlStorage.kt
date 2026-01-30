@@ -1,7 +1,10 @@
 package sh.pcx.xinventories.internal.storage
 
 import sh.pcx.xinventories.XInventories
+import sh.pcx.xinventories.internal.model.DeathRecord
+import sh.pcx.xinventories.internal.model.InventoryVersion
 import sh.pcx.xinventories.internal.model.PlayerData
+import sh.pcx.xinventories.internal.model.VersionTrigger
 import sh.pcx.xinventories.internal.util.Logging
 import sh.pcx.xinventories.internal.util.PlayerDataSerializer
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +14,7 @@ import kotlinx.coroutines.withContext
 import org.bukkit.GameMode
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
+import java.time.Instant
 import java.util.UUID
 
 /**
@@ -31,13 +35,24 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
     private lateinit var playersDir: File
     private val fileMutex = Mutex()
 
+    private lateinit var versionsDir: File
+    private lateinit var deathsDir: File
+
     override suspend fun doInitialize() {
         dataDir = File(plugin.dataFolder, "data")
         playersDir = File(dataDir, "players")
+        versionsDir = File(dataDir, "versions")
+        deathsDir = File(dataDir, "deaths")
 
         withContext(Dispatchers.IO) {
             if (!playersDir.exists()) {
                 playersDir.mkdirs()
+            }
+            if (!versionsDir.exists()) {
+                versionsDir.mkdirs()
+            }
+            if (!deathsDir.exists()) {
+                deathsDir.mkdirs()
             }
         }
     }
@@ -270,5 +285,308 @@ class YamlStorage(plugin: XInventories) : AbstractStorage(plugin) {
             }
         }
         return size
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Inventory Version Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun doSaveVersion(version: InventoryVersion) {
+        val playerVersionsDir = File(versionsDir, version.playerUuid.toString())
+        val file = File(playerVersionsDir, "${version.id}.yml")
+
+        withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                playerVersionsDir.mkdirs()
+                val yaml = YamlConfiguration()
+
+                yaml.set("id", version.id)
+                yaml.set("playerUuid", version.playerUuid.toString())
+                yaml.set("group", version.group)
+                yaml.set("gameMode", version.gameMode?.name)
+                yaml.set("timestamp", version.timestamp.toEpochMilli())
+                yaml.set("trigger", version.trigger.name)
+                yaml.set("metadata", version.metadata)
+
+                // Save player data inline
+                PlayerDataSerializer.toYaml(version.data, yaml.createSection("data"))
+
+                yaml.save(file)
+            }
+        }
+    }
+
+    override suspend fun doLoadVersions(playerUuid: UUID, group: String?, limit: Int): List<InventoryVersion> {
+        val playerVersionsDir = File(versionsDir, playerUuid.toString())
+
+        return withContext(Dispatchers.IO) {
+            if (!playerVersionsDir.exists()) return@withContext emptyList()
+
+            fileMutex.withLock {
+                val versions = mutableListOf<InventoryVersion>()
+
+                playerVersionsDir.listFiles { file -> file.extension == "yml" }
+                    ?.sortedByDescending { it.lastModified() }
+                    ?.forEach { file ->
+                        if (versions.size >= limit) return@forEach
+
+                        try {
+                            val yaml = YamlConfiguration.loadConfiguration(file)
+                            val version = parseVersionFromYaml(yaml)
+
+                            if (version != null) {
+                                // Filter by group if specified
+                                if (group == null || version.group == group) {
+                                    versions.add(version)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Logging.error("Failed to load version from ${file.name}", e)
+                        }
+                    }
+
+                versions.sortedByDescending { it.timestamp }
+            }
+        }
+    }
+
+    override suspend fun doLoadVersion(versionId: String): InventoryVersion? {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                // Search through all player version directories
+                versionsDir.listFiles { file -> file.isDirectory }?.forEach { playerDir ->
+                    val versionFile = File(playerDir, "$versionId.yml")
+                    if (versionFile.exists()) {
+                        try {
+                            val yaml = YamlConfiguration.loadConfiguration(versionFile)
+                            return@withLock parseVersionFromYaml(yaml)
+                        } catch (e: Exception) {
+                            Logging.error("Failed to load version $versionId", e)
+                        }
+                    }
+                }
+                null
+            }
+        }
+    }
+
+    override suspend fun doDeleteVersion(versionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                versionsDir.listFiles { file -> file.isDirectory }?.forEach { playerDir ->
+                    val versionFile = File(playerDir, "$versionId.yml")
+                    if (versionFile.exists()) {
+                        return@withLock versionFile.delete()
+                    }
+                }
+                false
+            }
+        }
+    }
+
+    override suspend fun doPruneVersions(olderThan: Instant): Int {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                var deleted = 0
+                val cutoffMillis = olderThan.toEpochMilli()
+
+                versionsDir.listFiles { file -> file.isDirectory }?.forEach { playerDir ->
+                    playerDir.listFiles { file -> file.extension == "yml" }?.forEach { file ->
+                        try {
+                            val yaml = YamlConfiguration.loadConfiguration(file)
+                            val timestamp = yaml.getLong("timestamp")
+                            if (timestamp < cutoffMillis) {
+                                if (file.delete()) deleted++
+                            }
+                        } catch (e: Exception) {
+                            Logging.error("Failed to check version timestamp in ${file.name}", e)
+                        }
+                    }
+
+                    // Clean up empty player directories
+                    if (playerDir.listFiles()?.isEmpty() == true) {
+                        playerDir.delete()
+                    }
+                }
+
+                deleted
+            }
+        }
+    }
+
+    private fun parseVersionFromYaml(yaml: YamlConfiguration): InventoryVersion? {
+        val id = yaml.getString("id") ?: return null
+        val playerUuid = yaml.getString("playerUuid")?.let { UUID.fromString(it) } ?: return null
+        val group = yaml.getString("group") ?: return null
+        val gameMode = yaml.getString("gameMode")?.let { GameMode.valueOf(it) }
+        val timestamp = Instant.ofEpochMilli(yaml.getLong("timestamp"))
+        val trigger = yaml.getString("trigger")?.let { VersionTrigger.valueOf(it) } ?: VersionTrigger.MANUAL
+
+        @Suppress("UNCHECKED_CAST")
+        val metadata = yaml.getConfigurationSection("metadata")?.getValues(false)
+            ?.mapValues { it.value.toString() } ?: emptyMap()
+
+        val dataSection = yaml.getConfigurationSection("data")
+        val data = if (dataSection != null) {
+            PlayerDataSerializer.fromYamlSection(dataSection, playerUuid, group, gameMode ?: GameMode.SURVIVAL)
+        } else {
+            null
+        } ?: return null
+
+        return InventoryVersion.fromStorage(id, playerUuid, group, gameMode, timestamp, trigger, data, metadata)
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // Death Record Storage
+    // ═══════════════════════════════════════════════════════════════════
+
+    override suspend fun doSaveDeathRecord(record: DeathRecord) {
+        val playerDeathsDir = File(deathsDir, record.playerUuid.toString())
+        val file = File(playerDeathsDir, "${record.id}.yml")
+
+        withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                playerDeathsDir.mkdirs()
+                val yaml = YamlConfiguration()
+
+                yaml.set("id", record.id)
+                yaml.set("playerUuid", record.playerUuid.toString())
+                yaml.set("timestamp", record.timestamp.toEpochMilli())
+                yaml.set("world", record.world)
+                yaml.set("x", record.x)
+                yaml.set("y", record.y)
+                yaml.set("z", record.z)
+                yaml.set("deathCause", record.deathCause)
+                yaml.set("killerName", record.killerName)
+                yaml.set("killerUuid", record.killerUuid?.toString())
+                yaml.set("group", record.group)
+                yaml.set("gameMode", record.gameMode.name)
+
+                // Save inventory data inline
+                PlayerDataSerializer.toYaml(record.inventoryData, yaml.createSection("inventoryData"))
+
+                yaml.save(file)
+            }
+        }
+    }
+
+    override suspend fun doLoadDeathRecords(playerUuid: UUID, limit: Int): List<DeathRecord> {
+        val playerDeathsDir = File(deathsDir, playerUuid.toString())
+
+        return withContext(Dispatchers.IO) {
+            if (!playerDeathsDir.exists()) return@withContext emptyList()
+
+            fileMutex.withLock {
+                val records = mutableListOf<DeathRecord>()
+
+                playerDeathsDir.listFiles { file -> file.extension == "yml" }
+                    ?.sortedByDescending { it.lastModified() }
+                    ?.forEach { file ->
+                        if (records.size >= limit) return@forEach
+
+                        try {
+                            val yaml = YamlConfiguration.loadConfiguration(file)
+                            val record = parseDeathRecordFromYaml(yaml)
+                            if (record != null) {
+                                records.add(record)
+                            }
+                        } catch (e: Exception) {
+                            Logging.error("Failed to load death record from ${file.name}", e)
+                        }
+                    }
+
+                records.sortedByDescending { it.timestamp }
+            }
+        }
+    }
+
+    override suspend fun doLoadDeathRecord(deathId: String): DeathRecord? {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                deathsDir.listFiles { file -> file.isDirectory }?.forEach { playerDir ->
+                    val deathFile = File(playerDir, "$deathId.yml")
+                    if (deathFile.exists()) {
+                        try {
+                            val yaml = YamlConfiguration.loadConfiguration(deathFile)
+                            return@withLock parseDeathRecordFromYaml(yaml)
+                        } catch (e: Exception) {
+                            Logging.error("Failed to load death record $deathId", e)
+                        }
+                    }
+                }
+                null
+            }
+        }
+    }
+
+    override suspend fun doDeleteDeathRecord(deathId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                deathsDir.listFiles { file -> file.isDirectory }?.forEach { playerDir ->
+                    val deathFile = File(playerDir, "$deathId.yml")
+                    if (deathFile.exists()) {
+                        return@withLock deathFile.delete()
+                    }
+                }
+                false
+            }
+        }
+    }
+
+    override suspend fun doPruneDeathRecords(olderThan: Instant): Int {
+        return withContext(Dispatchers.IO) {
+            fileMutex.withLock {
+                var deleted = 0
+                val cutoffMillis = olderThan.toEpochMilli()
+
+                deathsDir.listFiles { file -> file.isDirectory }?.forEach { playerDir ->
+                    playerDir.listFiles { file -> file.extension == "yml" }?.forEach { file ->
+                        try {
+                            val yaml = YamlConfiguration.loadConfiguration(file)
+                            val timestamp = yaml.getLong("timestamp")
+                            if (timestamp < cutoffMillis) {
+                                if (file.delete()) deleted++
+                            }
+                        } catch (e: Exception) {
+                            Logging.error("Failed to check death record timestamp in ${file.name}", e)
+                        }
+                    }
+
+                    // Clean up empty player directories
+                    if (playerDir.listFiles()?.isEmpty() == true) {
+                        playerDir.delete()
+                    }
+                }
+
+                deleted
+            }
+        }
+    }
+
+    private fun parseDeathRecordFromYaml(yaml: YamlConfiguration): DeathRecord? {
+        val id = yaml.getString("id") ?: return null
+        val playerUuid = yaml.getString("playerUuid")?.let { UUID.fromString(it) } ?: return null
+        val timestamp = Instant.ofEpochMilli(yaml.getLong("timestamp"))
+        val world = yaml.getString("world") ?: "unknown"
+        val x = yaml.getDouble("x")
+        val y = yaml.getDouble("y")
+        val z = yaml.getDouble("z")
+        val deathCause = yaml.getString("deathCause")
+        val killerName = yaml.getString("killerName")
+        val killerUuid = yaml.getString("killerUuid")?.let { UUID.fromString(it) }
+        val group = yaml.getString("group") ?: "default"
+        val gameMode = yaml.getString("gameMode")?.let { GameMode.valueOf(it) } ?: GameMode.SURVIVAL
+
+        val dataSection = yaml.getConfigurationSection("inventoryData")
+        val inventoryData = if (dataSection != null) {
+            PlayerDataSerializer.fromYamlSection(dataSection, playerUuid, group, gameMode)
+        } else {
+            null
+        } ?: return null
+
+        return DeathRecord.fromStorage(
+            id, playerUuid, timestamp, world, x, y, z,
+            deathCause, killerName, killerUuid, group, gameMode, inventoryData
+        )
     }
 }
