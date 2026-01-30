@@ -15,6 +15,64 @@ import java.util.concurrent.CompletableFuture
 interface XInventoriesAPI {
 
     // ═══════════════════════════════════════════════════════════════════
+    // v1.1.0 Feature APIs
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Inventory versioning API for history and rollback.
+     * Returns null if versioning is disabled.
+     */
+    val versioning: InventoryVersioningAPI?
+
+    /**
+     * Death recovery API for restoring inventories after death.
+     * Returns null if death recovery is disabled.
+     */
+    val deathRecovery: DeathRecoveryAPI?
+
+    /**
+     * Template API for managing inventory presets.
+     */
+    val templates: TemplateAPI
+
+    /**
+     * Restriction API for item blacklists/whitelists.
+     */
+    val restrictions: RestrictionAPI
+
+    /**
+     * Shared slots API for cross-group slot persistence.
+     */
+    val sharedSlots: SharedSlotsAPI
+
+    /**
+     * Condition API for evaluating group conditions.
+     */
+    val conditions: ConditionAPI
+
+    /**
+     * Inventory locking API for freezing player inventories.
+     */
+    val locking: InventoryLockingAPI
+
+    /**
+     * Economy API for per-group balances.
+     * Returns null if Vault is not present or economy is disabled.
+     */
+    val economy: EconomyAPI?
+
+    /**
+     * Import API for migrating from other plugins.
+     */
+    val importing: ImportAPI
+
+    /**
+     * Sync API for cross-server synchronization.
+     * Returns null if sync is disabled.
+     */
+    val sync: SyncAPI?
+
+    // ═══════════════════════════════════════════════════════════════════
     // Inventory Operations
     // ═══════════════════════════════════════════════════════════════════
 

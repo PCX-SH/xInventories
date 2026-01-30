@@ -1,8 +1,7 @@
 package sh.pcx.xinventories.internal.api
 
 import sh.pcx.xinventories.XInventories
-import sh.pcx.xinventories.api.Subscription
-import sh.pcx.xinventories.api.XInventoriesAPI
+import sh.pcx.xinventories.api.*
 import sh.pcx.xinventories.api.event.*
 import sh.pcx.xinventories.api.model.*
 import sh.pcx.xinventories.internal.model.Group
@@ -23,6 +22,50 @@ class XInventoriesAPIImpl(private val plugin: XInventories) : XInventoriesAPI {
     private val saveHandlers = mutableListOf<Pair<(InventorySaveContext) -> Unit, SubscriptionImpl>>()
     private val loadHandlers = mutableListOf<Pair<(InventoryLoadContext) -> Unit, SubscriptionImpl>>()
     private val groupChangeHandlers = mutableListOf<Pair<(GroupChangeContext) -> Unit, SubscriptionImpl>>()
+
+    // ==================== v1.1.0 Feature API Properties ====================
+
+    // Lazy-initialized API adapters
+    private val versioningApi: InventoryVersioningAPI by lazy { VersioningAPIImpl(plugin) }
+    private val deathRecoveryApi: DeathRecoveryAPI by lazy { DeathRecoveryAPIImpl(plugin) }
+    private val templateApi: TemplateAPI by lazy { TemplateAPIImpl(plugin) }
+    private val restrictionApi: RestrictionAPI by lazy { RestrictionAPIImpl(plugin) }
+    private val sharedSlotsApi: SharedSlotsAPI by lazy { SharedSlotsAPIImpl(plugin) }
+    private val conditionApi: ConditionAPI by lazy { ConditionAPIImpl(plugin) }
+    private val lockingApi: InventoryLockingAPI by lazy { LockingAPIImpl(plugin) }
+    private val economyApi: EconomyAPI by lazy { EconomyAPIImpl(plugin) }
+    private val importApi: ImportAPI by lazy { ImportAPIImpl(plugin) }
+    private val syncApi: SyncAPI by lazy { SyncAPIImpl(plugin) }
+
+    override val versioning: InventoryVersioningAPI?
+        get() = if (plugin.configManager.mainConfig.versioning.enabled) versioningApi else null
+
+    override val deathRecovery: DeathRecoveryAPI?
+        get() = if (plugin.configManager.mainConfig.deathRecovery.enabled) deathRecoveryApi else null
+
+    override val templates: TemplateAPI
+        get() = templateApi
+
+    override val restrictions: RestrictionAPI
+        get() = restrictionApi
+
+    override val sharedSlots: SharedSlotsAPI
+        get() = sharedSlotsApi
+
+    override val conditions: ConditionAPI
+        get() = conditionApi
+
+    override val locking: InventoryLockingAPI
+        get() = lockingApi
+
+    override val economy: EconomyAPI?
+        get() = if (plugin.configManager.mainConfig.economy.enabled) economyApi else null
+
+    override val importing: ImportAPI
+        get() = importApi
+
+    override val sync: SyncAPI?
+        get() = if (plugin.configManager.mainConfig.sync.enabled) syncApi else null
 
     // ==================== Inventory Operations ====================
 
