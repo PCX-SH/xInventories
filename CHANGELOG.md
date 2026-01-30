@@ -125,6 +125,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Server heartbeat monitoring
   - Cache invalidation across servers
 
+#### Backwards Compatibility
+- **Spigot Support** - Runtime dependency loading for Spigot servers
+  - Automatically downloads required libraries (Kotlin, coroutines, serialization, etc.) from Maven Central
+  - SHA-256 checksum verification for all downloaded dependencies
+  - Isolated classloader ensures no conflicts with other plugins
+  - Works transparently on Spigot 1.20.5+ and older Paper versions
+  - On Paper 1.21+, uses server-provided libraries for optimal performance
+  - Dependencies cached in `plugins/xInventories/libraries/` folder
+
 #### Quality of Life
 - **Inventory Merge** - Merge two groups' inventories
   - Strategies: COMBINE, REPLACE, KEEP_HIGHER, MANUAL

@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Paper-1.20.5--1.21.11+-blue?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAyklEQVQokZVSQQ7DIAzz0v7/y+wyCEkDdNImTQKJ7TgBPgBuOgEHd19FZO8uT3f3BQDS93VEpGaW2s0bSJJU1cy2A9VVtR4FkjQz28ysxgCApO37IEmttWZmNcaAqjaA1FpLjJE5Z+acyzBCRHoIYbTWPMlxHJZzthgjQwiIMUJV0Xvv7u69d4oIAEBEEGMEEUHvHb13xBjh7mBmAAB3BzNDRNBaw5wTRNQCHMfhAJBSwtgRzjlJKUFVQUSIMWL8JL8HqsN/8n3+AWPvTE9qfPlzAAAAAElFTkSuQmCC" alt="Paper">
+  <img src="https://img.shields.io/badge/Paper%20%7C%20Spigot-1.20.5--1.21.11+-blue?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAyklEQVQokZVSQQ7DIAzz0v7/y+wyCEkDdNImTQKJ7TgBPgBuOgEHd19FZO8uT3f3BQDS93VEpGaW2s0bSJJU1cy2A9VVtR4FkjQz28ysxgCApO37IEmttWZmNcaAqjaA1FpLjJE5Z+acyzBCRHoIYbTWPMlxHJZzthgjQwiIMUJV0Xvv7u69d4oIAEBEEGMEEUHvHb13xBjh7mBmAAB3BzNDRNBaw5wTRNQCHMfhAJBSwtgRzjlJKUFVQUSIMWL8JL8HqsN/8n3+AWPvTE9qfPlzAAAAAElFTkSuQmCC" alt="Paper | Spigot">
   <img src="https://img.shields.io/badge/Java-21+-orange?logo=openjdk&logoColor=white" alt="Java 21+">
   <a href="https://github.com/PCX-SH/xInventories/blob/main/LICENSE"><img src="https://img.shields.io/github/license/PCX-SH/xInventories?color=green" alt="License"></a>
   <a href="https://github.com/PCX-SH/xInventories/stargazers"><img src="https://img.shields.io/github/stars/PCX-SH/xInventories?style=flat&color=yellow" alt="Stars"></a>
@@ -94,8 +94,10 @@ A powerful per-world inventory management plugin for Paper 1.20.5+ servers. Sepa
 
 ## Requirements
 
-- **Paper 1.20.5+** (1.20.5 - 1.21.11+ supported, not compatible with Spigot)
+- **Paper 1.20.5+** or **Spigot 1.20.5+** (1.20.5 - 1.21.11+ supported)
 - **Java 21+**
+
+> **Note:** While both Paper and Spigot are supported, Paper is recommended for optimal performance and access to all features.
 
 ## Downloads
 
@@ -108,11 +110,11 @@ A powerful per-world inventory management plugin for Paper 1.20.5+ servers. Sepa
 
 1. Download `xInventories.jar` (~1.7MB) from the links above
 2. Place in your server's `plugins/` folder
-3. Restart your server (Paper will automatically download required libraries)
+3. Restart your server
 4. Configure `plugins/xInventories/config.yml` as needed
 5. Set up world groups in `plugins/xInventories/groups.yml`
 
-> **Note:** xInventories uses Paper's library loader to automatically download dependencies at startup. This keeps the jar small and ensures you always have compatible library versions.
+> **Note:** On Paper 1.21+, dependencies are provided by the server. On Spigot or older Paper versions, xInventories automatically downloads required libraries from Maven Central on first startup (with SHA-256 verification). This keeps the jar small while ensuring broad compatibility.
 
 ## Commands
 
@@ -520,7 +522,7 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 ## FAQ
 
 **Q: Does this work with Spigot?**
-A: No, xInventories requires Paper 1.20.5+ (1.20.5 - 1.21.11+ all supported). It uses Paper-specific APIs and the native Adventure library.
+A: Yes! As of v1.1.0, xInventories supports both Paper and Spigot 1.20.5+. On Spigot or older Paper versions, the plugin automatically downloads required libraries (Kotlin, coroutines, etc.) from Maven Central on first startup. Paper 1.21+ is still recommended for best performance as it provides these libraries natively.
 
 **Q: How do I share inventories between servers?**
 A: For BungeeCord/Velocity networks, enable Redis sync in config.yml. This provides real-time synchronization with distributed locking to prevent conflicts. Alternatively, use MySQL storage with all servers pointing to the same database.
