@@ -24,27 +24,20 @@ dependencies {
     // Kotlin - provided by Paper 1.21+
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib'
 
-    // Coroutines - must be shaded (1.9.0 for better compatibility)
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    // Coroutines - downloaded by Paper's library loader at runtime
+    compileOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
 
-    // Serialization - must be shaded (1.8.1 compatible with Kotlin 2.1.x)
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
+    // Serialization - downloaded by Paper's library loader at runtime
+    compileOnly 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
 
-    // Caching - must be shaded
-    implementation('com.github.ben-manes.caffeine:caffeine:3.2.3') {
-        exclude group: 'com.google.errorprone'
-        exclude group: 'org.checkerframework'
-    }
+    // Caching - downloaded by Paper's library loader at runtime
+    compileOnly 'com.github.ben-manes.caffeine:caffeine:3.2.3'
 
-    // Database - must be shaded
-    implementation('com.zaxxer:HikariCP:6.2.1') {
-        exclude group: 'org.slf4j'
-    }
+    // Database - downloaded by Paper's library loader at runtime
+    compileOnly 'com.zaxxer:HikariCP:6.2.1'
 
-    // Redis client for cross-server sync - must be shaded
-    implementation('redis.clients:jedis:5.2.0') {
-        exclude group: 'org.slf4j'
-    }
+    // Redis client for cross-server sync - downloaded by Paper's library loader at runtime
+    compileOnly 'redis.clients:jedis:5.2.0'
 
     // Soft dependencies
     compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') {
@@ -73,6 +66,13 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.13.4'
     testImplementation 'io.mockk:mockk:1.14.7'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
+
+    // Runtime dependencies needed for tests (downloaded by Paper's library loader at runtime)
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
+    testImplementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
+    testImplementation 'com.zaxxer:HikariCP:6.2.1'
+    testImplementation 'redis.clients:jedis:5.2.0'
     testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.101.0') {
         exclude group: 'org.jetbrains.kotlin'
@@ -106,11 +106,8 @@ shadowJar {
     // Relocate bStats to avoid conflicts with other plugins
     relocate 'org.bstats', 'sh.pcx.xinventories.lib.bstats'
 
-    // Minimize - exclude reflection-heavy libraries
+    // Minimize jar - bStats is the only runtime dependency now
     minimize {
-        exclude dependency('com.zaxxer:HikariCP:.*')
-        exclude dependency('com.github.ben-manes.caffeine:caffeine:.*')
-        exclude dependency('redis.clients:jedis:.*')
         exclude dependency('org.bstats:bstats-bukkit:.*')
     }
 

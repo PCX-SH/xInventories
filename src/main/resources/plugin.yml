@@ -5,6 +5,14 @@ api-version: '1.21'
 author: Reset65
 description: Advanced per-world inventory management
 
+# Paper library loader - downloads dependencies at runtime
+libraries:
+  - org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0
+  - org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1
+  - com.github.ben-manes.caffeine:caffeine:3.2.3
+  - com.zaxxer:HikariCP:6.2.1
+  - redis.clients:jedis:5.2.0
+
 softdepend:
   - Vault
   - PlaceholderAPI
