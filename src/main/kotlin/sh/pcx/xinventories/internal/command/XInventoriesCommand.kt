@@ -21,6 +21,10 @@ class XInventoriesCommand(
     private val commandManager: CommandManager
 ) : CommandExecutor, TabCompleter {
 
+    companion object {
+        private const val COMMANDS_PER_PAGE = 8
+    }
+
     override fun onCommand(
         sender: CommandSender,
         command: Command,
@@ -30,11 +34,26 @@ class XInventoriesCommand(
         val messages = plugin.serviceManager.messageService
 
         if (args.isEmpty()) {
-            showHelp(sender)
+            showHelp(sender, 1)
             return true
         }
 
         val subcommandName = args[0]
+
+        // Handle "help" specially for pagination
+        if (subcommandName.equals("help", ignoreCase = true)) {
+            val page = args.getOrNull(1)?.toIntOrNull() ?: 1
+            showHelp(sender, page)
+            return true
+        }
+
+        // Check if first arg is a page number (for /xinv 2 style navigation)
+        val pageNumber = subcommandName.toIntOrNull()
+        if (pageNumber != null) {
+            showHelp(sender, pageNumber)
+            return true
+        }
+
         val subcommand = commandManager.getSubcommand(subcommandName)
 
         if (subcommand == null) {
@@ -75,12 +94,25 @@ class XInventoriesCommand(
         }
 
         if (args.size == 1) {
-            // Complete subcommand names
-            return commandManager.getAllSubcommands()
-                .filter { sender.hasPermission(it.permission) }
-                .map { it.name }
+            // Complete subcommand names + help
+            val completions = mutableListOf("help")
+            completions.addAll(
+                commandManager.getAllSubcommands()
+                    .filter { sender.hasPermission(it.permission) }
+                    .map { it.name }
+            )
+            return completions
                 .filter { it.lowercase().startsWith(args[0].lowercase()) }
                 .sorted()
+        }
+
+        // Handle help page completion
+        if (args[0].equals("help", ignoreCase = true) && args.size == 2) {
+            val subcommands = commandManager.getAllSubcommands()
+                .filter { sender.hasPermission(it.permission) }
+            val maxPage = (subcommands.size + COMMANDS_PER_PAGE - 1) / COMMANDS_PER_PAGE
+            return (1..maxPage).map { it.toString() }
+                .filter { it.startsWith(args[1]) }
         }
 
         // Delegate to subcommand
@@ -92,14 +124,89 @@ class XInventoriesCommand(
         return subcommand.tabComplete(plugin, sender, args.drop(1).toTypedArray())
     }
 
-    private fun showHelp(sender: CommandSender) {
+    private fun showHelp(sender: CommandSender, page: Int) {
         val primaryColor = TextColor.color(0x5e4fa2)  // Purple
         val secondaryColor = TextColor.color(0x9e7bb5) // Light purple
         val accentColor = TextColor.color(0x5dade2)   // Cyan/blue
 
         fun send(component: Component) = sender.sendMessage(component)
 
-        // Header with gradient effect
+        // Get available subcommands grouped by category
+        val subcommands = commandManager.getAllSubcommands()
+            .filter { sender.hasPermission(it.permission) }
+
+        // Define categories with their commands
+        val categories = listOf(
+            "Core" to listOf("gui", "reload", "save", "load"),
+            "Management" to listOf("group", "world", "pattern", "template", "restrict"),
+            "Data" to listOf("history", "restore", "snapshot", "deaths", "vault"),
+            "Groups" to listOf("conditions", "whoami", "lock", "unlock", "tempgroup", "expiration"),
+            "Utilities" to listOf("cache", "backup", "convert", "debug", "sync", "reset"),
+            "Import/Export" to listOf("import", "export", "importjson", "merge", "balance"),
+            "Admin" to listOf("bulk", "audit", "stats")
+        )
+
+        // Build flat list of (category, command) pairs for pagination
+        val allEntries = mutableListOf<Pair<String?, sh.pcx.xinventories.internal.command.subcommand.Subcommand>>()
+        val categorizedCommands = mutableSetOf<String>()
+
+        for ((category, commandNames) in categories) {
+            val categoryCommands = subcommands.filter { it.name in commandNames }.sortedBy { it.name }
+            if (categoryCommands.isNotEmpty()) {
+                // Add category header marker (null command)
+                allEntries.add(category to categoryCommands.first()) // First entry includes category
+                categoryCommands.forEachIndexed { index, cmd ->
+                    if (index == 0) {
+                        // Already added with category
+                    } else {
+                        allEntries.add(null to cmd)
+                    }
+                    categorizedCommands.add(cmd.name)
+                }
+            }
+        }
+
+        // Add uncategorized commands
+        val uncategorized = subcommands.filter { it.name !in categorizedCommands }.sortedBy { it.name }
+        if (uncategorized.isNotEmpty()) {
+            allEntries.add("Other" to uncategorized.first())
+            uncategorized.forEachIndexed { index, cmd ->
+                if (index > 0) {
+                    allEntries.add(null to cmd)
+                }
+                categorizedCommands.add(cmd.name)
+            }
+        }
+
+        // Calculate pagination
+        val totalCommands = subcommands.size
+        val maxPage = (totalCommands + COMMANDS_PER_PAGE - 1) / COMMANDS_PER_PAGE
+        val currentPage = page.coerceIn(1, maxPage.coerceAtLeast(1))
+
+        // Build paginated command list maintaining category groupings
+        val paginatedCommands = mutableListOf<Pair<String?, sh.pcx.xinventories.internal.command.subcommand.Subcommand>>()
+        var commandCount = 0
+        var startIndex = (currentPage - 1) * COMMANDS_PER_PAGE
+        var currentCategory: String? = null
+
+        for (entry in allEntries) {
+            val (category, cmd) = entry
+            if (category != null) {
+                currentCategory = category
+            }
+
+            if (commandCount >= startIndex && paginatedCommands.size < COMMANDS_PER_PAGE) {
+                // If this is the first command on the page and we're mid-category, add the category header
+                if (paginatedCommands.isEmpty() && category == null && currentCategory != null) {
+                    paginatedCommands.add(currentCategory to cmd)
+                } else {
+                    paginatedCommands.add(entry)
+                }
+            }
+            commandCount++
+        }
+
+        // Header
         send(Component.empty())
         send(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NamedTextColor.DARK_GRAY))
         send(
@@ -112,58 +219,79 @@ class XInventoriesCommand(
         )
         send(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NamedTextColor.DARK_GRAY))
 
-        // Get available subcommands
-        val subcommands = commandManager.getAllSubcommands()
-            .filter { sender.hasPermission(it.permission) }
-            .sortedBy { it.name }
-
-        // Group commands by category
-        val coreCommands = listOf("gui", "reload", "save", "load")
-        val managementCommands = listOf("group", "world", "pattern")
-        val utilityCommands = listOf("cache", "backup", "convert", "debug")
-
-        // Core Commands
-        val availableCore = subcommands.filter { it.name in coreCommands }
-        if (availableCore.isNotEmpty()) {
-            send(Component.empty())
-            send(Component.text("  Core Commands", accentColor).decorate(TextDecoration.BOLD))
-            availableCore.forEach { cmd -> send(buildCommandEntry(cmd, primaryColor, accentColor)) }
+        // Display commands for current page
+        var lastCategory: String? = null
+        for ((category, cmd) in paginatedCommands) {
+            if (category != null && category != lastCategory) {
+                send(Component.empty())
+                send(Component.text("  $category", accentColor).decorate(TextDecoration.BOLD))
+                lastCategory = category
+            }
+            send(buildCommandEntry(cmd, primaryColor, accentColor))
         }
 
-        // Management Commands
-        val availableManagement = subcommands.filter { it.name in managementCommands }
-        if (availableManagement.isNotEmpty()) {
-            send(Component.empty())
-            send(Component.text("  Management", accentColor).decorate(TextDecoration.BOLD))
-            availableManagement.forEach { cmd -> send(buildCommandEntry(cmd, primaryColor, accentColor)) }
-        }
-
-        // Utility Commands
-        val availableUtility = subcommands.filter { it.name in utilityCommands }
-        if (availableUtility.isNotEmpty()) {
-            send(Component.empty())
-            send(Component.text("  Utilities", accentColor).decorate(TextDecoration.BOLD))
-            availableUtility.forEach { cmd -> send(buildCommandEntry(cmd, primaryColor, accentColor)) }
-        }
-
-        // Any other commands not categorized
-        val otherCommands = subcommands.filter {
-            it.name !in coreCommands && it.name !in managementCommands && it.name !in utilityCommands
-        }
-        if (otherCommands.isNotEmpty()) {
-            send(Component.empty())
-            send(Component.text("  Other", accentColor).decorate(TextDecoration.BOLD))
-            otherCommands.forEach { cmd -> send(buildCommandEntry(cmd, primaryColor, accentColor)) }
-        }
-
-        // Footer
+        // Navigation footer
         send(Component.empty())
         send(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NamedTextColor.DARK_GRAY))
+
+        // Build navigation row
+        val navBuilder = Component.text().append(Component.text("  "))
+
+        // Previous button
+        if (currentPage > 1) {
+            navBuilder.append(
+                Component.text("[")
+                    .color(NamedTextColor.DARK_GRAY)
+            ).append(
+                Component.text("< Prev")
+                    .color(accentColor)
+                    .decorate(TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/xinv help ${currentPage - 1}"))
+                    .hoverEvent(HoverEvent.showText(Component.text("Go to page ${currentPage - 1}", NamedTextColor.GRAY)))
+            ).append(
+                Component.text("]")
+                    .color(NamedTextColor.DARK_GRAY)
+            ).append(Component.text("  "))
+        } else {
+            navBuilder.append(
+                Component.text("[< Prev]  ", NamedTextColor.DARK_GRAY)
+            )
+        }
+
+        // Page indicator
+        navBuilder.append(
+            Component.text("Page $currentPage/$maxPage", NamedTextColor.GRAY)
+        ).append(Component.text("  "))
+
+        // Next button
+        if (currentPage < maxPage) {
+            navBuilder.append(
+                Component.text("[")
+                    .color(NamedTextColor.DARK_GRAY)
+            ).append(
+                Component.text("Next >")
+                    .color(accentColor)
+                    .decorate(TextDecoration.BOLD)
+                    .clickEvent(ClickEvent.runCommand("/xinv help ${currentPage + 1}"))
+                    .hoverEvent(HoverEvent.showText(Component.text("Go to page ${currentPage + 1}", NamedTextColor.GRAY)))
+            ).append(
+                Component.text("]")
+                    .color(NamedTextColor.DARK_GRAY)
+            )
+        } else {
+            navBuilder.append(
+                Component.text("[Next >]", NamedTextColor.DARK_GRAY)
+            )
+        }
+
+        send(navBuilder.build())
+
+        // Tip
         send(
             Component.text()
                 .append(Component.text("  Tip: ", NamedTextColor.GRAY))
                 .append(Component.text("Click", accentColor).decorate(TextDecoration.UNDERLINED))
-                .append(Component.text(" a command to use it!", NamedTextColor.GRAY))
+                .append(Component.text(" commands to use them", NamedTextColor.GRAY))
                 .build()
         )
         send(Component.empty())
