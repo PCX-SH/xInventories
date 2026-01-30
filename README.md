@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/PCX-SH/xInventories/main/images/BANNER.png" alt="xInventories Banner">
 </p>
 
-A powerful per-world inventory management plugin for Paper 1.21.1+ servers. Separate player inventories, experience, health, and more across different worlds or world groups.
+A powerful per-world inventory management plugin for Paper 1.21.11+ servers. Separate player inventories, experience, health, and more across different worlds or world groups.
 
 ## Features
 
@@ -45,7 +45,7 @@ A powerful per-world inventory management plugin for Paper 1.21.1+ servers. Sepa
 
 ## Requirements
 
-- **Paper 1.21.1+** (not compatible with Spigot)
+- **Paper 1.21.11+** (not compatible with Spigot)
 - **Java 21+**
 
 ## Installation
@@ -406,9 +406,9 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 
 | Category | Tests | Description |
 |----------|-------|-------------|
-| **Unit Tests** | 600+ | Serializers, models, cache, configuration, sync messages |
-| **Integration Tests** | 800+ | Storage backends, services, API, economy, templates |
-| **Total** | **1418 passing** | 83 skipped (MockBukkit limitations) |
+| **Unit Tests** | 700+ | Serializers, models, cache, configuration, sync messages |
+| **Integration Tests** | 850+ | Storage backends, services, API, economy, templates |
+| **Total** | **1578 passing** | 23 skipped (MockBukkit limitations) |
 
 ### Running Tests
 
@@ -443,7 +443,7 @@ xInventories includes a comprehensive test suite to ensure reliability and preve
 ## FAQ
 
 **Q: Does this work with Spigot?**
-A: No, xInventories requires Paper 1.21.1 or higher. It uses Paper-specific APIs and the native Adventure library.
+A: No, xInventories requires Paper 1.21.11 or higher. It uses Paper-specific APIs and the native Adventure library.
 
 **Q: How do I share inventories between servers?**
 A: For BungeeCord/Velocity networks, enable Redis sync in config.yml. This provides real-time synchronization with distributed locking to prevent conflicts. Alternatively, use MySQL storage with all servers pointing to the same database.
