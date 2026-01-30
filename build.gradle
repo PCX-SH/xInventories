@@ -1,6 +1,6 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.3.0'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.0'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.21'
     id 'org.jetbrains.dokka' version '1.9.20'
     id 'com.gradleup.shadow' version '9.3.1'
     id 'xyz.jpenilla.run-paper' version '3.0.2'
@@ -30,10 +30,10 @@ dependencies {
     compileOnly 'org.jetbrains.kotlin:kotlin-stdlib'
 
     // Coroutines - downloaded by Paper's library loader at runtime
-    compileOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+    compileOnly 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
 
     // Serialization - downloaded by Paper's library loader at runtime
-    compileOnly 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0'
+    compileOnly 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
 
     // Caching - downloaded by Paper's library loader at runtime
     compileOnly 'com.github.ben-manes.caffeine:caffeine:3.2.3'
@@ -67,14 +67,14 @@ dependencies {
     }
 
     // Testing - use kotlin-test-junit5 to bridge kotlin.test to JUnit 5
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5:2.3.0'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5:2.1.21'
     testImplementation 'org.junit.jupiter:junit-jupiter:6.0.2'
     testImplementation 'io.mockk:mockk:1.14.9'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0'
 
     // Runtime dependencies needed for tests (downloaded by Paper's library loader at runtime)
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1'
     testImplementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
     testImplementation 'com.zaxxer:HikariCP:7.0.2'
     testImplementation 'redis.clients:jedis:7.2.1'

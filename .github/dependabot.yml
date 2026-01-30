@@ -26,6 +26,10 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # Ignore Kotlin 2.2+ until CodeQL supports it
+    ignore:
+      - dependency-name: "org.jetbrains.kotlin*"
+        versions: [">=2.2.0"]
 
   # GitHub Actions dependencies
   - package-ecosystem: "github-actions"
