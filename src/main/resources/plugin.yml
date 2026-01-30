@@ -1,20 +1,12 @@
 name: xInventories
 version: '${version}'
-main: sh.pcx.xinventories.XInventories
+main: sh.pcx.xinventories.loader.XInventoriesLoader
 api-version: '1.20'
 author: Reset65
 description: Advanced per-world inventory management
 
-# Paper library loader - downloads dependencies at runtime
-# Note: kotlin-stdlib is included for Paper 1.20.5-1.20.6 which don't bundle Kotlin
-# Paper 1.21+ bundles Kotlin but having it here doesn't hurt (won't double-load)
-libraries:
-  - org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}
-  - org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}
-  - org.jetbrains.kotlinx:kotlinx-serialization-json:${serializationVersion}
-  - com.github.ben-manes.caffeine:caffeine:${caffeineVersion}
-  - com.zaxxer:HikariCP:${hikariVersion}
-  - redis.clients:jedis:${jedisVersion}
+# Dependencies are loaded at runtime by XInventoriesLoader
+# This provides compatibility with both Spigot and Paper servers
 
 softdepend:
   - Vault
