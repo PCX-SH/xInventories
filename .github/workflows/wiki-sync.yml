@@ -52,7 +52,7 @@ jobs:
           ls -la wiki-content/
 
       - name: Sync to GitHub Wiki
-        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           path: wiki-content
           # The action uses GITHUB_TOKEN by default
