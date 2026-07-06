@@ -2,7 +2,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.3.0'
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.0'
     id 'org.jetbrains.dokka' version '1.9.20'
-    id 'com.gradleup.shadow' version '9.4.2'
+    id 'com.gradleup.shadow' version '9.5.0'
     id 'xyz.jpenilla.run-paper' version '3.0.2'
     // Code coverage with JaCoCo
     id 'jacoco'
@@ -20,7 +20,7 @@ ext {
     serializationVersion = '1.11.0'
     caffeineVersion = '3.2.4'
     hikariVersion = '7.1.0'
-    jedisVersion = '7.5.2'
+    jedisVersion = '7.5.3'
     slf4jVersion = '2.0.16'
     commonsPool2Version = '2.12.0'
     gsonVersion = '2.12.1'
@@ -88,7 +88,7 @@ dependencies {
     compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') {
         exclude group: 'org.bukkit', module: 'bukkit'
     }
-    compileOnly 'me.clip:placeholderapi:2.12.2'
+    compileOnly 'me.clip:placeholderapi:2.12.3'
     compileOnly 'net.luckperms:api:5.5'
 
     // bStats metrics
@@ -109,7 +109,7 @@ dependencies {
 
     // Testing - use kotlin-test-junit5 to bridge kotlin.test to JUnit 5
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:${kotlinVersion}"
-    testImplementation 'org.junit.jupiter:junit-jupiter:6.1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:6.1.1'
     testImplementation 'io.mockk:mockk:1.14.11'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesVersion}"
 
@@ -120,7 +120,7 @@ dependencies {
     testImplementation "com.zaxxer:HikariCP:${hikariVersion}"
     testImplementation "redis.clients:jedis:${jedisVersion}"
     testImplementation 'io.papermc.paper:paper-api:26.1.2.build.71-stable'
-    testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v26.1.2:4.113.2') {
+    testImplementation('org.mockbukkit.mockbukkit:mockbukkit-v26.1.2:4.114.0') {
         exclude group: 'org.jetbrains.kotlin'
         exclude group: 'org.jetbrains.kotlinx'
     }
@@ -132,7 +132,7 @@ dependencies {
     // LuckPerms API for hook tests
     testImplementation 'net.luckperms:api:5.5'
     // PlaceholderAPI for hook tests
-    testImplementation 'me.clip:placeholderapi:2.12.2'
+    testImplementation 'me.clip:placeholderapi:2.12.3'
 
     // Embedded Redis for sync tests
     testImplementation 'com.github.codemonstur:embedded-redis:1.4.3'
